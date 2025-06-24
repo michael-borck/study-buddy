@@ -5,14 +5,14 @@ import {
 } from "eventsource-parser";
 import { LLMProvider, LLMStreamPayload } from "./types";
 
-export class TogetherProvider implements LLMProvider {
-  name = "together";
+export class OpenAIProvider implements LLMProvider {
+  name = "openai";
   private apiKey: string;
   private baseUrl: string;
 
   constructor(
     apiKey: string,
-    baseUrl: string = "https://api.together.xyz"
+    baseUrl: string = "https://api.openai.com"
   ) {
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
@@ -55,7 +55,7 @@ export class TogetherProvider implements LLMProvider {
             body: await res.text(),
           };
           console.log(
-            `Error: received non-200 status code from Together AI, ${JSON.stringify(data)}`,
+            `Error: received non-200 status code from OpenAI, ${JSON.stringify(data)}`,
           );
           controller.close();
           return;

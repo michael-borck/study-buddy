@@ -2,10 +2,15 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 let excludedSites = ["youtube.com"];
-let searchEngine: "bing" | "serper" = "serper";
+let searchEngine: "bing" | "serper" | "searxng" | "disabled" = process.env.SEARCH_ENGINE as any || "disabled";
 
 export async function POST(request: Request) {
   let { question } = await request.json();
+
+  // If search is disabled, return empty results
+  if (searchEngine === "disabled") {
+    return NextResponse.json([]);
+  }
 
   const finalQuestion = `what is ${question}`;
 
@@ -80,5 +85,53 @@ export async function POST(request: Request) {
     }));
 
     return NextResponse.json(results);
+  } else if (searchEngine === "searxng") {
+    const SEARXNG_URL = process.env.SEARXNG_URL;
+    if (!SEARXNG_URL) {
+      throw new Error("SEARXNG_URL is required when using SearXNG");
+    }
+
+    const params = new URLSearchParams({
+      q: finalQuestion,
+      format: "json",
+      categories: "general",
+    });
+
+    const response = await fetch(`${SEARXNG_URL}/search?${params}`, {
+      method: "GET",
+      headers: {
+        "User-Agent": "StudyBuddy/1.0",
+      },
+    });
+
+    if (!response.ok) {
+      console.error(`SearXNG search failed: ${response.status} ${response.statusText}`);
+      return NextResponse.json([]);
+    }
+
+    const SearXNGJSONSchema = z.object({
+      results: z.array(z.object({ 
+        title: z.string(), 
+        url: z.string(),
+        content: z.string().optional()
+      })),
+    });
+
+    const rawJSON = await response.json();
+    const data = SearXNGJSONSchema.parse(rawJSON);
+
+    // Filter out excluded sites and limit results
+    let results = data.results
+      .filter(result => !excludedSites.some(site => result.url.includes(site)))
+      .slice(0, 9)
+      .map(result => ({
+        name: result.title,
+        url: result.url,
+      }));
+
+    return NextResponse.json(results);
   }
+
+  // If we get here, search engine is not properly configured
+  return NextResponse.json([]);
 }

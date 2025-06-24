@@ -1,6 +1,11 @@
 {
   "name": "study-buddy",
   "version": "0.1.0",
+  "description": "An open-source AI personal tutor that runs locally on your computer",
+  "author": {
+    "name": "Study Buddy Contributors",
+    "email": "noreply@studybuddy.dev"
+  },
   "private": true,
   "main": "main.js",
   "homepage": "./",
@@ -71,8 +76,7 @@
           "target": "dmg",
           "arch": ["x64", "arm64"]
         }
-      ],
-      "icon": "assets/icon.icns"
+      ]
     },
     "win": {
       "target": [
@@ -84,8 +88,7 @@
           "target": "portable",
           "arch": ["x64"]
         }
-      ],
-      "icon": "assets/icon.ico"
+      ]
     },
     "linux": {
       "target": [
@@ -98,8 +101,8 @@
           "arch": ["x64"]
         }
       ],
-      "icon": "assets/icon.png",
-      "category": "Education"
+      "category": "Education",
+      "maintainer": "Study Buddy Contributors <noreply@studybuddy.dev>"
     },
     "nsis": {
       "oneClick": false,

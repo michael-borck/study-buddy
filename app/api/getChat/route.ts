@@ -1,7 +1,8 @@
 import {
-  TogetherAIStream,
-  TogetherAIStreamPayload,
-} from "@/utils/TogetherAIStream";
+  createProvider,
+  getDefaultProviderConfig,
+  LLMStreamPayload,
+} from "@/utils/providers";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { headers } from "next/headers";
@@ -15,7 +16,7 @@ if (process.env.UPSTASH_REDIS_REST_URL) {
     // Allow 10 requests per day
     limiter: Ratelimit.fixedWindow(10, "1440 m"),
     analytics: true,
-    prefix: "llamatutor",
+    prefix: "studybuddy",
   });
 }
 
@@ -34,12 +35,16 @@ export async function POST(request: Request) {
   }
 
   try {
-    const payload: TogetherAIStreamPayload = {
-      model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+    const providerConfig = getDefaultProviderConfig();
+    const provider = createProvider(providerConfig);
+    
+    const payload: LLMStreamPayload = {
+      model: providerConfig.defaultModel,
       messages,
       stream: true,
     };
-    const stream = await TogetherAIStream(payload);
+    
+    const stream = await provider.stream(payload);
 
     return new Response(stream, {
       headers: new Headers({
@@ -47,6 +52,7 @@ export async function POST(request: Request) {
       }),
     });
   } catch (e) {
+    console.error("LLM stream error:", e);
     return new Response("Error. Answer stream failed.", { status: 202 });
   }
 }

@@ -143,6 +143,8 @@ npm run dev
 
 Study Buddy is based on [Llama Tutor](https://github.com/Nutlope/llamatutor) by Hassan El Mghari ([@nutlope](https://github.com/nutlope)). The original project showcased the power of AI in education, and we're building on that foundation to make it accessible to all students.
 
+See our [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md) for a comprehensive list of all the amazing open source projects that make Study Buddy possible.
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.

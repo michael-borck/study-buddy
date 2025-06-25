@@ -1,5 +1,5 @@
 // Add command line arguments for development BEFORE requiring electron
-const isDev = process.env.NODE_ENV !== 'production';
+const isDev = process.env.NODE_ENV !== 'production' && !process.resourcesPath;
 
 // Import electron
 const { app, BrowserWindow } = require('electron');
@@ -29,21 +29,27 @@ if (isDev) {
   console.log('📁 Using production userData path:', userDataPath);
 }
 
-// Ensure the directory exists
-if (!fs.existsSync(userDataPath)) {
-  console.log('📂 Creating userData directory:', userDataPath);
-  fs.mkdirSync(userDataPath, { recursive: true });
-  console.log('✅ userData directory created');
+// Ensure the directory exists (only in development mode)
+if (isDev) {
+  if (!fs.existsSync(userDataPath)) {
+    console.log('📂 Creating dev userData directory:', userDataPath);
+    fs.mkdirSync(userDataPath, { recursive: true });
+    console.log('✅ Dev userData directory created');
+  } else {
+    console.log('📂 Dev userData directory already exists');
+  }
 } else {
-  console.log('📂 userData directory already exists');
+  console.log('📂 Using production userData path (Electron will handle creation):', userDataPath);
 }
 
-// List what's in the directory
-try {
-  const files = fs.readdirSync(userDataPath);
-  console.log('📁 Contents of userData directory:', files);
-} catch (e) {
-  console.log('📁 Could not read userData directory contents:', e.message);
+// List what's in the directory (development only)
+if (isDev) {
+  try {
+    const files = fs.readdirSync(userDataPath);
+    console.log('📁 Contents of dev userData directory:', files);
+  } catch (e) {
+    console.log('📁 Could not read dev userData directory contents:', e.message);
+  }
 }
 
 // Initialize Next.js

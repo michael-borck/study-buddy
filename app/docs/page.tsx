@@ -880,6 +880,218 @@ Study Buddy is designed for future extensibility:
     `
   },
   
+  development: {
+    title: "Development Guide",
+    content: `
+# Development Guide
+
+Quick development setup and workflow information for Study Buddy.
+
+## Getting Started
+
+### Prerequisites
+- Node.js 18+
+- npm or yarn
+- (Optional) Ollama for local AI
+
+### Quick Start
+
+Development with hot reload:
+npm run electron-dev
+
+Or run components separately:
+npm run dev        # Next.js only
+npm run electron   # Electron only (after Next.js is running)
+
+## Development Scripts
+
+| Command | Description |
+|---------|-------------|
+| npm run dev | Start Next.js development server |
+| npm run electron | Launch Electron app (needs Next.js running) |
+| npm run electron-dev | **Recommended**: Start both Next.js and Electron with hot reload |
+| npm run build | Build Next.js for production |
+| npm run dist | Build Electron distributables |
+| npm run lint | Run ESLint |
+
+## Configuration
+
+### Environment Variables
+Copy .env.example to .env.local and configure:
+
+AI Provider (default: ollama)
+LLM_PROVIDER=ollama
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.1:8b
+
+Search (default: disabled)
+SEARCH_ENGINE=disabled
+
+### Settings UI
+Access settings at http://localhost:3000/settings or use the Settings link in the app header.
+
+## Project Structure
+
+study-buddy/
+├── app/                    # Next.js App Router
+│   ├── api/               # API routes
+│   │   ├── getChat/       # LLM streaming endpoint
+│   │   ├── getSources/    # Search endpoint
+│   │   └── getParsedSources/ # Content parsing
+│   ├── settings/          # Settings page
+│   └── page.tsx          # Main app page
+├── components/            # React components
+├── utils/
+│   └── providers/         # LLM provider abstractions
+├── main.js               # Electron main process
+└── .github/workflows/    # CI/CD workflows
+
+## Debugging
+
+### Electron DevTools
+In development, DevTools open automatically. In production builds, use:
+- **macOS/Linux**: Cmd/Ctrl + Shift + I
+- **Windows**: F12
+
+### Common Issues
+
+1. **Port conflicts**: Next.js auto-increments ports (3000 → 3001 → 3002...)
+2. **Ollama not found**: Ensure Ollama is running on localhost:11434
+3. **Build failures**: Check npm run build works before npm run dist
+
+## Contributing
+
+### Code Style
+- ESLint configuration enforced
+- Prettier for formatting
+- TypeScript strict mode
+- Conventional commit messages
+
+### Pull Request Process
+1. Fork the repository
+2. Create feature branch: git checkout -b feature/amazing-feature
+3. Commit changes: git commit -m 'Add amazing feature'
+4. Push branch: git push origin feature/amazing-feature
+5. Open Pull Request
+
+For complete development setup, see the full Development Setup guide.
+    `
+  },
+
+  icons: {
+    title: "Icon Generation Guide",
+    content: `
+# Icon Generation Guide 🎓
+
+Complete guide for generating Study Buddy's graduation cap icons.
+
+## Required Icon Sizes
+
+### Web (favicon)
+- app/favicon.ico - 16x16, 32x32 (multi-size ICO file)
+
+### Electron (for cross-platform builds)
+- build/icons/icon.icns (macOS) - Multi-size ICNS file
+- build/icons/icon.ico (Windows) - Multi-size ICO file
+- build/icons/icon.png (Linux) - 512x512 PNG (Electron will auto-scale)
+
+### Additional sizes for Linux distributions
+- build/icons/16x16.png through build/icons/1024x1024.png
+
+## How to Generate Icons from 🎓 Emoji
+
+### Option 1: Online Tools (Recommended)
+1. Go to https://favicon.io/emoji-favicons/graduation-cap/
+2. Download the graduation cap emoji favicon package
+3. Extract and use the generated files
+
+### Option 2: Manual Creation
+1. **Create base image:**
+   - Open image editor (Figma, Canva, GIMP, etc.)
+   - Create 1024x1024 canvas with transparent background
+   - Add graduation cap emoji 🎓 at large size
+   - Center it with some padding around edges
+   - Export as PNG
+
+2. **Generate multiple sizes:**
+   - Use online converter like https://icoconvert.com/
+   - Upload your 1024x1024 PNG
+   - Generate .ico files with multiple sizes (16, 32, 48, 64, 128, 256)
+   - Generate .icns file for macOS
+   - Generate individual PNG files for Linux
+
+### Option 3: Command Line (ImageMagick)
+If you have ImageMagick installed:
+
+ICO for Windows (multi-size)
+magick icon-1024.png -resize 256x256 -resize 128x128 -resize 64x64 -resize 48x48 -resize 32x32 -resize 16x16 build/icons/icon.ico
+
+Individual PNGs for Linux
+magick icon-1024.png -resize 16x16 build/icons/16x16.png
+magick icon-1024.png -resize 32x32 build/icons/32x32.png
+magick icon-1024.png -resize 48x48 build/icons/48x48.png
+# ... continue for all sizes
+
+## Package.json Configuration
+
+Once you have the icons, add this to your package.json build config:
+
+{
+  "build": {
+    "mac": {
+      "icon": "build/icons/icon.icns"
+    },
+    "win": {
+      "icon": "build/icons/icon.ico"
+    },
+    "linux": {
+      "icon": "build/icons/icon.png"
+    }
+  }
+}
+
+## File Structure
+
+study-buddy/
+├── app/
+│   └── favicon.ico          # Replace with graduation cap favicon
+├── build/
+│   └── icons/
+│       ├── icon.icns        # macOS (multi-size)
+│       ├── icon.ico         # Windows (multi-size)
+│       ├── icon.png         # Linux main (512x512)
+│       ├── 16x16.png        # Linux sizes
+│       ├── 32x32.png
+│       └── ... (all sizes)
+└── public/
+    └── favicon.ico          # Copy from app/ for consistency
+
+## Design Guidelines
+
+- **Style**: Clean graduation cap emoji 🎓 on transparent background
+- **Padding**: Leave ~15% padding around edges so icon doesn't touch edges
+- **Colors**: Use standard emoji colors (black cap, gold tassel)
+- **Background**: Transparent for all sizes
+- **Quality**: Vector-based or high-DPI source for clean scaling
+
+## Testing
+
+After generating icons:
+1. Test favicon in browser (should show in tab)
+2. Build Electron app: npm run electron-pack
+3. Check generated apps show graduation cap icon in:
+   - Windows: Taskbar, window title, file explorer
+   - macOS: Dock, Finder, window title
+   - Linux: Application menu, window manager
+
+## Quick Start
+
+The fastest way is to use https://favicon.io/emoji-favicons/graduation-cap/ and download the complete package, then organize the files according to the structure above.
+
+**Note**: Study Buddy already has generated graduation cap icons! This guide is for reference if you need to regenerate or customize them.
+    `
+  },
+
   api: {
     title: "API Reference",
     content: `
@@ -1272,6 +1484,8 @@ const navigationItems = [
   { id: 'settings', title: 'Settings', icon: '⚙️' },
   { id: 'troubleshooting', title: 'Troubleshooting', icon: '🔧' },
   { id: 'shortcuts', title: 'Shortcuts', icon: '⌨️' },
+  { id: 'development', title: 'Development', icon: '👨‍💻' },
+  { id: 'icons', title: 'Icon Generation', icon: '🎨' },
   { id: 'technical', title: 'Technical', icon: '🔬' },
   { id: 'api', title: 'API Reference', icon: '🔌' },
 ];

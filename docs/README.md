@@ -13,6 +13,8 @@ Welcome to the comprehensive documentation for Study Buddy - your AI-powered per
 - [**Technical Architecture**](technical-architecture.md) - System design and components
 - [**API Documentation**](api-documentation.md) - Backend API reference
 - [**Development Setup**](development-setup.md) - Getting started with development
+- [**Development Guide**](development.md) - Additional development information
+- [**Icon Generation**](icon-generation.md) - Guide for creating app icons
 
 ### For Designers
 - [**Design System**](design-system.md) - UI components and styling guidelines

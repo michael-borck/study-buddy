@@ -31,7 +31,7 @@ npm install
 ### 3. Environment Setup
 ```bash
 # Copy example environment file
-cp .example.env .env.local
+cp .env.example .env.local
 
 # Edit with your API keys (optional for development)
 nano .env.local

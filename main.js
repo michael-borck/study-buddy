@@ -84,7 +84,8 @@ async function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
       webSecurity: false, // Disable for development
-      partition: 'persist:study-buddy' // Use persistent session
+      partition: 'persist:study-buddy', // Use persistent session
+      sandbox: false // Disable sandbox for Linux compatibility
     },
     titleBarStyle: 'default',
     show: true // Show immediately for debugging

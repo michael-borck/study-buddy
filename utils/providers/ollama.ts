@@ -8,19 +8,27 @@ import { LLMProvider, LLMStreamPayload } from "./types";
 export class OllamaProvider implements LLMProvider {
   name = "ollama";
   private baseUrl: string;
+  private apiKey?: string;
 
-  constructor(baseUrl: string = "http://localhost:11434") {
+  constructor(baseUrl: string = "http://localhost:11434", apiKey?: string) {
     this.baseUrl = baseUrl;
+    this.apiKey = apiKey;
   }
 
   async stream(payload: LLMStreamPayload): Promise<ReadableStream> {
     const encoder = new TextEncoder();
     const decoder = new TextDecoder();
 
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+
+    if (this.apiKey) {
+      headers.Authorization = `Bearer ${this.apiKey}`;
+    }
+
     const res = await fetch(`${this.baseUrl}/api/chat`, {
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       method: "POST",
       body: JSON.stringify({
         model: payload.model,

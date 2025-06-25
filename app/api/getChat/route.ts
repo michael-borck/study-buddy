@@ -1,18 +1,18 @@
 import {
   createProvider,
-  getDefaultProviderConfig,
   LLMStreamPayload,
 } from "@/utils/providers";
+import { getSettings } from "@/utils/settings";
 
 export async function POST(request: Request) {
   let { messages } = await request.json();
 
   try {
-    const providerConfig = getDefaultProviderConfig();
-    const provider = createProvider(providerConfig);
+    const settings = getSettings();
+    const provider = createProvider(); // Will use runtime settings
     
     const payload: LLMStreamPayload = {
-      model: providerConfig.defaultModel,
+      model: settings.llmModel,
       messages,
       stream: true,
     };

@@ -5,6 +5,7 @@ import { AnthropicProvider } from "./anthropic";
 import { GroqProvider } from "./groq";
 import { GoogleProvider } from "./google";
 import { LLMProvider, ProviderConfig } from "./types";
+import { getSettings } from "../settings";
 
 export * from "./types";
 export { OllamaProvider } from "./ollama";
@@ -14,10 +15,21 @@ export { AnthropicProvider } from "./anthropic";
 export { GroqProvider } from "./groq";
 export { GoogleProvider } from "./google";
 
-export function createProvider(config: ProviderConfig): LLMProvider {
+export function createProvider(config?: ProviderConfig): LLMProvider {
+  // Use runtime settings if no config provided
+  if (!config) {
+    const settings = getSettings();
+    config = {
+      name: settings.llmProvider,
+      apiKey: settings.llmApiKey,
+      baseUrl: settings.llmBaseUrl,
+      defaultModel: settings.llmModel,
+    };
+  }
+
   switch (config.name.toLowerCase()) {
     case "ollama":
-      return new OllamaProvider(config.baseUrl);
+      return new OllamaProvider(config.baseUrl, config.apiKey);
     case "together":
       if (!config.apiKey) {
         throw new Error("Together AI requires an API key");

@@ -8,6 +8,8 @@ const { app, BrowserWindow } = require('electron');
 if (isDev) {
   app.commandLine.appendSwitch('--no-sandbox');
   app.commandLine.appendSwitch('--disable-web-security');
+  app.commandLine.appendSwitch('--disable-gpu-sandbox');
+  app.commandLine.appendSwitch('--disable-software-rasterizer');
 }
 
 const next = require('next');
@@ -51,24 +53,42 @@ async function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      webSecurity: true
+      webSecurity: false // Disable for development
     },
-    icon: path.join(__dirname, 'assets/icon.png'), // We'll add this later
     titleBarStyle: 'default',
-    show: false // Don't show until ready
+    show: true // Show immediately for debugging
   });
 
+  console.log('Created BrowserWindow, loading URL...');
+
   // Load the Next.js app
-  await mainWindow.loadURL(`http://localhost:${port}`);
+  try {
+    console.log(`Loading URL: http://localhost:${port}`);
+    await mainWindow.loadURL(`http://localhost:${port}`);
+    console.log('URL loaded successfully');
+  } catch (error) {
+    console.error('Failed to load URL:', error);
+  }
 
   // Show window when ready to prevent visual flash
   mainWindow.once('ready-to-show', () => {
+    console.log('Window ready-to-show event fired');
     mainWindow.show();
+    console.log('Window should now be visible');
     
     // Open DevTools in development
     if (isDev) {
       mainWindow.webContents.openDevTools();
     }
+  });
+
+  // Additional debugging
+  mainWindow.once('show', () => {
+    console.log('Window show event fired');
+  });
+
+  mainWindow.webContents.once('did-finish-load', () => {
+    console.log('WebContents did-finish-load event fired');
   });
 
   // Handle window closed

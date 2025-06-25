@@ -1,0 +1,50 @@
+# Jekyll configuration for GitHub Pages
+
+title: Study Buddy Documentation
+description: Comprehensive documentation for Study Buddy - Your AI Personal Tutor
+url: https://michael-borck.github.io
+baseurl: /study-buddy
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+theme: minima
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Navigation
+navigation:
+  - name: User Guide
+    link: /user-guide
+  - name: Features
+    link: /features
+  - name: Settings
+    link: /settings
+  - name: Troubleshooting
+    link: /troubleshooting
+  - name: Technical
+    link: /technical-architecture
+  - name: API
+    link: /api-documentation
+  - name: Development
+    link: /development-setup
+
+# Social
+github_username: michael-borck
+linkedin_username: michaelborck
+twitter_username: Michael_Borck
+
+# SEO
+author: Michael Borck
+logo: /assets/images/icon.png
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor

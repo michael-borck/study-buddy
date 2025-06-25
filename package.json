@@ -15,7 +15,7 @@
     "start": "next start",
     "lint": "next lint",
     "electron": "cross-env NODE_ENV=development ELECTRON_DISABLE_SANDBOX=1 electron . --no-sandbox",
-    "electron-dev": "cross-env NODE_ENV=development concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron-dev": "cross-env NODE_ENV=development ELECTRON_DISABLE_SANDBOX=1 concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron . --no-sandbox\"",
     "build-electron": "next build && electron-builder",
     "dist": "next build && electron-builder --publish=never"
   },

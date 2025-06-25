@@ -3,6 +3,8 @@ const isDev = process.env.NODE_ENV !== 'production';
 
 // Import electron
 const { app, BrowserWindow } = require('electron');
+const fs = require('fs');
+const path = require('path');
 
 // Set command line switches before app is ready
 if (isDev) {
@@ -14,7 +16,35 @@ if (isDev) {
 
 const next = require('next');
 const getPort = require('get-port').default;
-const path = require('path');
+
+// Set persistent user data directory
+const userDataPath = isDev 
+  ? path.join(__dirname, 'electron-dev-data') 
+  : app.getPath('userData');
+
+if (isDev) {
+  app.setPath('userData', userDataPath);
+  console.log('📁 Setting dev userData path:', userDataPath);
+} else {
+  console.log('📁 Using production userData path:', userDataPath);
+}
+
+// Ensure the directory exists
+if (!fs.existsSync(userDataPath)) {
+  console.log('📂 Creating userData directory:', userDataPath);
+  fs.mkdirSync(userDataPath, { recursive: true });
+  console.log('✅ userData directory created');
+} else {
+  console.log('📂 userData directory already exists');
+}
+
+// List what's in the directory
+try {
+  const files = fs.readdirSync(userDataPath);
+  console.log('📁 Contents of userData directory:', files);
+} catch (e) {
+  console.log('📁 Could not read userData directory contents:', e.message);
+}
 
 // Initialize Next.js
 const nextApp = next({ 
@@ -53,7 +83,8 @@ async function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      webSecurity: false // Disable for development
+      webSecurity: false, // Disable for development
+      partition: 'persist:study-buddy' // Use persistent session
     },
     titleBarStyle: 'default',
     show: true // Show immediately for debugging

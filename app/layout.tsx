@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
-import PlausibleProvider from "next-plausible";
 import "./globals.css";
 import Image from "next/image";
 import bgImage from "../public/new-bg.png";
+import InitializeSettings from "./initialize-settings";
 
 const montserrat = Montserrat({ subsets: ["latin"] });
 
-let title = "Llama Tutor – AI Personal Tutor";
+let title = "Study Buddy – AI Personal Tutor";
 let description = "Learn faster with our open source AI personal tutor";
-let url = "https://llamatutor.com/";
-let ogimage = "https://llamatutor.together.ai/og-image.png";
-let sitename = "llamatutor.com";
+let url = "https://studybuddy.com/";
+let ogimage = "https://studybuddy.com/og-image.png";
+let sitename = "studybuddy.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(url),
@@ -44,13 +44,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full">
-      <head>
-        <PlausibleProvider domain="llamatutor.together.ai" />
-      </head>
-
       <body
         className={`${montserrat.className} flex h-full flex-col justify-between text-gray-700 antialiased`}
       >
+        <InitializeSettings />
         <Image
           src={bgImage}
           alt=""

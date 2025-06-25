@@ -17,23 +17,13 @@ export interface TogetherAIStreamPayload {
   stream: boolean;
 }
 
-// const together = new Together({
-//   apiKey: process.env["TOGETHER_API_KEY"],
-//   baseURL: "https://together.helicone.ai/v1",
-//   defaultHeaders: {
-//     "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-//   },
-// });
-
 export async function TogetherAIStream(payload: TogetherAIStreamPayload) {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
 
-  const res = await fetch("https://together.helicone.ai/v1/chat/completions", {
+  const res = await fetch("https://api.together.xyz/v1/chat/completions", {
     headers: {
       "Content-Type": "application/json",
-      "Helicone-Auth": `Bearer ${process.env.HELICONE_API_KEY}`,
-      "Helicone-Property-AppName": "llamatutor",
       Authorization: `Bearer ${process.env.TOGETHER_API_KEY ?? ""}`,
     },
     method: "POST",

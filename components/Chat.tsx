@@ -1,7 +1,6 @@
 import ReactMarkdown from "react-markdown";
 import FinalInputArea from "./FinalInputArea";
 import { useEffect, useRef, useState } from "react";
-import simpleLogo from "../public/simple-logo.png";
 import Image from "next/image";
 
 export default function Chat({
@@ -74,11 +73,7 @@ export default function Chat({
               {messages.slice(2).map((message, index) =>
                 message.role === "assistant" ? (
                   <div className="relative w-full" key={index}>
-                    <Image
-                      src={simpleLogo}
-                      alt=""
-                      className="absolute left-0 top-0 !my-0 size-7"
-                    />
+                    <span className="absolute left-0 top-0 text-2xl">🎓</span>
                     <ReactMarkdown className="w-full pl-10">
                       {message.content}
                     </ReactMarkdown>

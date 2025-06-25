@@ -1,7 +1,5 @@
 import Image from "next/image";
 import { FC } from "react";
-import desktopImg from "../public/desktop-screenshot.png";
-import mobileImg from "../public/screenshot-mobile.png";
 import InitialInputArea from "./InitialInputArea";
 import { suggestions } from "@/utils/utils";
 
@@ -92,7 +90,7 @@ const Hero: FC<THeroProps> = ({
           Fully open source!{" "}
           <span className="text-sm font-medium underline">
             <a
-              href="https://github.com/Nutlope/llamatutor"
+              href="https://github.com/michael-borck/study-buddy"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -100,18 +98,6 @@ const Hero: FC<THeroProps> = ({
             </a>
           </span>
         </p>
-      </div>
-      <div className="mx-auto max-w-7xl">
-        <Image
-          src={desktopImg}
-          alt="hero"
-          className="my-32 max-w-full max-lg:hidden"
-        />
-        <Image
-          src={mobileImg}
-          alt="hero"
-          className="my-5 max-w-full lg:hidden"
-        />
       </div>
     </>
   );

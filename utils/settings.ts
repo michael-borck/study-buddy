@@ -9,6 +9,7 @@ export interface AppSettings {
   searchEngine: string;
   searchApiKey: string;
   searchUrl: string;
+  defaultEducationLevel: string;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -16,9 +17,10 @@ export const DEFAULT_SETTINGS: AppSettings = {
   llmApiKey: "",
   llmBaseUrl: "http://localhost:11434",
   llmModel: "llama3.1:8b",
-  searchEngine: "disabled",
+  searchEngine: "duckduckgo",
   searchApiKey: "",
   searchUrl: "",
+  defaultEducationLevel: "Middle School",
 };
 
 let runtimeSettings: AppSettings | null = null;
@@ -26,13 +28,16 @@ let runtimeSettings: AppSettings | null = null;
 export function getSettings(): AppSettings {
   // Return runtime settings if available (from frontend)
   if (runtimeSettings) {
+    console.log('Using runtime settings:', runtimeSettings.llmProvider);
     return runtimeSettings;
   }
 
+  console.log('No runtime settings, using environment variables');
+  
   // Fallback to environment variables
   const provider = process.env.LLM_PROVIDER || DEFAULT_SETTINGS.llmProvider;
   
-  return {
+  const settings = {
     llmProvider: provider,
     llmApiKey: getProviderApiKey(provider),
     llmBaseUrl: getProviderBaseUrl(provider),
@@ -40,7 +45,15 @@ export function getSettings(): AppSettings {
     searchEngine: process.env.SEARCH_ENGINE || DEFAULT_SETTINGS.searchEngine,
     searchApiKey: getSearchApiKey(),
     searchUrl: process.env.SEARXNG_URL || DEFAULT_SETTINGS.searchUrl,
+    defaultEducationLevel: process.env.DEFAULT_EDUCATION_LEVEL || DEFAULT_SETTINGS.defaultEducationLevel,
   };
+  
+  console.log('Environment-based settings:', { 
+    provider: settings.llmProvider, 
+    baseUrl: settings.llmBaseUrl 
+  });
+  
+  return settings;
 }
 
 export function updateSettings(newSettings: AppSettings) {
@@ -95,6 +108,8 @@ function getSearchApiKey(): string {
   switch (searchEngine.toLowerCase()) {
     case "serper": return process.env.SERPER_API_KEY || "";
     case "bing": return process.env.BING_API_KEY || "";
+    case "brave": return process.env.BRAVE_API_KEY || "";
+    case "duckduckgo": return ""; // DuckDuckGo doesn't need an API key
     default: return "";
   }
 }

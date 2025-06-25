@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import Sources from "@/components/Sources";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   createParser,
   ParsedEvent,
@@ -25,6 +25,59 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [ageGroup, setAgeGroup] = useState("Middle School");
 
+  // Load default education level from settings on mount
+  useEffect(() => {
+    const loadDefaultEducationLevel = () => {
+      try {
+        const savedSettings = localStorage.getItem("studybuddy-settings");
+        if (savedSettings) {
+          const settings = JSON.parse(savedSettings);
+          if (settings.defaultEducationLevel) {
+            console.log("Loading default education level from settings:", settings.defaultEducationLevel);
+            setAgeGroup(settings.defaultEducationLevel);
+          }
+        }
+      } catch (error) {
+        console.warn("Failed to load default education level:", error);
+      }
+    };
+
+    loadDefaultEducationLevel();
+  }, []);
+
+  // Listen for settings changes (when user saves settings or settings are loaded)
+  useEffect(() => {
+    const handleSettingsUpdate = () => {
+      try {
+        const savedSettings = localStorage.getItem("studybuddy-settings");
+        if (savedSettings) {
+          const settings = JSON.parse(savedSettings);
+          if (settings.defaultEducationLevel) {
+            console.log("Settings updated, updating education level:", settings.defaultEducationLevel);
+            setAgeGroup(settings.defaultEducationLevel);
+          }
+        }
+      } catch (error) {
+        console.warn("Failed to update education level from settings update:", error);
+      }
+    };
+
+    // Listen for localStorage changes
+    window.addEventListener('storage', handleSettingsUpdate);
+    
+    // Listen for settings changed event (when user saves settings)
+    window.addEventListener('settingsChanged', handleSettingsUpdate);
+    
+    // Listen for settings loaded event (when app initializes from file)
+    window.addEventListener('settingsLoaded', handleSettingsUpdate);
+
+    return () => {
+      window.removeEventListener('storage', handleSettingsUpdate);
+      window.removeEventListener('settingsChanged', handleSettingsUpdate);
+      window.removeEventListener('settingsLoaded', handleSettingsUpdate);
+    };
+  }, []);
+
   const handleInitialChat = async () => {
     setShowResult(true);
     setLoading(true);
@@ -38,11 +91,20 @@ export default function Home() {
 
   const handleChat = async (messages?: { role: string; content: string }[]) => {
     setLoading(true);
+    
+    // Get settings from localStorage to send with request
+    const savedSettings = localStorage.getItem("studybuddy-settings");
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    
+    if (savedSettings) {
+      headers["X-StudyBuddy-Settings"] = savedSettings;
+    }
+    
     const chatRes = await fetch("/api/getChat", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       body: JSON.stringify({ messages }),
     });
 
@@ -98,8 +160,20 @@ export default function Home() {
 
   async function handleSourcesAndChat(question: string) {
     setIsLoadingSources(true);
+    
+    // Get settings from localStorage to send with request
+    const savedSettings = localStorage.getItem("studybuddy-settings");
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    
+    if (savedSettings) {
+      headers["X-StudyBuddy-Settings"] = savedSettings;
+    }
+    
     let sourcesResponse = await fetch("/api/getSources", {
       method: "POST",
+      headers,
       body: JSON.stringify({ question }),
     });
     let sources;
@@ -114,6 +188,7 @@ export default function Home() {
 
     const parsedSourcesRes = await fetch("/api/getParsedSources", {
       method: "POST",
+      headers,
       body: JSON.stringify({ sources }),
     });
     let parsedSources;

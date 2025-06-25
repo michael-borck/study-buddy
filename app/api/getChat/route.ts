@@ -8,7 +8,27 @@ export async function POST(request: Request) {
   let { messages } = await request.json();
 
   try {
+    // First, try to get settings from request headers (if frontend sends them)
+    const settingsHeader = request.headers.get('X-StudyBuddy-Settings');
+    if (settingsHeader) {
+      try {
+        const frontendSettings = JSON.parse(settingsHeader);
+        const { updateSettings } = await import("@/utils/settings");
+        updateSettings(frontendSettings);
+        console.log('Applied frontend settings:', frontendSettings.llmProvider);
+      } catch (e) {
+        console.warn('Failed to parse frontend settings:', e);
+      }
+    }
+    
     const settings = getSettings();
+    console.log('Using settings:', { 
+      provider: settings.llmProvider, 
+      baseUrl: settings.llmBaseUrl, 
+      model: settings.llmModel,
+      hasApiKey: !!settings.llmApiKey 
+    });
+    
     const provider = createProvider(); // Will use runtime settings
     
     const payload: LLMStreamPayload = {

@@ -177,14 +177,6 @@ Study Buddy is built upon the incredible work of many open source projects and c
 - **Description**: Wait for files, ports, sockets, and http(s) resources to become available
 - **Version**: 8.0.3
 
-## Analytics & Monitoring
-
-### **[next-plausible](https://github.com/4lejandrito/next-plausible)**
-- **Maintainer**: Alejandro Zabala
-- **License**: MIT
-- **Description**: Simple integration for Plausible Analytics and Next.js
-- **Version**: 3.12.0
-
 ## Type Definitions
 
 We also rely on numerous `@types/*` packages maintained by the **[DefinitelyTyped](https://github.com/DefinitelyTyped/DefinitelyTyped)** community:

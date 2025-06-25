@@ -36,7 +36,7 @@ Study Buddy is a desktop application that provides personalized AI tutoring with
 
 ### Quick Start
 
-1. **Download the latest release** from the [Releases page](https://github.com/YOUR_USERNAME/study-buddy/releases)
+1. **Download the latest release** from the [Releases page](https://github.com/michael-borck/study-buddy/releases)
    - Windows: `StudyBuddy-Setup-x.x.x.exe`
    - macOS: `StudyBuddy-x.x.x.dmg`
    - Linux: `StudyBuddy-x.x.x.AppImage`
@@ -47,7 +47,7 @@ Study Buddy is a desktop application that provides personalized AI tutoring with
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/study-buddy.git
+git clone https://github.com/michael-borck/study-buddy.git
 cd study-buddy
 
 # Install dependencies
@@ -124,7 +124,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ```bash
 # Fork the repo, then:
-git clone https://github.com/YOUR_USERNAME/study-buddy.git
+git clone https://github.com/michael-borck/study-buddy.git
 cd study-buddy
 npm install
 npm run dev

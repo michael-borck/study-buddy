@@ -35,4 +35,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-.env
+
+# electron development data
+/electron-dev-data/

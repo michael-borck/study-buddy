@@ -65,11 +65,6 @@ export const suggestions: suggestionType[] = [
     name: "Personal Finance",
     icon: "/finance.svg",
   },
-  {
-    id: 4,
-    name: "U.S History",
-    icon: "/us.svg",
-  },
 ];
 
 export const getSystemPrompt = (

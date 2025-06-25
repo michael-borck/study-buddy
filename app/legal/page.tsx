@@ -154,7 +154,7 @@ export default function LegalPage() {
                   </a>
                 </h3>
                 <p className="text-sm text-gray-600">Together Computer • MIT License</p>
-                <p className="text-sm text-gray-700 mt-1">TypeScript SDK for Together AI's API</p>
+                <p className="text-sm text-gray-700 mt-1">TypeScript SDK for Together AI&apos;s API</p>
               </div>
               
               <div className="border border-gray-200 p-4 rounded-lg">
@@ -296,10 +296,10 @@ export default function LegalPage() {
               <h3 className="font-semibold text-blue-900 mb-3">Thank You</h3>
               <p className="text-blue-800 text-sm">
                 Thank you to every developer, maintainer, and contributor who has made Study Buddy possible. 
-                Open source is the foundation of innovation, and we're proud to be part of this incredible ecosystem.
+                Open source is the foundation of innovation, and we&apos;re proud to be part of this incredible ecosystem.
               </p>
               <p className="text-blue-700 text-xs mt-3">
-                If we've missed any attribution or you'd like to update information about your project, 
+                If we&apos;ve missed any attribution or you&apos;d like to update information about your project, 
                 please open an issue or pull request on our GitHub repository.
               </p>
             </div>

@@ -122,7 +122,7 @@ export default function AboutPage() {
                 ).
               </p>
               <p className="text-gray-600 text-sm">
-                The original project showcased the power of AI in education, and we're building on that 
+                The original project showcased the power of AI in education, and we&apos;re building on that 
                 foundation to make it accessible to all students. The interface screenshots above are 
                 from the original Llama Tutor project.
               </p>

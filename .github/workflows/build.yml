@@ -74,6 +74,20 @@ jobs:
     - name: Build Next.js app
       run: npm run build
       
+    - name: Import macOS signing certificate
+      if: matrix.os == 'macos-latest'
+      env:
+        MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+        MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+      run: |
+        echo "$MACOS_CERTIFICATE" | base64 --decode > certificate.p12
+        security create-keychain -p actions build.keychain
+        security default-keychain -s build.keychain
+        security unlock-keychain -p actions build.keychain
+        security import certificate.p12 -k build.keychain -P "$MACOS_CERTIFICATE_PWD" -T /usr/bin/codesign
+        security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k actions build.keychain
+        rm certificate.p12
+
     - name: Build Electron app (with retry)
       uses: nick-fields/retry@v3
       with:
@@ -82,17 +96,10 @@ jobs:
         retry_wait_seconds: 30
         command: npm run dist
       env:
-        # Code signing (add your certificates as secrets)
-        # CSC_LINK: ${{ secrets.CSC_LINK }}
-        # CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-        # Windows signing
-        # WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
-        # WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
-        # macOS notarization
-        # APPLE_ID: ${{ secrets.APPLE_ID }}
-        # APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
-        # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        APPLE_ID: ${{ secrets.APPLE_ID }}
+        APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+        APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4

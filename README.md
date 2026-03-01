@@ -1,5 +1,9 @@
 # Study Buddy AI
 
+<!-- BADGES:START -->
+[![ai-tutor](https://img.shields.io/badge/-ai--tutor-blue?style=flat-square)](https://github.com/topics/ai-tutor) [![css](https://img.shields.io/badge/-css-1572b6?style=flat-square)](https://github.com/topics/css) [![desktop-application](https://img.shields.io/badge/-desktop--application-blue?style=flat-square)](https://github.com/topics/desktop-application) [![electron](https://img.shields.io/badge/-electron-47848f?style=flat-square)](https://github.com/topics/electron) [![javascript](https://img.shields.io/badge/-javascript-f7df1e?style=flat-square)](https://github.com/topics/javascript) [![local-inference](https://img.shields.io/badge/-local--inference-blue?style=flat-square)](https://github.com/topics/local-inference) [![privacy-focused](https://img.shields.io/badge/-privacy--focused-blue?style=flat-square)](https://github.com/topics/privacy-focused) [![typescript](https://img.shields.io/badge/-typescript-3178c6?style=flat-square)](https://github.com/topics/typescript) [![offline-application](https://img.shields.io/badge/-offline--application-blue?style=flat-square)](https://github.com/topics/offline-application) [![edtech](https://img.shields.io/badge/-edtech-4caf50?style=flat-square)](https://github.com/topics/edtech)
+<!-- BADGES:END -->
+
 > 🎓 An open-source AI personal tutor that runs locally on your computer
 > 
 > Based on [Llama Tutor](https://github.com/Nutlope/llamatutor) by [@nutlope](https://github.com/nutlope)

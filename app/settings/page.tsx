@@ -13,6 +13,7 @@ interface Settings {
   searchApiKey: string;
   searchUrl: string;
   defaultEducationLevel: string;
+  contextSize: string;
   voiceGender: string;
   autoRead: boolean;
   sttProvider: string;
@@ -28,6 +29,7 @@ export default function SettingsPage() {
     searchApiKey: "",
     searchUrl: "",
     defaultEducationLevel: "Middle School",
+    contextSize: "small",
     voiceGender: "female",
     autoRead: false,
     sttProvider: "web",
@@ -279,6 +281,7 @@ export default function SettingsPage() {
       searchApiKey: "",
       searchUrl: "",
       defaultEducationLevel: "Middle School",
+      contextSize: "small",
       voiceGender: "female",
       autoRead: false,
       sttProvider: "web",
@@ -571,6 +574,26 @@ export default function SettingsPage() {
               </select>
               <p className="mt-1 text-sm text-ink-quiet">
                 This will be the default level when starting a new conversation. You can still change it each time.
+              </p>
+            </div>
+
+            <div className="mb-4">
+              <label className={labelClasses}>
+                Context window size
+              </label>
+              <select
+                value={settings.contextSize}
+                onChange={(e) => setSettings({...settings, contextSize: e.target.value})}
+                className={inputClasses}
+              >
+                <option value="small">Small (8K) — Local models like Llama 3.1 8B</option>
+                <option value="medium">Medium (32K) — Larger local models, some cloud models</option>
+                <option value="large">Large (128K+) — Most cloud providers (OpenAI, Anthropic, etc.)</option>
+              </select>
+              <p className="mt-1 text-sm text-ink-quiet">
+                Controls how much source material the tutor can use at once. With a small context,
+                Study Buddy will summarise sources to fit. With a large context, it can use full
+                web pages and longer notes without summarising.
               </p>
             </div>
           </div>

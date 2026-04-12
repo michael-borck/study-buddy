@@ -14,7 +14,13 @@ import { getSystemPrompt } from "@/utils/utils";
 import { getStrategyById, nudgePrompt } from "@/utils/strategies";
 import Chat from "@/components/Chat";
 
-const CONTENT_BUDGET = 15000; // chars — leaves room for system prompt, strategy, and conversation
+// Content budgets by context size setting (chars)
+// Leaves room for system prompt (~2K), strategy (~1K), and conversation
+const CONTENT_BUDGETS: Record<string, number> = {
+  small: 15000,   // ~4K tokens — fits 8K context models
+  medium: 60000,  // ~15K tokens — fits 32K context models
+  large: 300000,  // ~75K tokens — fits 128K+ context models
+};
 
 type Phase = "landing" | "preparing" | "chat";
 
@@ -212,6 +218,17 @@ export default function Home() {
 
     // ── Fit content to context budget ──────────────────────────────
     let processedCustomText = customText || "";
+
+    // Determine content budget from settings
+    let contextSizeSetting = "small";
+    try {
+      const saved = localStorage.getItem("studybuddy-settings");
+      if (saved) {
+        const s = JSON.parse(saved);
+        if (s.contextSize) contextSizeSetting = s.contextSize;
+      }
+    } catch {}
+    const CONTENT_BUDGET = CONTENT_BUDGETS[contextSizeSetting] || CONTENT_BUDGETS.small;
 
     const contentSize = () =>
       parsed.reduce((sum, s) => sum + (s.fullContent?.length || 0), 0) +

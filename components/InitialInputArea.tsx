@@ -39,22 +39,23 @@ const InitialInputArea: FC<TInputAreaProps> = ({
         handleInitialChat();
       }}
     >
-      <div className="flex w-full rounded-lg border">
+      <div className="flex w-full rounded-soft border border-hairline bg-paper transition-colors duration-normal hover:border-hairline-strong">
         <textarea
           placeholder="Teach me about..."
-          className="block w-full resize-none rounded-l-lg border-r p-6 text-sm text-gray-900 placeholder:text-gray-400 sm:text-base"
+          className="block w-full resize-none rounded-l-soft border-r border-hairline bg-paper p-6 text-sm text-ink placeholder:text-ink-quiet sm:text-base"
           disabled={disabled}
           value={promptValue}
           required
           onKeyDown={handleKeyDown}
           onChange={(e) => setPromptValue(e.target.value)}
           rows={1}
+          style={{ outline: "none" }}
         />
         <div className="flex items-center justify-center">
           <select
             id="grade"
             name="grade"
-            className="ring-none h-full rounded-md rounded-r-lg border-0 bg-transparent px-2 text-sm font-medium text-black focus:ring-0 sm:text-base"
+            className="h-full rounded-r-soft border-0 bg-paper px-2 text-sm font-medium text-ink focus:ring-0 sm:text-base"
             value={ageGroup}
             onChange={(e) => setAgeGroup(e.target.value)}
           >
@@ -70,7 +71,7 @@ const InitialInputArea: FC<TInputAreaProps> = ({
       <button
         disabled={disabled}
         type="submit"
-        className="relative flex size-[72px] w-[358px] shrink-0 items-center justify-center rounded-md bg-[linear-gradient(154deg,#2A8EF9_23.37%,#175CB6_91.91%)] disabled:pointer-events-none disabled:opacity-75 sm:ml-3 sm:w-[72px]"
+        className="relative flex size-[72px] w-[358px] shrink-0 items-center justify-center rounded-soft bg-ink text-paper transition-colors duration-normal hover:bg-accent disabled:pointer-events-none disabled:opacity-75 sm:ml-3 sm:w-[72px]"
       >
         {disabled && (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -86,7 +87,7 @@ const InitialInputArea: FC<TInputAreaProps> = ({
           height={24}
           className={disabled ? "invisible" : ""}
         />
-        <span className="ml-2 font-bold text-white sm:hidden">Search</span>
+        <span className="ml-2 font-medium text-paper sm:hidden">Search</span>
       </button>
     </form>
   );

@@ -41,13 +41,11 @@ export default function SettingsPage() {
 
   const loadSettings = async () => {
     try {
-      // Load from localStorage first (user's saved settings)
       const savedSettings = localStorage.getItem("studybuddy-settings");
       if (savedSettings) {
         const parsedSettings = JSON.parse(savedSettings);
         setSettings(parsedSettings);
       } else {
-        // If no localStorage settings, get backend defaults
         const response = await fetch('/api/settings');
         if (response.ok) {
           const backendSettings = await response.json();
@@ -56,7 +54,6 @@ export default function SettingsPage() {
       }
     } catch (error) {
       console.error("Error loading settings:", error);
-      // Final fallback to localStorage only
       const savedSettings = localStorage.getItem("studybuddy-settings");
       if (savedSettings) {
         setSettings(JSON.parse(savedSettings));
@@ -68,10 +65,8 @@ export default function SettingsPage() {
 
   const handleSave = async () => {
     try {
-      // Save to localStorage for persistence
       localStorage.setItem("studybuddy-settings", JSON.stringify(settings));
-      
-      // Save to backend for immediate use
+
       const response = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -81,8 +76,6 @@ export default function SettingsPage() {
       if (response.ok) {
         setSaved(true);
         setTimeout(() => setSaved(false), 3000);
-        
-        // Dispatch custom event to notify other components that settings changed
         window.dispatchEvent(new CustomEvent('settingsChanged'));
       } else {
         throw new Error('Failed to save settings');
@@ -97,14 +90,14 @@ export default function SettingsPage() {
     if (!settings.llmBaseUrl) {
       setTestResult({
         type: 'error',
-        message: 'Please enter a base URL first'
+        message: 'Please enter a server address first'
       });
       setTimeout(() => setTestResult(null), 3000);
       return;
     }
 
     setLoadingModels(true);
-    setTestResult(null); // Clear any previous results
+    setTestResult(null);
     try {
       const response = await fetch('/api/models', {
         method: 'POST',
@@ -122,13 +115,13 @@ export default function SettingsPage() {
         if (data.models && data.models.length > 0) {
           setTestResult({
             type: 'success',
-            message: `✅ Found ${data.models.length} models from ${settings.llmProvider} server`
+            message: `Found ${data.models.length} models from ${settings.llmProvider} server`
           });
           setTimeout(() => setTestResult(null), 3000);
         } else {
           setTestResult({
             type: 'warning',
-            message: '⚠️ Connected to server but no models found'
+            message: 'Connected to server but no models found'
           });
           setTimeout(() => setTestResult(null), 3000);
         }
@@ -153,9 +146,8 @@ export default function SettingsPage() {
   };
 
   const testSearch = async () => {
-    // Prevent rapid clicking (rate limiting)
     const now = Date.now();
-    if (now - lastTestTime < 2000) { // 2 second cooldown
+    if (now - lastTestTime < 2000) {
       setTestResult({
         type: 'warning',
         message: 'Please wait a moment before testing again.'
@@ -177,38 +169,34 @@ export default function SettingsPage() {
     if (settings.searchEngine === "searxng" && !settings.searchUrl) {
       setTestResult({
         type: 'error',
-        message: 'Please enter a SearXNG server URL first'
+        message: 'Please enter a search server address first'
       });
       setTimeout(() => setTestResult(null), 3000);
       return;
     }
 
     if ((settings.searchEngine === "serper" || settings.searchEngine === "bing" || settings.searchEngine === "brave") && !settings.searchApiKey) {
-      const engineName = settings.searchEngine === "serper" ? "Serper" : 
+      const engineName = settings.searchEngine === "serper" ? "Serper" :
                         settings.searchEngine === "bing" ? "Bing" : "Brave";
       setTestResult({
         type: 'error',
-        message: `Please enter your ${engineName} API key first`
+        message: `Please enter your ${engineName} secret key first`
       });
       setTimeout(() => setTestResult(null), 3000);
       return;
     }
 
     setTestingSearch(true);
-    setTestResult(null); // Clear any previous test results
+    setTestResult(null);
     try {
-      // First, let's test basic connectivity to the server
       if (settings.searchEngine === "searxng") {
         console.log(`Testing SearXNG connectivity to: ${settings.searchUrl}`);
-        
-        // Try a basic fetch to the root URL first
         try {
           const testUrl = new URL(settings.searchUrl);
           console.log(`Testing basic connectivity to: ${testUrl.origin}`);
-          
           const basicTest = await fetch(testUrl.origin, {
             method: 'HEAD',
-            mode: 'no-cors', // Avoid CORS issues for basic connectivity test
+            mode: 'no-cors',
           });
           console.log('Basic connectivity test completed');
         } catch (basicError) {
@@ -219,8 +207,6 @@ export default function SettingsPage() {
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
       };
-      
-      // Include current settings in the test
       headers["X-StudyBuddy-Settings"] = JSON.stringify(settings);
 
       console.log('Sending search test request with settings:', settings.searchEngine, settings.searchUrl);
@@ -236,23 +222,23 @@ export default function SettingsPage() {
         if (results && results.length > 0) {
           setTestResult({
             type: 'success',
-            message: `✅ Search test successful! Found ${results.length} results using ${settings.searchEngine}.`
+            message: `Search test successful! Found ${results.length} results using ${settings.searchEngine}.`
           });
         } else {
           setTestResult({
             type: 'warning',
-            message: '⚠️ Search connected but returned no results. This might be normal for the test query.'
+            message: 'Search connected but returned no results. This might be normal for the test query.'
           });
         }
       } else {
         const error = await response.json().catch(() => ({ error: 'Unknown error' }));
         console.error('Search test failed with response:', response.status, response.statusText, error);
-        
+
         let errorMessage = `Search test failed: ${error.error || response.statusText}`;
         if (error.details) {
           errorMessage += `. Details: ${error.details}`;
         }
-        
+
         setTestResult({
           type: 'error',
           message: errorMessage
@@ -261,18 +247,17 @@ export default function SettingsPage() {
     } catch (error) {
       console.error("Search test error:", error);
       let errorMessage = `Search test failed: ${error instanceof Error ? error.message : 'Connection failed'}`;
-      
+
       if (error instanceof Error && error.message.includes('fetch')) {
-        errorMessage += '. This might be a network connectivity issue or CORS restriction.';
+        errorMessage += '. This might be a network connectivity issue.';
       }
-      
+
       setTestResult({
         type: 'error',
         message: errorMessage
       });
     } finally {
       setTestingSearch(false);
-      // Clear the test result after 5 seconds
       setTimeout(() => setTestResult(null), 5000);
     }
   };
@@ -303,27 +288,29 @@ export default function SettingsPage() {
 
   const searchEngines = [
     { value: "duckduckgo", label: "DuckDuckGo (Free)" },
-    { value: "brave", label: "Brave Search API" },
-    { value: "serper", label: "Serper (Google Search API)" },
-    { value: "bing", label: "Bing Search API" },
+    { value: "brave", label: "Brave Search" },
+    { value: "serper", label: "Serper (Google Search)" },
+    { value: "bing", label: "Bing Search" },
     { value: "searxng", label: "SearXNG (Self-hosted)" },
     { value: "disabled", label: "Disabled (No Search)" },
   ];
 
   const currentProvider = llmProviders.find(p => p.value === settings.llmProvider);
-  const currentSearchEngine = searchEngines.find(s => s.value === settings.searchEngine);
+
+  const inputClasses = "w-full rounded-soft border border-hairline bg-paper p-3 text-ink transition-colors duration-normal placeholder:text-ink-quiet hover:border-hairline-strong focus:border-accent focus:outline-none focus:ring-[3px] focus:ring-accent-soft";
+  const labelClasses = "block text-xs font-medium uppercase tracking-widest text-ink-quiet mb-2";
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-paper">
         <Header />
-        <main className="container mx-auto px-4 py-8 max-w-4xl">
-          <div className="bg-white rounded-lg shadow-lg p-6">
+        <main className="container mx-auto max-w-4xl px-4 py-8">
+          <div className="rounded-soft border border-hairline p-6">
             <div className="animate-pulse">
-              <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+              <div className="mb-6 h-8 w-1/4 rounded-soft bg-ink/10"></div>
               <div className="space-y-4">
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-4 w-3/4 rounded-soft bg-ink/10"></div>
+                <div className="h-4 w-1/2 rounded-soft bg-ink/10"></div>
               </div>
             </div>
           </div>
@@ -333,25 +320,30 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-paper">
       <Header />
-      
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">Settings</h1>
-          
-          {/* LLM Provider Section */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">AI Provider</h2>
-            
+
+      <main className="container mx-auto max-w-4xl px-4 py-8">
+        <div className="rounded-soft border border-hairline p-8">
+          <h1 className="text-3xl font-semibold text-ink mb-8">Settings</h1>
+
+          {/* AI Provider Section */}
+          <div className="mb-10">
+            <div className="flex items-center mb-6">
+              <span className="inline-block h-px w-9 bg-accent mr-3"></span>
+              <span className="text-xs font-medium uppercase tracking-widest text-ink-muted">
+                AI Provider
+              </span>
+            </div>
+
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className={labelClasses}>
                 Provider
               </label>
               <select
                 value={settings.llmProvider}
                 onChange={(e) => setSettings({...settings, llmProvider: e.target.value})}
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={inputClasses}
               >
                 {llmProviders.map(provider => (
                   <option key={provider.value} value={provider.value}>
@@ -363,22 +355,22 @@ export default function SettingsPage() {
 
             {(currentProvider?.requiresKey || settings.llmProvider === "ollama") && (
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  API Key {settings.llmProvider === "ollama" ? "(Optional)" : "(Required)"}
+                <label className={labelClasses}>
+                  Secret key {settings.llmProvider === "ollama" ? "(Optional)" : "(Required)"}
                 </label>
                 <input
                   type="password"
                   value={settings.llmApiKey}
                   onChange={(e) => setSettings({...settings, llmApiKey: e.target.value})}
                   placeholder={
-                    settings.llmProvider === "ollama" 
-                      ? "Enter API key if your Ollama requires authentication"
-                      : "Enter your API key"
+                    settings.llmProvider === "ollama"
+                      ? "Enter secret key if your Ollama requires it"
+                      : "Enter your secret key"
                   }
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={inputClasses}
                 />
                 {settings.llmProvider === "ollama" && (
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="mt-1 text-sm text-ink-quiet">
                     Leave empty for local Ollama. Add if using remote Ollama with authentication.
                   </p>
                 )}
@@ -386,29 +378,29 @@ export default function SettingsPage() {
             )}
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Base URL (optional)
+              <label className={labelClasses}>
+                Server address (optional)
               </label>
               <input
                 type="url"
                 value={settings.llmBaseUrl}
                 onChange={(e) => setSettings({...settings, llmBaseUrl: e.target.value})}
-                placeholder={currentProvider?.value === "ollama" ? "http://localhost:11434" : "Default API URL"}
+                placeholder={currentProvider?.value === "ollama" ? "http://localhost:11434" : "Default server address"}
                 spellCheck={false}
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={inputClasses}
               />
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Model
+              <label className={labelClasses}>
+                AI Brain
               </label>
               <div className="flex gap-2">
                 {models.length > 0 ? (
                   <select
                     value={settings.llmModel}
                     onChange={(e) => setSettings({...settings, llmModel: e.target.value})}
-                    className="flex-1 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={`flex-1 ${inputClasses}`}
                   >
                     <option value="">Select a model...</option>
                     {models.map(model => (
@@ -422,38 +414,43 @@ export default function SettingsPage() {
                     onChange={(e) => setSettings({...settings, llmModel: e.target.value})}
                     placeholder={currentProvider?.value === "ollama" ? "llama3.1:8b" : "Default model"}
                     spellCheck={false}
-                    className="flex-1 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={`flex-1 ${inputClasses}`}
                   />
                 )}
                 <button
                   type="button"
                   onClick={refreshModels}
                   disabled={loadingModels || !settings.llmBaseUrl}
-                  className="px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="rounded-soft border border-hairline px-4 py-3 text-ink transition-colors duration-normal hover:border-hairline-strong hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {loadingModels ? "..." : "🔄"}
+                  {loadingModels ? "..." : "Refresh"}
                 </button>
               </div>
               {models.length > 0 && (
-                <p className="text-sm text-green-600 mt-1">
-                  Found {models.length} models. Select one or clear to use custom.
+                <p className="mt-1 text-sm text-accent">
+                  Found {models.length} models. Select one or clear to type your own.
                 </p>
               )}
             </div>
           </div>
 
           {/* Search Engine Section */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Search Engine</h2>
-            
+          <div className="mb-10">
+            <div className="flex items-center mb-6">
+              <span className="inline-block h-px w-9 bg-accent mr-3"></span>
+              <span className="text-xs font-medium uppercase tracking-widest text-ink-muted">
+                Web Search
+              </span>
+            </div>
+
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Search Provider
+              <label className={labelClasses}>
+                Search provider
               </label>
               <select
                 value={settings.searchEngine}
                 onChange={(e) => setSettings({...settings, searchEngine: e.target.value})}
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={inputClasses}
               >
                 {searchEngines.map(engine => (
                   <option key={engine.value} value={engine.value}>
@@ -465,22 +462,22 @@ export default function SettingsPage() {
 
             {settings.searchEngine === "duckduckgo" && (
               <div className="mb-4">
-                <p className="text-sm text-green-600 mb-2">✅ DuckDuckGo is free and requires no API key</p>
+                <p className="mb-2 text-sm text-accent">DuckDuckGo is free and requires no secret key</p>
                 <button
                   type="button"
                   onClick={testSearch}
                   disabled={testingSearch}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="rounded-soft border border-hairline px-4 py-2 text-sm text-ink transition-colors duration-normal hover:border-hairline-strong hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {testingSearch ? "Testing..." : "🔍 Test DuckDuckGo Search"}
+                  {testingSearch ? "Testing..." : "Test DuckDuckGo search"}
                 </button>
               </div>
             )}
 
             {settings.searchEngine === "searxng" && (
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  SearXNG Server URL
+                <label className={labelClasses}>
+                  Search server address
                 </label>
                 <div className="flex gap-2">
                   <input
@@ -489,67 +486,71 @@ export default function SettingsPage() {
                     onChange={(e) => setSettings({...settings, searchUrl: e.target.value})}
                     placeholder="https://your-searxng-server.com"
                     spellCheck={false}
-                    className="flex-1 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={`flex-1 ${inputClasses}`}
                   />
                   <button
                     type="button"
                     onClick={testSearch}
                     disabled={testingSearch || !settings.searchUrl}
-                    className="px-4 py-3 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    className="rounded-soft border border-hairline px-4 py-3 text-ink transition-colors duration-normal hover:border-hairline-strong hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {testingSearch ? "..." : "🔍"}
+                    {testingSearch ? "..." : "Test"}
                   </button>
                 </div>
-                <p className="text-sm text-gray-500 mt-1">
-                  Click 🔍 to test your SearXNG server connectivity
+                <p className="mt-1 text-sm text-ink-quiet">
+                  Click Test to check your SearXNG server connectivity
                 </p>
               </div>
             )}
 
             {(settings.searchEngine === "serper" || settings.searchEngine === "bing" || settings.searchEngine === "brave") && (
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {settings.searchEngine === "serper" ? "Serper API Key" : 
-                   settings.searchEngine === "bing" ? "Bing API Key" :
-                   settings.searchEngine === "brave" ? "Brave API Key" : "API Key"}
+                <label className={labelClasses}>
+                  {settings.searchEngine === "serper" ? "Serper secret key" :
+                   settings.searchEngine === "bing" ? "Bing secret key" :
+                   settings.searchEngine === "brave" ? "Brave secret key" : "Secret key"}
                 </label>
                 <div className="flex gap-2">
                   <input
                     type="password"
                     value={settings.searchApiKey}
                     onChange={(e) => setSettings({...settings, searchApiKey: e.target.value})}
-                    placeholder="Enter your API key"
-                    className="flex-1 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter your secret key"
+                    className={`flex-1 ${inputClasses}`}
                   />
                   <button
                     type="button"
                     onClick={testSearch}
                     disabled={testingSearch || !settings.searchApiKey}
-                    className="px-4 py-3 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    className="rounded-soft border border-hairline px-4 py-3 text-ink transition-colors duration-normal hover:border-hairline-strong hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {testingSearch ? "..." : "🔍"}
+                    {testingSearch ? "..." : "Test"}
                   </button>
                 </div>
-                <p className="text-sm text-gray-500 mt-1">
-                  Click 🔍 to test your {settings.searchEngine === "serper" ? "Serper" : "Bing"} API key
+                <p className="mt-1 text-sm text-ink-quiet">
+                  Click Test to check your {settings.searchEngine === "serper" ? "Serper" : settings.searchEngine === "bing" ? "Bing" : "Brave"} secret key
                 </p>
               </div>
             )}
-
           </div>
 
           {/* Default Education Level Section */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Default Education Level</h2>
-            
+          <div className="mb-10">
+            <div className="flex items-center mb-6">
+              <span className="inline-block h-px w-9 bg-accent mr-3"></span>
+              <span className="text-xs font-medium uppercase tracking-widest text-ink-muted">
+                Defaults
+              </span>
+            </div>
+
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Default Level for New Conversations
+              <label className={labelClasses}>
+                Default education level
               </label>
               <select
                 value={settings.defaultEducationLevel}
                 onChange={(e) => setSettings({...settings, defaultEducationLevel: e.target.value})}
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className={inputClasses}
               >
                 <option value="Elementary School">Elementary School</option>
                 <option value="Middle School">Middle School</option>
@@ -558,26 +559,26 @@ export default function SettingsPage() {
                 <option value="Undergrad">Undergrad</option>
                 <option value="Graduate">Graduate</option>
               </select>
-              <p className="text-sm text-gray-500 mt-1">
-                This will be the default level selected when starting a new conversation. You can still change it per conversation.
+              <p className="mt-1 text-sm text-ink-quiet">
+                This will be the default level when starting a new conversation. You can still change it each time.
               </p>
             </div>
           </div>
 
           {/* Test Result Notification */}
           {testResult && (
-            <div className={`mb-4 p-4 rounded-md border ${
-              testResult.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
-              testResult.type === 'warning' ? 'bg-yellow-50 border-yellow-200 text-yellow-800' :
-              'bg-red-50 border-red-200 text-red-800'
+            <div className={`mb-6 rounded-soft border p-4 ${
+              testResult.type === 'success' ? 'border-accent bg-accent-soft text-ink' :
+              testResult.type === 'warning' ? 'border-hairline-strong bg-paper-warm text-ink' :
+              'border-error/30 bg-error/5 text-ink'
             }`}>
-              <div className="flex justify-between items-start">
+              <div className="flex items-start justify-between">
                 <p className="text-sm">{testResult.message}</p>
                 <button
                   onClick={() => setTestResult(null)}
-                  className="ml-2 text-gray-400 hover:text-gray-600"
+                  className="ml-2 text-ink-quiet transition-colors duration-normal hover:text-ink"
                 >
-                  ✕
+                  &times;
                 </button>
               </div>
             </div>
@@ -587,37 +588,42 @@ export default function SettingsPage() {
           <div className="flex gap-4">
             <button
               onClick={handleSave}
-              className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              className="rounded-soft bg-ink px-8 py-3 font-medium text-paper transition-colors duration-normal hover:bg-accent"
             >
-              {saved ? "✓ Settings Applied!" : "Save & Apply Settings"}
+              {saved ? "Settings applied" : "Save and apply"}
             </button>
-            
+
             <button
               onClick={handleReset}
-              className="px-6 py-3 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
+              className="rounded-soft border border-hairline px-6 py-3 text-ink-muted transition-colors duration-normal hover:border-hairline-strong hover:text-ink"
             >
-              Reset to Defaults
+              Reset to defaults
             </button>
           </div>
 
           {saved && (
-            <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
-              <p className="text-green-800">
-                ✓ Settings saved and applied! Changes take effect immediately - no restart needed.
+            <div className="mt-4 rounded-soft border border-accent bg-accent-soft p-4">
+              <p className="text-sm text-ink">
+                Settings saved and applied. Changes take effect straight away.
               </p>
             </div>
           )}
 
           {/* Instructions */}
-          <div className="mt-8 p-4 bg-blue-50 rounded-md">
-            <h3 className="font-semibold text-blue-900 mb-2">Instructions:</h3>
-            <ul className="text-sm text-blue-800 space-y-1">
-              <li>• <strong>Ollama (Recommended):</strong> Free local AI. Install from <a href="https://ollama.com" target="_blank" rel="noopener noreferrer" className="underline">ollama.com</a></li>
-              <li>• <strong>Model Discovery:</strong> Click the 🔄 button to fetch available models from your provider</li>
-              <li>• <strong>Cloud Providers:</strong> Require API keys. Create accounts and add your keys above.</li>
-              <li>• <strong>Search:</strong> Optional for enriched content. Disabled by default for privacy.</li>
-              <li>• <strong>SearXNG:</strong> Self-hosted search engine for privacy-conscious users.</li>
-              <li>• <strong>Instant Apply:</strong> Settings take effect immediately - no app restart required!</li>
+          <div className="mt-10 rounded-soft border border-hairline p-6">
+            <div className="flex items-center mb-4">
+              <span className="inline-block h-px w-9 bg-accent mr-3"></span>
+              <span className="text-xs font-medium uppercase tracking-widest text-ink-muted">
+                Getting started
+              </span>
+            </div>
+            <ul className="space-y-2 text-sm text-ink-muted" style={{ lineHeight: 1.7 }}>
+              <li><strong className="text-ink">Ollama (Recommended):</strong> Free local AI. Install from <a href="https://ollama.com" target="_blank" rel="noopener noreferrer" className="underline transition-colors duration-normal hover:text-accent">ollama.com</a></li>
+              <li><strong className="text-ink">Find models:</strong> Click the Refresh button to see available models from your provider</li>
+              <li><strong className="text-ink">Cloud providers:</strong> Require secret keys. Create accounts and add your keys above.</li>
+              <li><strong className="text-ink">Web search:</strong> Optional for enriched content. Disabled by default for privacy.</li>
+              <li><strong className="text-ink">SearXNG:</strong> Self-hosted search engine for privacy-conscious users.</li>
+              <li><strong className="text-ink">Instant apply:</strong> Settings take effect straight away, no restart needed.</li>
             </ul>
           </div>
         </div>

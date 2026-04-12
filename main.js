@@ -1,5 +1,5 @@
 // Add command line arguments for development BEFORE requiring electron
-const isDev = process.env.NODE_ENV !== 'production' && !process.resourcesPath;
+const isDev = process.env.NODE_ENV === 'development';
 
 // Import electron
 const { app, BrowserWindow } = require('electron');

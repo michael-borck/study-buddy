@@ -47,22 +47,23 @@ const FinalInputArea: FC<TInputAreaProps> = ({
         onSubmit();
       }}
     >
-      <div className="flex w-full rounded-lg border">
+      <div className="flex w-full rounded-soft border border-hairline bg-paper transition-colors duration-normal hover:border-hairline-strong">
         <textarea
           placeholder="Follow up question"
-          className="block w-full resize-none rounded-l-lg border-r p-6 text-gray-900 placeholder:text-gray-400"
+          className="block w-full resize-none rounded-l-soft border-r border-hairline bg-paper p-6 text-ink placeholder:text-ink-quiet"
           disabled={disabled}
           value={promptValue}
           onKeyDown={handleKeyDown}
           required
           onChange={(e) => setPromptValue(e.target.value)}
           rows={1}
+          style={{ outline: "none" }}
         />
       </div>
       <button
         disabled={disabled}
         type="submit"
-        className="relative ml-3 flex size-[72px] shrink-0 items-center justify-center rounded-md bg-[linear-gradient(154deg,#2A8EF9_23.37%,#175CB6_91.91%)] disabled:pointer-events-none disabled:opacity-75"
+        className="relative ml-3 flex size-[72px] shrink-0 items-center justify-center rounded-soft bg-ink text-paper transition-colors duration-normal hover:bg-accent disabled:pointer-events-none disabled:opacity-75"
       >
         {disabled && (
           <div className="absolute inset-0 flex items-center justify-center">

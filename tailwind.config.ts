@@ -1,5 +1,4 @@
 import type { Config } from "tailwindcss";
-import colors from "tailwindcss/colors";
 
 const config: Config = {
   content: [
@@ -13,20 +12,46 @@ const config: Config = {
       md: "768px",
       lg: "898px",
     },
-
     container: {
       center: true,
     },
     extend: {
       colors: {
-        gray: colors.neutral,
+        paper: {
+          DEFAULT: "var(--paper)",
+          warm: "var(--paper-warm)",
+        },
+        ink: {
+          DEFAULT: "var(--ink)",
+          soft: "var(--ink-soft)",
+          muted: "var(--ink-muted)",
+          quiet: "var(--ink-quiet)",
+        },
+        accent: {
+          DEFAULT: "var(--accent)",
+          deep: "var(--accent-deep)",
+          soft: "var(--accent-soft)",
+        },
+        hairline: {
+          DEFAULT: "var(--hairline)",
+          strong: "var(--hairline-strong)",
+          contrast: "var(--hairline-contrast)",
+        },
+        error: "var(--error)",
       },
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "custom-gradient":
-          "linear-gradient(150deg, #1B1B16 1.28%, #565646 90.75%)",
-        "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+      fontFamily: {
+        sans: ["var(--font-sans)"],
+      },
+      borderRadius: {
+        soft: "var(--radius-soft)",
+      },
+      transitionDuration: {
+        fast: "var(--duration-fast)",
+        normal: "var(--duration-normal)",
+        slow: "var(--duration-slow)",
+      },
+      transitionTimingFunction: {
+        "ease-out-calm": "var(--ease-out)",
       },
     },
   },

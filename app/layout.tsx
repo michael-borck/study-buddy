@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
+import { Figtree } from "next/font/google";
 import "./globals.css";
-import Image from "next/image";
-import bgImage from "../public/new-bg.png";
 import InitializeSettings from "./initialize-settings";
 
-const montserrat = Montserrat({ subsets: ["latin"] });
+const figtree = Figtree({ subsets: ["latin"] });
 
 let title = "Study Buddy – AI Personal Tutor";
 let description = "Learn faster with our open source AI personal tutor";
@@ -43,16 +41,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en" className="h-full" data-app="study">
       <body
-        className={`${montserrat.className} flex h-full flex-col justify-between text-gray-700 antialiased`}
+        className={`${figtree.className} flex h-full flex-col justify-between bg-paper text-ink antialiased`}
       >
         <InitializeSettings />
-        <Image
-          src={bgImage}
-          alt=""
-          className="absolute inset-0 -z-10 max-h-full max-w-full blur-[2px]"
-        />
         {children}
       </body>
     </html>

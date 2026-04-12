@@ -64,10 +64,10 @@ export default function Home() {
 
     // Listen for localStorage changes
     window.addEventListener('storage', handleSettingsUpdate);
-    
+
     // Listen for settings changed event (when user saves settings)
     window.addEventListener('settingsChanged', handleSettingsUpdate);
-    
+
     // Listen for settings loaded event (when app initializes from file)
     window.addEventListener('settingsLoaded', handleSettingsUpdate);
 
@@ -91,17 +91,17 @@ export default function Home() {
 
   const handleChat = async (messages?: { role: string; content: string }[]) => {
     setLoading(true);
-    
+
     // Get settings from localStorage to send with request
     const savedSettings = localStorage.getItem("studybuddy-settings");
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
-    
+
     if (savedSettings) {
       headers["X-StudyBuddy-Settings"] = savedSettings;
     }
-    
+
     const chatRes = await fetch("/api/getChat", {
       method: "POST",
       headers,
@@ -160,17 +160,17 @@ export default function Home() {
 
   async function handleSourcesAndChat(question: string) {
     setIsLoadingSources(true);
-    
+
     // Get settings from localStorage to send with request
     const savedSettings = localStorage.getItem("studybuddy-settings");
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
-    
+
     if (savedSettings) {
       headers["X-StudyBuddy-Settings"] = savedSettings;
     }
-    
+
     let sourcesResponse = await fetch("/api/getSources", {
       method: "POST",
       headers,
@@ -239,7 +239,7 @@ export default function Home() {
           />
         )}
       </main>
-      {/* <Footer /> */}
+      <Footer />
     </>
   );
 }

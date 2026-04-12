@@ -60,13 +60,13 @@ export default function Chat({
   return (
     <div className="flex grow flex-col gap-4 overflow-hidden">
       <div className="flex grow flex-col overflow-hidden lg:p-4">
-        <p className="uppercase text-gray-900">
-          <b>Topic: </b>
+        <p className="text-xs font-medium uppercase tracking-widest text-ink-quiet">
+          <span className="text-ink font-semibold">Topic:</span>{" "}
           {topic}
         </p>
         <div
           ref={scrollableContainerRef}
-          className="mt-2 overflow-y-scroll rounded-lg border border-solid border-[#C2C2C2] bg-white px-5 lg:p-7"
+          className="mt-2 overflow-y-scroll rounded-soft border border-hairline bg-paper px-5 lg:p-7"
         >
           {messages.length > 2 ? (
             <div className="prose-sm max-w-5xl lg:prose lg:max-w-full">
@@ -81,7 +81,7 @@ export default function Chat({
                 ) : (
                   <p
                     key={index}
-                    className="ml-auto w-fit rounded-xl bg-blue-500 p-4 font-medium text-white"
+                    className="ml-auto w-fit rounded-soft bg-ink p-4 font-medium text-paper"
                   >
                     {message.content}
                   </p>
@@ -94,7 +94,7 @@ export default function Chat({
               {Array.from(Array(10).keys()).map((i) => (
                 <div
                   key={i}
-                  className={`${i < 5 && "hidden sm:block"} h-10 animate-pulse rounded-md bg-gray-300`}
+                  className={`${i < 5 && "hidden sm:block"} h-10 animate-pulse rounded-soft bg-ink/10`}
                   style={{ animationDelay: `${i * 0.05}s` }}
                 />
               ))}
@@ -103,7 +103,7 @@ export default function Chat({
         </div>
       </div>
 
-      <div className="bg-white lg:p-4">
+      <div className="lg:p-4">
         <FinalInputArea
           disabled={disabled}
           promptValue={promptValue}

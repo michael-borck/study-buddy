@@ -1497,28 +1497,28 @@ export default function DocsPage() {
   const currentContent = docsContent[activeSection as keyof typeof docsContent] || docsContent.overview;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-paper">
       <Header />
-      
+
       <div className="flex">
         {/* Sidebar */}
-        <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+        <div className={`fixed inset-y-0 left-0 z-50 w-64 border-r border-hairline bg-paper transition-transform duration-slow lg:static lg:inset-0 lg:translate-x-0 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}>
-          <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 lg:hidden">
-              <h2 className="text-lg font-semibold text-gray-900">Documentation</h2>
+          <div className="flex h-full flex-col">
+            <div className="flex items-center justify-between border-b border-hairline p-4 lg:hidden">
+              <h2 className="text-lg font-semibold text-ink">Documentation</h2>
               <button
                 onClick={() => setIsSidebarOpen(false)}
-                className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+                className="rounded-soft p-2 text-ink-quiet transition-colors duration-normal hover:text-ink"
               >
-                ✕
+                &times;
               </button>
             </div>
-            
-            <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 hidden lg:block">Documentation</h2>
-              
+
+            <nav className="flex-1 space-y-1 overflow-y-auto p-4">
+              <h2 className="mb-4 hidden text-lg font-semibold text-ink lg:block">Documentation</h2>
+
               {navigationItems.map((item) => (
                 <button
                   key={item.id}
@@ -1526,10 +1526,10 @@ export default function DocsPage() {
                     setActiveSection(item.id);
                     setIsSidebarOpen(false);
                   }}
-                  className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  className={`flex w-full items-center rounded-soft px-3 py-2 text-sm transition-colors duration-normal ${
                     activeSection === item.id
-                      ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      ? 'border-r-2 border-accent bg-accent-soft font-medium text-ink'
+                      : 'text-ink-muted hover:bg-accent-soft hover:text-ink'
                   }`}
                 >
                   <span className="mr-3 text-lg">{item.icon}</span>
@@ -1537,12 +1537,12 @@ export default function DocsPage() {
                 </button>
               ))}
             </nav>
-            
-            <div className="p-4 border-t border-gray-200">
-              <div className="text-xs text-gray-500 space-y-1">
-                <p>📚 In-App Documentation</p>
-                <p>🔄 Always up-to-date</p>
-                <p>🔍 Search with Ctrl+F</p>
+
+            <div className="border-t border-hairline p-4">
+              <div className="space-y-1 text-xs text-ink-quiet">
+                <p>In-app documentation</p>
+                <p>Always up-to-date</p>
+                <p>Search with Ctrl+F</p>
               </div>
             </div>
           </div>
@@ -1550,91 +1550,84 @@ export default function DocsPage() {
 
         {/* Overlay for mobile */}
         {isSidebarOpen && (
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          <div
+            className="fixed inset-0 z-40 bg-ink/60 lg:hidden"
             onClick={() => setIsSidebarOpen(false)}
           />
         )}
 
         {/* Main Content */}
         <div className="flex-1 lg:ml-0">
-          <div className="sticky top-0 z-30 bg-white border-b border-gray-200 lg:hidden">
+          <div className="sticky top-0 z-30 border-b border-hairline bg-paper lg:hidden">
             <div className="flex items-center justify-between p-4">
               <button
                 onClick={() => setIsSidebarOpen(true)}
-                className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+                className="rounded-soft p-2 text-ink-quiet transition-colors duration-normal hover:text-ink"
               >
                 <span className="sr-only">Open sidebar</span>
-                ☰
+                &#9776;
               </button>
-              <h1 className="text-lg font-semibold text-gray-900">{currentContent.title}</h1>
-              <div className="w-10" /> {/* Spacer for center alignment */}
+              <h1 className="text-lg font-semibold text-ink">{currentContent.title}</h1>
+              <div className="w-10" />
             </div>
           </div>
 
           <main className="flex-1">
-            <div className="max-w-4xl mx-auto px-4 py-8 lg:px-8">
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-                <div className="prose prose-blue max-w-none">
-                  <div className="whitespace-pre-wrap text-gray-900 leading-relaxed">
+            <div className="mx-auto max-w-4xl px-4 py-8 lg:px-8">
+              <div className="rounded-soft border border-hairline p-8">
+                <div className="prose max-w-none">
+                  <div className="whitespace-pre-wrap leading-relaxed text-ink">
                     {currentContent.content.split('\n').map((line, index) => {
-                      // Handle headers
                       if (line.startsWith('# ')) {
-                        return <h1 key={index} className="text-3xl font-bold text-gray-900 mt-8 mb-4 first:mt-0">{line.substring(2)}</h1>;
+                        return <h1 key={index} className="mb-4 mt-8 text-3xl font-semibold text-ink first:mt-0">{line.substring(2)}</h1>;
                       }
                       if (line.startsWith('## ')) {
-                        return <h2 key={index} className="text-2xl font-semibold text-gray-900 mt-6 mb-3">{line.substring(3)}</h2>;
+                        return <h2 key={index} className="mb-3 mt-6 text-2xl font-semibold text-ink">{line.substring(3)}</h2>;
                       }
                       if (line.startsWith('### ')) {
-                        return <h3 key={index} className="text-xl font-medium text-gray-900 mt-5 mb-2">{line.substring(4)}</h3>;
+                        return <h3 key={index} className="mb-2 mt-5 text-xl font-medium text-ink">{line.substring(4)}</h3>;
                       }
-                      
-                      // Handle code blocks - skip triple backticks
+
                       if (line.startsWith('')) {
-                        return null; // Skip code block delimiters
+                        return null;
                       }
-                      
-                      // Handle lists
+
                       if (line.startsWith('- ')) {
-                        return <li key={index} className="text-gray-700 ml-4">{line.substring(2)}</li>;
+                        return <li key={index} className="ml-4 text-ink-muted">{line.substring(2)}</li>;
                       }
-                      
-                      // Handle bold text
+
                       if (line.includes('**')) {
                         const parts = line.split('**');
                         return (
-                          <p key={index} className="text-gray-700 mb-2">
-                            {parts.map((part, i) => 
-                              i % 2 === 1 ? <strong key={i} className="font-semibold">{part}</strong> : part
+                          <p key={index} className="mb-2 text-ink-muted">
+                            {parts.map((part, i) =>
+                              i % 2 === 1 ? <strong key={i} className="font-semibold text-ink">{part}</strong> : part
                             )}
                           </p>
                         );
                       }
-                      
-                      // Handle links
+
                       if (line.includes('[') && line.includes('](')) {
                         const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
                         const parts = line.split(linkRegex);
                         return (
-                          <p key={index} className="text-gray-700 mb-2">
+                          <p key={index} className="mb-2 text-ink-muted">
                             {parts.map((part, i) => {
                               if (i % 3 === 1) {
-                                return <a key={i} href={parts[i + 1]} className="text-blue-600 hover:text-blue-800 underline" target="_blank" rel="noopener noreferrer">{part}</a>;
+                                return <a key={i} href={parts[i + 1]} className="text-ink underline transition-colors duration-normal hover:text-accent" target="_blank" rel="noopener noreferrer">{part}</a>;
                               } else if (i % 3 === 2) {
-                                return null; // Skip URL part
+                                return null;
                               }
                               return part;
                             })}
                           </p>
                         );
                       }
-                      
-                      // Regular paragraphs
+
                       if (line.trim()) {
-                        return <p key={index} className="text-gray-700 mb-2">{line}</p>;
+                        return <p key={index} className="mb-2 text-ink-muted">{line}</p>;
                       }
-                      
-                      // Empty lines
+
                       return <div key={index} className="h-2" />;
                     })}
                   </div>

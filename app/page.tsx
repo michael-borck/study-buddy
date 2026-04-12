@@ -14,7 +14,7 @@ import { getSystemPrompt } from "@/utils/utils";
 import { getStrategyById, nudgePrompt } from "@/utils/strategies";
 import Chat from "@/components/Chat";
 
-const AUTO_SUMMARISE_THRESHOLD = 20000;
+const CONTENT_BUDGET = 15000; // chars — leaves room for system prompt, strategy, and conversation
 
 type Phase = "landing" | "preparing" | "chat";
 
@@ -210,12 +210,15 @@ export default function Home() {
       updateStep(1, "skipped", setPrepSteps);
     }
 
-    // Auto-summarise if content is too large
-    const totalContentSize =
-      parsed.reduce((sum, s) => sum + (s.fullContent?.length || 0), 0) +
-      (customText?.length || 0);
+    // ── Fit content to context budget ──────────────────────────────
+    let processedCustomText = customText || "";
 
-    if (totalContentSize > AUTO_SUMMARISE_THRESHOLD && parsed.length > 0) {
+    const contentSize = () =>
+      parsed.reduce((sum, s) => sum + (s.fullContent?.length || 0), 0) +
+      processedCustomText.length;
+
+    // Step A: Summarise web sources if over budget
+    if (contentSize() > CONTENT_BUDGET && parsed.length > 0) {
       setPrepSteps((prev) => [
         ...prev.slice(0, 2),
         { label: "Summarising sources to fit...", status: "active" },
@@ -232,7 +235,7 @@ export default function Home() {
           parsed = await summariseRes.json();
         }
       } catch (e) {
-        console.error("Summarisation failed:", e);
+        console.error("Source summarisation failed:", e);
       }
 
       setPrepSteps((prev) =>
@@ -240,7 +243,60 @@ export default function Home() {
       );
     }
 
-    // Store parsed sources for strategy switching
+    // Step B: If notes alone are still too large, chunk and summarise them
+    const notesBudget = CONTENT_BUDGET - parsed.reduce((sum, s) => sum + (s.fullContent?.length || 0), 0);
+    if (processedCustomText.length > Math.max(notesBudget, 4000)) {
+      setPrepSteps((prev) => {
+        // Add a notes step before the final "Preparing" step
+        const preparing = prev[prev.length - 1];
+        return [
+          ...prev.slice(0, -1),
+          { label: "Your notes are long — summarising to fit...", status: "active" },
+          preparing,
+        ];
+      });
+
+      // Chunk notes into ~8K pieces and summarise each
+      const chunkSize = 8000;
+      const chunks: { name: string; url: string; fullContent: string }[] = [];
+      for (let i = 0; i < processedCustomText.length; i += chunkSize) {
+        chunks.push({
+          name: `Notes part ${Math.floor(i / chunkSize) + 1}`,
+          url: "",
+          fullContent: processedCustomText.slice(i, i + chunkSize),
+        });
+      }
+
+      try {
+        const summariseRes = await fetch("/api/summariseSources", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ sources: chunks }),
+        });
+        if (summariseRes.ok) {
+          const summarised = await summariseRes.json();
+          processedCustomText = summarised
+            .map((s: { fullContent: string }) => s.fullContent)
+            .join("\n\n");
+        }
+      } catch (e) {
+        console.error("Notes summarisation failed:", e);
+      }
+
+      // Mark the step done
+      setPrepSteps((prev) =>
+        prev.map((s) =>
+          s.label.includes("notes are long") ? { ...s, status: "done" } : s,
+        ),
+      );
+    }
+
+    // Step C: If still over budget, take fewer sources
+    while (contentSize() > CONTENT_BUDGET && parsed.length > 3) {
+      parsed = parsed.slice(0, parsed.length - 1);
+    }
+
+    // Store for strategy switching
     setParsedSources(parsed);
 
     // Step 3: Prepare tutor
@@ -250,12 +306,28 @@ export default function Home() {
       ),
     );
 
-    const hasContent = parsed.length > 0 || customText;
+    const hasContent = parsed.length > 0 || processedCustomText;
     const strategy = getStrategyById(strategyId);
     const nudge = nudgeEnabled ? nudgePrompt : undefined;
 
+    // Build system prompt — use processedCustomText (may have been summarised)
+    const buildPromptWithNotes = (
+      p: { fullContent: string }[],
+      sid: string,
+      n: boolean,
+    ) => {
+      const strat = getStrategyById(sid);
+      return getSystemPrompt(
+        p,
+        ageGroup,
+        processedCustomText || undefined,
+        strat.prompt,
+        n ? nudgePrompt : undefined,
+      );
+    };
+
     const systemContent = hasContent
-      ? buildSystemPrompt(parsed, strategyId, nudgeEnabled)
+      ? buildPromptWithNotes(parsed, strategyId, nudgeEnabled)
       : `You are a professional interactive personal tutor. The student wants to learn about a topic at a ${ageGroup} level. You don't have specific source material for this topic, so teach from your own knowledge. Be upfront that you're teaching from general knowledge and may not have the latest information. Start by greeting the learner, giving a short overview, and asking what they want to learn about (in markdown numbers). Be interactive. Keep the first message short and concise. Please return answers in markdown.\n\n${strategy.prompt}${nudge ? "\n\n" + nudge : ""}`;
 
     const initialMessage = [

@@ -132,7 +132,7 @@ The AI model may get things wrong when it has no sources to ground its answers. 
 
 ## Learning strategies
 
-Study Buddy offers five teaching strategies. You choose one on the landing page and can switch at any time during the conversation.
+Study Buddy offers eight teaching strategies. You choose one on the landing page and can switch at any time during the conversation.
 
 ### Explain (default)
 The tutor teaches the topic with clear explanations, examples, and analogies appropriate for your education level. It checks understanding before moving on. This is the most familiar mode — like a patient teacher explaining a concept.
@@ -148,6 +148,15 @@ The tutor takes the opposing view to whatever you say. If you state a common pos
 
 ### Perspectives
 The tutor presents the topic through at least three different professional lenses — for example, how a marketer, engineer, and legal counsel would each think about the same issue. Then it asks which perspective resonates with you and why. Good for business topics, ethics, and policy.
+
+### Feynman
+Named after physicist Richard Feynman's learning technique. The tutor gives a brief overview, then asks you to explain the concept back in simple words — as if teaching a 10-year-old. It evaluates your explanation, points out gaps, and asks you to try again until your understanding is solid. Forces deep comprehension.
+
+### Spaced recall
+The tutor teaches a concept, moves on to the next one, then circles back: "Earlier we discussed X. Without looking back, can you explain...?" This mimics spaced repetition within a single session. The forgetting is the point — retrieving information under difficulty strengthens your memory.
+
+### Worked examples
+Best for STEM, maths, and problem-solving topics. The tutor solves a problem step by step, then presents a similar problem for you to solve. If you get stuck, it hints at the specific step — not the whole solution. Difficulty increases gradually.
 
 ## Make me think (reflection prompts)
 
@@ -210,6 +219,7 @@ Choose which AI service to use:
 - **Anthropic (Claude)** — Requires a secret key.
 - **Google (Gemini)** — Requires a secret key.
 - **Groq** — Requires a secret key. Fast inference.
+- **OpenRouter** — Requires a secret key. Access to hundreds of models from many providers through one key.
 - **Together AI** — Requires a secret key. Open-source models.
 
 ### Secret key

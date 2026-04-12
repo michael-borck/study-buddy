@@ -292,6 +292,7 @@ export default function SettingsPage() {
     { value: "anthropic", label: "Anthropic (Claude)", requiresKey: true },
     { value: "google", label: "Google (Gemini)", requiresKey: true },
     { value: "groq", label: "Groq", requiresKey: true },
+    { value: "openrouter", label: "OpenRouter", requiresKey: true },
     { value: "together", label: "Together AI", requiresKey: true },
   ];
 

@@ -46,6 +46,11 @@ export function createProvider(config?: ProviderConfig): LLMProvider {
         throw new Error("Anthropic requires an API key");
       }
       return new AnthropicProvider(config.apiKey, config.baseUrl);
+    case "openrouter":
+      if (!config.apiKey) {
+        throw new Error("OpenRouter requires an API key");
+      }
+      return new OpenAIProvider(config.apiKey, config.baseUrl || "https://openrouter.ai");
     case "groq":
       if (!config.apiKey) {
         throw new Error("Groq requires an API key");
@@ -94,6 +99,13 @@ export function getDefaultProviderConfig(): ProviderConfig {
         apiKey: process.env.ANTHROPIC_API_KEY,
         baseUrl: process.env.ANTHROPIC_BASE_URL || "https://api.anthropic.com",
         defaultModel: process.env.ANTHROPIC_MODEL || "claude-3-5-haiku-20241022",
+      };
+    case "openrouter":
+      return {
+        name: "openrouter",
+        apiKey: process.env.OPENROUTER_API_KEY,
+        baseUrl: process.env.OPENROUTER_BASE_URL || "https://openrouter.ai",
+        defaultModel: process.env.OPENROUTER_MODEL || "meta-llama/llama-3.1-8b-instruct:free",
       };
     case "groq":
       return {

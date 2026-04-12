@@ -71,7 +71,7 @@ export default function AboutPage() {
             </div>
             <p className="text-ink-muted mb-4">
               A real tutor doesn&apos;t just explain — they quiz you, ask questions, challenge your
-              thinking. Study Buddy offers five teaching strategies you can switch between at any time:
+              thinking. Study Buddy offers eight teaching strategies you can switch between at any time:
             </p>
             <div className="mb-8 grid gap-4 md:grid-cols-2">
               <div className="rounded-soft border border-hairline p-5">
@@ -90,9 +90,21 @@ export default function AboutPage() {
                 <h3 className="mb-1 font-semibold text-ink">Devil&apos;s advocate</h3>
                 <p className="text-sm text-ink-muted">Challenges your position to sharpen your thinking.</p>
               </div>
-              <div className="rounded-soft border border-hairline p-5 md:col-span-2">
+              <div className="rounded-soft border border-hairline p-5">
                 <h3 className="mb-1 font-semibold text-ink">Perspectives</h3>
                 <p className="text-sm text-ink-muted">The topic through different lenses — marketer, engineer, legal, scientist.</p>
+              </div>
+              <div className="rounded-soft border border-hairline p-5">
+                <h3 className="mb-1 font-semibold text-ink">Feynman</h3>
+                <p className="text-sm text-ink-muted">Explain the concept back in simple words. Gaps become obvious.</p>
+              </div>
+              <div className="rounded-soft border border-hairline p-5">
+                <h3 className="mb-1 font-semibold text-ink">Spaced recall</h3>
+                <p className="text-sm text-ink-muted">Learn, move on, get tested on it later. Strengthens memory.</p>
+              </div>
+              <div className="rounded-soft border border-hairline p-5">
+                <h3 className="mb-1 font-semibold text-ink">Worked examples</h3>
+                <p className="text-sm text-ink-muted">Watch a solved problem, then solve a similar one yourself. Best for STEM.</p>
               </div>
             </div>
 

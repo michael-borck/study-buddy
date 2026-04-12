@@ -596,6 +596,26 @@ export default function SettingsPage() {
                 web pages and longer notes without summarising.
               </p>
             </div>
+
+            <div className="mb-4">
+              <label className="flex cursor-pointer items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={typeof window !== "undefined" && localStorage.getItem("studybuddy-first-run-dismissed") !== "true"}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      localStorage.removeItem("studybuddy-first-run-dismissed");
+                    } else {
+                      localStorage.setItem("studybuddy-first-run-dismissed", "true");
+                    }
+                    // Force re-render
+                    setSettings({ ...settings });
+                  }}
+                  className="h-3.5 w-3.5 cursor-pointer rounded-sm accent-accent"
+                />
+                <span className="text-sm text-ink-muted">Show welcome message on home page</span>
+              </label>
+            </div>
           </div>
 
           {/* Audio Section */}

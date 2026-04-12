@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { FC, useState } from "react";
+import { FC, useState, useEffect } from "react";
 import InitialInputArea from "./InitialInputArea";
 import { suggestions } from "@/utils/utils";
 import { strategies } from "@/utils/strategies";
@@ -38,6 +38,19 @@ const Hero: FC<THeroProps> = ({
   setSearchWeb,
 }) => {
   const [showNotes, setShowNotes] = useState(false);
+  const [showFirstRun, setShowFirstRun] = useState(false);
+
+  useEffect(() => {
+    const dismissed = localStorage.getItem("studybuddy-first-run-dismissed");
+    if (dismissed !== "true") {
+      setShowFirstRun(true);
+    }
+  }, []);
+
+  const dismissFirstRun = () => {
+    setShowFirstRun(false);
+    localStorage.setItem("studybuddy-first-run-dismissed", "true");
+  };
 
   const handleClickSuggestion = (value: string) => {
     setPromptValue(value);
@@ -48,6 +61,42 @@ const Hero: FC<THeroProps> = ({
   return (
     <>
       <div className="mx-auto mt-6 flex max-w-3xl flex-col items-center justify-center sm:mt-12">
+
+        {/* First-run banner */}
+        {showFirstRun && (
+          <div className="mb-4 w-full rounded-soft border border-accent bg-accent-soft px-4 py-3">
+            <div className="flex items-start justify-between gap-3">
+              <p className="text-sm text-ink-muted" style={{ lineHeight: 1.6 }}>
+                <strong className="text-ink">First time?</strong> You&apos;ll need an AI model
+                running.{" "}
+                <a
+                  href="https://ollama.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-ink underline transition-colors duration-normal hover:text-accent"
+                >
+                  Set up Ollama (free)
+                </a>{" "}
+                or go to{" "}
+                <a
+                  href="/settings"
+                  className="font-medium text-ink underline transition-colors duration-normal hover:text-accent"
+                >
+                  Settings
+                </a>{" "}
+                to add a cloud provider.
+              </p>
+              <button
+                onClick={dismissFirstRun}
+                className="shrink-0 text-ink-quiet transition-colors duration-normal hover:text-ink"
+                title="Dismiss"
+              >
+                &times;
+              </button>
+            </div>
+          </div>
+        )}
+
         <h2 className="mt-2 text-center text-4xl font-semibold tracking-tight text-ink sm:text-6xl" style={{ lineHeight: 1.1 }}>
           Your Personal{" "}
           <span className="text-accent">Tutor</span>

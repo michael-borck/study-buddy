@@ -71,6 +71,8 @@ export const getSystemPrompt = (
   finalResults: { fullContent: string }[],
   ageGroup: string,
   customText?: string,
+  strategyPrompt?: string,
+  nudgePromptText?: string,
 ) => {
   const sourceBlock = finalResults
     .slice(0, 7)
@@ -83,8 +85,16 @@ export const getSystemPrompt = (
     ? `\n\n<student_notes>\n${customText.substring(0, 50000)}\n</student_notes>\n\nThe student has also provided their own notes above. Incorporate this material into your teaching alongside the web sources.`
     : "";
 
+  const strategyBlock = strategyPrompt
+    ? `\n\n<strategy>\n${strategyPrompt}\n</strategy>\n\nFollow the teaching strategy above carefully. It determines how you interact with the student.`
+    : "";
+
+  const nudgeBlock = nudgePromptText
+    ? `\n\n<reflection>\n${nudgePromptText}\n</reflection>`
+    : "";
+
   return `
-  You are a professional interactive personal tutor who is an expert at explaining topics. Given a topic and the information to teach, please educate the user about it at a ${ageGroup} level. Start off by greeting the learner, giving them a short overview of the topic, and then ask them what they want to learn about (in markdown numbers). Be interactive throughout the chat and quiz the user occasionally after you teach them material. Do not quiz them in the first overview message and make the first message short and concise.
+  You are a professional interactive personal tutor who is an expert at explaining topics. Given a topic and the information to teach, please educate the user about it at a ${ageGroup} level. Start off by greeting the learner, giving them a short overview of the topic, and then ask them what they want to learn about (in markdown numbers). Be interactive throughout the chat. Do not quiz them in the first overview message and make the first message short and concise.
 
   Here is the information to teach:
 
@@ -96,8 +106,8 @@ export const getSystemPrompt = (
 
   <age_group>
   ${ageGroup}
-  </age_group>
+  </age_group>${strategyBlock}${nudgeBlock}
 
-  Please return answer in markdown. It is very important for my career that you follow these instructions. Here is the topic to educate on:
+  Please return answers in markdown. Here is the topic to educate on:
     `;
 };

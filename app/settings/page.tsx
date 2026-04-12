@@ -13,6 +13,9 @@ interface Settings {
   searchApiKey: string;
   searchUrl: string;
   defaultEducationLevel: string;
+  voiceGender: string;
+  autoRead: boolean;
+  sttProvider: string;
 }
 
 export default function SettingsPage() {
@@ -25,6 +28,9 @@ export default function SettingsPage() {
     searchApiKey: "",
     searchUrl: "",
     defaultEducationLevel: "Middle School",
+    voiceGender: "female",
+    autoRead: false,
+    sttProvider: "web",
   });
 
   const [saved, setSaved] = useState(false);
@@ -273,6 +279,9 @@ export default function SettingsPage() {
       searchApiKey: "",
       searchUrl: "",
       defaultEducationLevel: "Middle School",
+      voiceGender: "female",
+      autoRead: false,
+      sttProvider: "web",
     });
     setModels([]);
   };
@@ -562,6 +571,99 @@ export default function SettingsPage() {
               <p className="mt-1 text-sm text-ink-quiet">
                 This will be the default level when starting a new conversation. You can still change it each time.
               </p>
+            </div>
+          </div>
+
+          {/* Audio Section */}
+          <div className="mb-10">
+            <div className="flex items-center mb-6">
+              <span className="inline-block h-px w-9 bg-accent mr-3"></span>
+              <span className="text-xs font-medium uppercase tracking-widest text-ink-muted">
+                Audio
+              </span>
+            </div>
+
+            <div className="mb-4">
+              <label className={labelClasses}>
+                Tutor voice
+              </label>
+              <select
+                value={settings.voiceGender}
+                onChange={(e) => setSettings({...settings, voiceGender: e.target.value})}
+                className={inputClasses}
+              >
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+              </select>
+              <p className="mt-1 text-sm text-ink-quiet">
+                Uses your computer&apos;s built-in voices. Quality varies by operating system.
+              </p>
+            </div>
+
+            <div className="mb-4">
+              <label className="flex cursor-pointer items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={settings.autoRead}
+                  onChange={(e) => setSettings({...settings, autoRead: e.target.checked})}
+                  className="h-3.5 w-3.5 cursor-pointer rounded-sm accent-accent"
+                />
+                <span className="text-sm text-ink-muted">Read responses aloud automatically</span>
+              </label>
+            </div>
+
+            <div className="mb-4">
+              <label className={labelClasses}>
+                Voice input method
+              </label>
+              <select
+                value={settings.sttProvider}
+                onChange={(e) => setSettings({...settings, sttProvider: e.target.value})}
+                className={inputClasses}
+              >
+                <option value="web">Online (Google, via browser)</option>
+                <option value="whisper">Local (Whisper, private)</option>
+              </select>
+              <div className="mt-2 rounded-soft border border-hairline p-4 text-sm text-ink-muted" style={{ lineHeight: 1.7 }}>
+                {settings.sttProvider === "web" ? (
+                  <>
+                    <strong className="text-ink">Online voice input</strong> uses your browser&apos;s
+                    built-in speech recognition (powered by Google). It&apos;s fast and accurate, but
+                    your spoken audio is sent to Google&apos;s servers for processing. No account is
+                    needed. This is the same technology used by voice typing in Google Docs.
+                  </>
+                ) : (
+                  <>
+                    <strong className="text-ink">Local voice input</strong> uses a Whisper speech
+                    recognition model that runs entirely on your computer. Your audio never leaves
+                    your machine. It requires a one-time download of about 40 MB. Transcription
+                    is slightly slower than the online option (a few seconds per phrase).
+                    <br /><br />
+                    The model will download automatically the first time you use the microphone
+                    button. You can also{" "}
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const { loadWhisperModel, isWhisperLoaded } = await import("@/utils/speech");
+                        if (isWhisperLoaded()) {
+                          alert("Whisper model is already downloaded and ready.");
+                          return;
+                        }
+                        alert("Downloading Whisper model (~40 MB). This may take a minute. Check the console for progress.");
+                        const ok = await loadWhisperModel((p) => {
+                          console.log("Whisper download:", p.status, p.progress ? Math.round(p.progress) + "%" : "", p.file || "");
+                        });
+                        if (ok) alert("Whisper model downloaded and ready to use.");
+                        else alert("Download failed. Check your internet connection and try again.");
+                      }}
+                      className="text-ink underline transition-colors duration-normal hover:text-accent"
+                    >
+                      download it now
+                    </button>
+                    .
+                  </>
+                )}
+              </div>
             </div>
           </div>
 

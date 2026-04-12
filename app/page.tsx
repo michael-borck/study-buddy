@@ -11,9 +11,10 @@ import {
   ReconnectInterval,
 } from "eventsource-parser";
 import { getSystemPrompt } from "@/utils/utils";
+import { getStrategyById, nudgePrompt } from "@/utils/strategies";
 import Chat from "@/components/Chat";
 
-const AUTO_SUMMARISE_THRESHOLD = 20000; // chars — roughly 5K tokens
+const AUTO_SUMMARISE_THRESHOLD = 20000;
 
 type Phase = "landing" | "preparing" | "chat";
 
@@ -29,10 +30,29 @@ export default function Home() {
   const [ageGroup, setAgeGroup] = useState("Middle School");
   const [customText, setCustomText] = useState("");
 
+  // Strategy state
+  const [strategyId, setStrategyId] = useState("explain");
+  const [nudgeEnabled, setNudgeEnabled] = useState(false);
+
+  // Search toggle (landing page override)
+  const [searchWeb, setSearchWeb] = useState(true);
+
+  // Audio settings
+  const [audioSettings, setAudioSettings] = useState({
+    voiceGender: "female" as "male" | "female",
+    autoRead: false,
+    sttProvider: "web" as "web" | "whisper",
+  });
+
+  // Keep parsed sources for rebuilding prompt on strategy change
+  const [parsedSources, setParsedSources] = useState<
+    { fullContent: string }[]
+  >([]);
+
   // Preparation phase steps
   const [prepSteps, setPrepSteps] = useState<PrepStep[]>([]);
 
-  // Load default education level from settings on mount
+  // Load defaults from settings on mount
   useEffect(() => {
     try {
       const savedSettings = localStorage.getItem("studybuddy-settings");
@@ -41,9 +61,17 @@ export default function Home() {
         if (settings.defaultEducationLevel) {
           setAgeGroup(settings.defaultEducationLevel);
         }
+        // If search is disabled in settings, default the toggle off
+        if (settings.searchEngine === "disabled") {
+          setSearchWeb(false);
+        }
+        // Load audio settings
+        if (settings.voiceGender) setAudioSettings((prev) => ({ ...prev, voiceGender: settings.voiceGender }));
+        if (settings.autoRead !== undefined) setAudioSettings((prev) => ({ ...prev, autoRead: settings.autoRead }));
+        if (settings.sttProvider) setAudioSettings((prev) => ({ ...prev, sttProvider: settings.sttProvider }));
       }
     } catch (error) {
-      console.warn("Failed to load default education level:", error);
+      console.warn("Failed to load settings:", error);
     }
   }, []);
 
@@ -93,6 +121,21 @@ export default function Home() {
     setter((prev) => prev.map((s, i) => (i === index ? { ...s, status } : s)));
   };
 
+  // Build system prompt with current strategy/nudge settings
+  const buildSystemPrompt = useCallback(
+    (parsed: { fullContent: string }[], sid: string, nudge: boolean) => {
+      const strategy = getStrategyById(sid);
+      return getSystemPrompt(
+        parsed,
+        ageGroup,
+        customText || undefined,
+        strategy.prompt,
+        nudge ? nudgePrompt : undefined,
+      );
+    },
+    [ageGroup, customText],
+  );
+
   const handleInitialChat = async () => {
     const currentTopic = inputValue;
     setTopic(currentTopic);
@@ -100,23 +143,25 @@ export default function Home() {
     setPhase("preparing");
     setLoading(true);
 
-    // Check if search is enabled
-    let searchEnabled = true;
-    try {
-      const savedSettings = localStorage.getItem("studybuddy-settings");
-      if (savedSettings) {
-        const settings = JSON.parse(savedSettings);
-        if (settings.searchEngine === "disabled") {
-          searchEnabled = false;
+    // Determine if we should search — landing page toggle AND settings
+    let shouldSearch = searchWeb;
+    if (shouldSearch) {
+      try {
+        const savedSettings = localStorage.getItem("studybuddy-settings");
+        if (savedSettings) {
+          const settings = JSON.parse(savedSettings);
+          if (settings.searchEngine === "disabled") {
+            shouldSearch = false;
+          }
         }
-      }
-    } catch {}
+      } catch {}
+    }
 
     // Build initial steps
     const steps: PrepStep[] = [
       {
-        label: searchEnabled ? "Searching for sources..." : "Web search disabled",
-        status: searchEnabled ? "active" : "skipped",
+        label: shouldSearch ? "Searching for sources..." : "Web search off",
+        status: shouldSearch ? "active" : "skipped",
       },
       { label: "Reading web pages...", status: "waiting" },
       { label: "Preparing your tutor...", status: "waiting" },
@@ -127,7 +172,7 @@ export default function Home() {
     let fetchedSources: { name: string; url: string }[] = [];
 
     // Step 1: Search
-    if (searchEnabled) {
+    if (shouldSearch) {
       try {
         const sourcesResponse = await fetch("/api/getSources", {
           method: "POST",
@@ -162,7 +207,7 @@ export default function Home() {
       }
       updateStep(1, "done", setPrepSteps);
     } else {
-      updateStep(1, fetchedSources.length === 0 && searchEnabled ? "skipped" : "skipped", setPrepSteps);
+      updateStep(1, "skipped", setPrepSteps);
     }
 
     // Auto-summarise if content is too large
@@ -171,7 +216,6 @@ export default function Home() {
       (customText?.length || 0);
 
     if (totalContentSize > AUTO_SUMMARISE_THRESHOLD && parsed.length > 0) {
-      // Insert a summarising step before "Preparing"
       setPrepSteps((prev) => [
         ...prev.slice(0, 2),
         { label: "Summarising sources to fit...", status: "active" },
@@ -196,6 +240,9 @@ export default function Home() {
       );
     }
 
+    // Store parsed sources for strategy switching
+    setParsedSources(parsed);
+
     // Step 3: Prepare tutor
     setPrepSteps((prev) =>
       prev.map((s, i) =>
@@ -203,43 +250,40 @@ export default function Home() {
       ),
     );
 
-    // If no sources and no custom text, teach from knowledge
     const hasContent = parsed.length > 0 || customText;
+    const strategy = getStrategyById(strategyId);
+    const nudge = nudgeEnabled ? nudgePrompt : undefined;
+
+    const systemContent = hasContent
+      ? buildSystemPrompt(parsed, strategyId, nudgeEnabled)
+      : `You are a professional interactive personal tutor. The student wants to learn about a topic at a ${ageGroup} level. You don't have specific source material for this topic, so teach from your own knowledge. Be upfront that you're teaching from general knowledge and may not have the latest information. Start by greeting the learner, giving a short overview, and asking what they want to learn about (in markdown numbers). Be interactive. Keep the first message short and concise. Please return answers in markdown.\n\n${strategy.prompt}${nudge ? "\n\n" + nudge : ""}`;
 
     const initialMessage = [
-      {
-        role: "system",
-        content: hasContent
-          ? getSystemPrompt(parsed, ageGroup, customText || undefined)
-          : `You are a professional interactive personal tutor. The student wants to learn about a topic at a ${ageGroup} level. You don't have specific source material for this topic, so teach from your own knowledge. Be upfront that you're teaching from general knowledge and may not have the latest information. Start by greeting the learner, giving a short overview, and asking what they want to learn about (in markdown numbers). Be interactive and quiz them occasionally. Keep the first message short and concise. Please return answers in markdown.`,
-      },
+      { role: "system", content: systemContent },
       { role: "user", content: currentTopic },
     ];
     setMessages(initialMessage);
 
-    // Transition to chat
     setPrepSteps((prev) =>
       prev.map((s, i) =>
         i === prev.length - 1 ? { ...s, status: "done" } : s,
       ),
     );
 
-    // Brief pause so the user sees all steps complete
     await new Promise((r) => setTimeout(r, 400));
     setPhase("chat");
 
-    // Start streaming
     await handleChat(initialMessage);
     setLoading(false);
   };
 
-  const handleChat = async (messages?: { role: string; content: string }[]) => {
+  const handleChat = async (msgs?: { role: string; content: string }[]) => {
     setLoading(true);
 
     const chatRes = await fetch("/api/getChat", {
       method: "POST",
       headers: getHeaders(),
-      body: JSON.stringify({ messages }),
+      body: JSON.stringify({ messages: msgs }),
     });
 
     if (!chatRes.ok) {
@@ -287,6 +331,31 @@ export default function Home() {
     setLoading(false);
   };
 
+  // Mid-conversation strategy change
+  const handleStrategyChange = (newStrategyId: string) => {
+    setStrategyId(newStrategyId);
+    setMessages((prev) => {
+      if (prev.length === 0) return prev;
+      const newSystemContent =
+        parsedSources.length > 0 || customText
+          ? buildSystemPrompt(parsedSources, newStrategyId, nudgeEnabled)
+          : prev[0].content;
+      return [{ ...prev[0], content: newSystemContent }, ...prev.slice(1)];
+    });
+  };
+
+  const handleNudgeChange = (enabled: boolean) => {
+    setNudgeEnabled(enabled);
+    setMessages((prev) => {
+      if (prev.length === 0) return prev;
+      const newSystemContent =
+        parsedSources.length > 0 || customText
+          ? buildSystemPrompt(parsedSources, strategyId, enabled)
+          : prev[0].content;
+      return [{ ...prev[0], content: newSystemContent }, ...prev.slice(1)];
+    });
+  };
+
   return (
     <>
       <Header />
@@ -302,6 +371,12 @@ export default function Home() {
             handleInitialChat={handleInitialChat}
             customText={customText}
             setCustomText={setCustomText}
+            strategyId={strategyId}
+            setStrategyId={setStrategyId}
+            nudgeEnabled={nudgeEnabled}
+            setNudgeEnabled={setNudgeEnabled}
+            searchWeb={searchWeb}
+            setSearchWeb={setSearchWeb}
           />
         )}
 
@@ -321,6 +396,11 @@ export default function Home() {
               topic={topic}
               sources={sources}
               hasCustomText={!!customText}
+              strategyId={strategyId}
+              onStrategyChange={handleStrategyChange}
+              nudgeEnabled={nudgeEnabled}
+              onNudgeChange={handleNudgeChange}
+              audioSettings={audioSettings}
             />
           </div>
         )}

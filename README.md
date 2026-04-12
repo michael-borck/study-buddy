@@ -1,158 +1,127 @@
-# Study Buddy AI
+# Study Buddy
 
 <!-- BADGES:START -->
 [![ai-tutor](https://img.shields.io/badge/-ai--tutor-blue?style=flat-square)](https://github.com/topics/ai-tutor) [![css](https://img.shields.io/badge/-css-1572b6?style=flat-square)](https://github.com/topics/css) [![desktop-application](https://img.shields.io/badge/-desktop--application-blue?style=flat-square)](https://github.com/topics/desktop-application) [![electron](https://img.shields.io/badge/-electron-47848f?style=flat-square)](https://github.com/topics/electron) [![javascript](https://img.shields.io/badge/-javascript-f7df1e?style=flat-square)](https://github.com/topics/javascript) [![local-inference](https://img.shields.io/badge/-local--inference-blue?style=flat-square)](https://github.com/topics/local-inference) [![privacy-focused](https://img.shields.io/badge/-privacy--focused-blue?style=flat-square)](https://github.com/topics/privacy-focused) [![typescript](https://img.shields.io/badge/-typescript-3178c6?style=flat-square)](https://github.com/topics/typescript) [![offline-application](https://img.shields.io/badge/-offline--application-blue?style=flat-square)](https://github.com/topics/offline-application) [![edtech](https://img.shields.io/badge/-edtech-4caf50?style=flat-square)](https://github.com/topics/edtech)
 <!-- BADGES:END -->
 
-> 🎓 An open-source AI personal tutor that runs locally on your computer
-> 
-> Based on [Llama Tutor](https://github.com/Nutlope/llamatutor) by [@nutlope](https://github.com/nutlope)
+> An open-source AI personal tutor that runs entirely on your computer. Private by design. Bring your own model.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
 [![Electron](https://img.shields.io/badge/Electron-Latest-9FEAF9)](https://www.electronjs.org/)
 
-## About
+## Why Study Buddy?
 
-Study Buddy is a desktop application that provides personalized AI tutoring without requiring internet access, accounts, or risking API abuse. It's a fork of the excellent Llama Tutor project, enhanced with:
+Most AI tutoring tools require you to create an account, hand over your data, and pay a subscription. NotebookLM needs a Google account. ChatGPT needs OpenAI. DeepTutor needs uploads and cloud processing. They're powerful, but they're not private, and they're not yours.
 
-- 🔌 **Provider-agnostic architecture** - Use Ollama (local), OpenAI, Together AI, or others
-- 🖥️ **Desktop application** - Runs securely on your computer via Electron
-- 🔒 **Privacy-first** - Default local mode means your data never leaves your device
-- 💰 **Free to use** - No API costs with local Ollama mode
-- 🎯 **Student-focused** - Simple interface designed for learners
+Study Buddy takes a different approach:
 
-## Features
+**You own the whole stack.** The app runs on your laptop. The AI runs on your laptop (via Ollama). Your questions, your notes, your learning — none of it leaves your machine. There's no account to create, no data to leak, no subscription to cancel.
 
-- 📚 Generate comprehensive tutorials on any topic
-- 🔍 Smart search integration for enriched content
-- 💬 Interactive chat for follow-up questions
-- 🎨 Clean, intuitive interface
-- 📱 Works offline after initial setup
-- ⚡ Fast local inference with Ollama
+**It does one thing well.** Type a topic, get a grounded tutor. Study Buddy searches the web for sources, reads them, and uses that content to teach you — reducing hallucinations and keeping answers factual. It's a focused conversation, not a research platform. When the session ends, you take away what you learned. Like a real tutor.
+
+**It's designed for students, not power users.** The interface uses plain language (not developer jargon), generous whitespace, and a calm visual style built specifically for university students — including ESL learners who are already spending mental energy working in a second language. Settings say "Secret key" not "API Key", "AI Brain" not "Model".
+
+**Bring your own key, or don't.** Works with Ollama locally (free, no key needed) or any cloud provider you prefer — OpenAI, Anthropic, Google, Groq, Together AI. You choose where your data goes.
+
+## How it works
+
+Study Buddy is a simple grounded tutor — a lightweight RAG (retrieval-augmented generation) pipeline that runs fresh for each session:
+
+1. **You type a topic** and choose an education level (Elementary through Graduate)
+2. **Study Buddy searches the web** for relevant sources (DuckDuckGo by default — free, no key needed)
+3. **It reads those pages** and extracts the content
+4. **If the content is too large** for your model's context window, it auto-summarises the sources
+5. **The AI teaches you** from that grounded material at your chosen level, with an interactive quiz-style conversation
+6. **You ask follow-up questions** and the tutor responds in context
+
+You can also paste your own notes (lecture slides, textbook excerpts) and the tutor will teach from those alongside the web sources.
+
+There's no persistent knowledge base, no embeddings, no vector store. Each session starts fresh. The simplicity is deliberate — it keeps the app fast, private, and easy to understand.
+
+## What it's not
+
+Study Buddy is not trying to be NotebookLM, DeepTutor, or a general-purpose research assistant. It doesn't do multi-document analysis, audio generation, collaborative notebooks, or knowledge graphs. Those tools are excellent at what they do, but they require accounts, cloud processing, and complexity.
+
+Study Buddy is for a student who wants to open an app, type "photosynthesis", and have a private, grounded conversation about it. Then close the app and get back to studying.
 
 ## Installation
 
-### Prerequisites
+### Download
 
-- Node.js 18+ installed
-- (Optional) [Ollama](https://ollama.com/) for local AI - recommended for students
+Grab the latest release from the [Releases page](https://github.com/michael-borck/study-buddy/releases):
 
-### Quick Start
+- **Windows:** `StudyBuddy-Setup-x.x.x.exe`
+- **macOS:** `StudyBuddy-x.x.x.dmg`
+- **Linux:** `StudyBuddy-x.x.x.AppImage`
 
-1. **Download the latest release** from the [Releases page](https://github.com/michael-borck/study-buddy/releases)
-   - Windows: `StudyBuddy-Setup-x.x.x.exe`
-   - macOS: `StudyBuddy-x.x.x.dmg`
-   - Linux: `StudyBuddy-x.x.x.AppImage`
+### Set up a local AI (recommended)
 
-2. **Install and run** - that's it! Study Buddy will use Ollama if installed, or prompt for API configuration.
+1. Install [Ollama](https://ollama.com/)
+2. Pull a model: `ollama pull llama3.1:8b`
+3. Open Study Buddy — it connects to Ollama automatically
 
-### Development Setup
+That's it. No account, no API key, no internet required after the model is downloaded.
+
+### Or use a cloud provider
+
+Open Settings and choose your provider (OpenAI, Anthropic, Google, Groq, Together AI). Add your secret key. Study Buddy works with any provider, but your questions will leave your machine.
+
+## Development
 
 ```bash
-# Clone the repository
 git clone https://github.com/michael-borck/study-buddy.git
 cd study-buddy
-
-# Install dependencies
 npm install
-
-# Run in development mode
 npm run electron-dev
+```
 
-# Build for production
+### Project structure
+
+```
+study-buddy/
+├── app/                    # Next.js App Router
+│   ├── api/               # API routes (chat, search, settings)
+│   ├── settings/          # Settings page
+│   └── page.tsx           # Main tutor interface
+├── components/            # React components
+├── utils/
+│   └── providers/         # LLM provider integrations
+├── main.js               # Electron main process
+└── docs/                  # Documentation
+```
+
+### Technical stack
+
+- **Frontend:** Next.js 14, React, TypeScript, Tailwind CSS
+- **Desktop:** Electron
+- **Design:** Studio Calm (shared with [Talk Buddy](https://github.com/michael-borck/talk-buddy))
+- **AI:** Ollama, OpenAI, Anthropic, Google, Groq, Together AI
+- **Search:** DuckDuckGo (default), Brave, Bing, Serper, SearXNG
+
+### Build for distribution
+
+```bash
+npm run build
 npm run electron-pack
 ```
 
-## Configuration
+## The Buddy suite
 
-### AI Providers
+Study Buddy is part of a family of apps for university students:
 
-Study Buddy supports multiple AI providers. Configure in Settings or via environment variables:
+| App | Purpose | Accent colour |
+|-----|---------|---------------|
+| [Talk Buddy](https://github.com/michael-borck/talk-buddy) | Speech practice for high-stakes scenarios | Eucalyptus sage |
+| **Study Buddy** | AI personal tutor | Dusty bluebell |
+| Career Compass (planned) | Career guidance and interview prep | Warm ochre |
 
-#### Local (Recommended for Students)
-```env
-AI_PROVIDER=ollama
-# No API key needed! Just install Ollama
-```
-
-#### OpenAI
-```env
-AI_PROVIDER=openai
-OPENAI_API_KEY=your_api_key_here
-```
-
-#### Together AI
-```env
-AI_PROVIDER=together
-TOGETHER_API_KEY=your_api_key_here
-```
-
-### Adding New Providers
-
-1. Create a new provider in `utils/providers/`
-2. Implement the `LLMProvider` interface
-3. Add to the provider factory in `utils/provider-factory.ts`
-
-## Usage
-
-1. **Launch Study Buddy** from your Applications/Programs
-2. **Enter a topic** you want to learn about
-3. **Click "Generate"** to create your personalized tutorial
-4. **Ask follow-up questions** in the chat interface
-5. **Save or export** your sessions for later review
-
-## For Educators
-
-Study Buddy can be deployed institution-wide:
-
-- **Self-hosted option**: Deploy the web version on your school's servers
-- **Managed API keys**: Configure with your institution's API keys
-- **Custom models**: Use your preferred AI models
-- **Usage analytics**: Monitor usage with built-in observability
-
-See our [Educator's Guide](docs/EDUCATORS.md) for deployment instructions.
-
-## Technical Stack
-
-- **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
-- **Desktop**: Electron
-- **AI Integration**: Configurable providers (Ollama, OpenAI, Together AI)
-- **Search**: Tavily API for enriched content
-- **Analytics**: Helicone (optional)
-- **Database**: Supabase (optional, for web deployment)
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-```bash
-# Fork the repo, then:
-git clone https://github.com/michael-borck/study-buddy.git
-cd study-buddy
-npm install
-npm run dev
-```
-
-## Roadmap
-
-- [ ] Additional AI provider support (Anthropic, Cohere, local GGUF)
-- [ ] Collaborative study sessions
-- [ ] PDF/Document upload and analysis
-- [ ] Study progress tracking
-- [ ] Flashcard generation
-- [ ] Mobile app (React Native)
+All three share the same design system ([Studio Calm](https://github.com/michael-borck/talk-buddy/blob/main/docs/design/studio-calm.md)) — same font, same warm palette, same calm interface. The only difference is the accent colour. A student who uses one recognises the others instantly.
 
 ## Credits
 
-Study Buddy is based on [Llama Tutor](https://github.com/Nutlope/llamatutor) by Hassan El Mghari ([@nutlope](https://github.com/nutlope)). The original project showcased the power of AI in education, and we're building on that foundation to make it accessible to all students.
+Study Buddy is based on [Llama Tutor](https://github.com/Nutlope/llamatutor) by Hassan El Mghari ([@nutlope](https://github.com/nutlope)). The original project demonstrated how simple and effective an AI tutor could be. Study Buddy builds on that foundation with local-first privacy, provider flexibility, and a design system built for the students who need it most.
 
-See our [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md) for a comprehensive list of all the amazing open source projects that make Study Buddy possible.
+## Licence
 
-## License
-
-MIT License - see [LICENSE](LICENSE) file for details.
-
----
-
-**Note**: This is an independent fork and is not officially associated with the original Llama Tutor project.
+MIT — see [LICENSE](LICENSE).

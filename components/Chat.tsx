@@ -1,7 +1,6 @@
 import ReactMarkdown from "react-markdown";
 import FinalInputArea from "./FinalInputArea";
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 
 export default function Chat({
   messages,
@@ -11,6 +10,8 @@ export default function Chat({
   setMessages,
   handleChat,
   topic,
+  sources,
+  hasCustomText,
 }: {
   messages: { role: string; content: string }[];
   disabled: boolean;
@@ -21,10 +22,13 @@ export default function Chat({
   >;
   handleChat: () => void;
   topic: string;
+  sources: { name: string; url: string }[];
+  hasCustomText: boolean;
 }) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollableContainerRef = useRef<HTMLDivElement>(null);
   const [didScrollToBottom, setDidScrollToBottom] = useState(true);
+  const [showSources, setShowSources] = useState(false);
 
   function scrollToBottom() {
     messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
@@ -57,19 +61,67 @@ export default function Chat({
     };
   }, []);
 
+  // Build attribution text
+  const sourceCount = sources.length;
+  let attribution = "";
+  if (sourceCount > 0 && hasCustomText) {
+    attribution = `Based on ${sourceCount} web source${sourceCount !== 1 ? "s" : ""} + your notes`;
+  } else if (sourceCount > 0) {
+    attribution = `Based on ${sourceCount} web source${sourceCount !== 1 ? "s" : ""}`;
+  } else if (hasCustomText) {
+    attribution = "Based on your notes";
+  }
+
   return (
-    <div className="flex grow flex-col gap-4 overflow-hidden">
+    <div className="mx-auto flex w-full max-w-3xl grow flex-col gap-4 overflow-hidden">
       <div className="flex grow flex-col overflow-hidden lg:p-4">
-        <p className="text-xs font-medium uppercase tracking-widest text-ink-quiet">
-          <span className="text-ink font-semibold">Topic:</span>{" "}
-          {topic}
-        </p>
+        {/* Topic + attribution */}
+        <div className="mb-2">
+          <p className="text-xs font-medium uppercase tracking-widest text-ink-quiet">
+            <span className="font-semibold text-ink">Topic:</span> {topic}
+          </p>
+          {attribution && (
+            <div className="mt-1">
+              <span className="text-xs text-ink-quiet">{attribution}</span>
+              {sourceCount > 0 && (
+                <>
+                  <span className="text-xs text-ink-quiet"> &middot; </span>
+                  <button
+                    onClick={() => setShowSources(!showSources)}
+                    className="text-xs text-ink-muted transition-colors duration-normal hover:text-accent"
+                  >
+                    {showSources ? "Hide sources" : "View sources"}
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+          {showSources && sourceCount > 0 && (
+            <ul className="mt-2 space-y-1 border-l-2 border-hairline pl-3">
+              {sources.map((source) => (
+                <li key={source.url} className="text-xs">
+                  <a
+                    href={source.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-ink-muted underline transition-colors duration-normal hover:text-accent"
+                  >
+                    {source.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Messages */}
         <div
           ref={scrollableContainerRef}
-          className="mt-2 overflow-y-scroll rounded-soft border border-hairline bg-paper px-5 lg:p-7"
+          className="overflow-y-scroll rounded-soft border border-hairline bg-paper px-5 lg:p-7"
+          style={{ flexGrow: 1 }}
         >
           {messages.length > 2 ? (
-            <div className="prose-sm max-w-5xl lg:prose lg:max-w-full">
+            <div className="prose-sm max-w-none lg:prose lg:max-w-none">
               {messages.slice(2).map((message, index) =>
                 message.role === "assistant" ? (
                   <div className="relative w-full" key={index}>
@@ -91,10 +143,10 @@ export default function Chat({
             </div>
           ) : (
             <div className="flex w-full flex-col gap-4 py-5">
-              {Array.from(Array(10).keys()).map((i) => (
+              {Array.from(Array(6).keys()).map((i) => (
                 <div
                   key={i}
-                  className={`${i < 5 && "hidden sm:block"} h-10 animate-pulse rounded-soft bg-ink/10`}
+                  className={`${i < 3 && "hidden sm:block"} h-10 animate-pulse rounded-soft bg-ink/10`}
                   style={{ animationDelay: `${i * 0.05}s` }}
                 />
               ))}
@@ -103,7 +155,7 @@ export default function Chat({
         </div>
       </div>
 
-      <div className="lg:p-4">
+      <div className="lg:px-4 lg:pb-4">
         <FinalInputArea
           disabled={disabled}
           promptValue={promptValue}

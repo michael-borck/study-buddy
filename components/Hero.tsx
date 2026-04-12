@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { FC } from "react";
+import { FC, useState } from "react";
 import InitialInputArea from "./InitialInputArea";
 import { suggestions } from "@/utils/utils";
 
@@ -10,6 +10,8 @@ type THeroProps = {
   ageGroup: string;
   setAgeGroup: React.Dispatch<React.SetStateAction<string>>;
   handleInitialChat: () => void;
+  customText: string;
+  setCustomText: React.Dispatch<React.SetStateAction<string>>;
 };
 
 const Hero: FC<THeroProps> = ({
@@ -19,7 +21,11 @@ const Hero: FC<THeroProps> = ({
   ageGroup,
   setAgeGroup,
   handleInitialChat,
+  customText,
+  setCustomText,
 }) => {
+  const [showNotes, setShowNotes] = useState(false);
+
   const handleClickSuggestion = (value: string) => {
     setPromptValue(value);
   };
@@ -37,7 +43,7 @@ const Hero: FC<THeroProps> = ({
           you.
         </p>
 
-        <div className="mt-6 w-full pb-6">
+        <div className="mt-6 w-full pb-4">
           <InitialInputArea
             promptValue={promptValue}
             handleInitialChat={handleInitialChat}
@@ -47,6 +53,35 @@ const Hero: FC<THeroProps> = ({
             setAgeGroup={setAgeGroup}
           />
         </div>
+
+        {/* Add notes toggle */}
+        <div className="mb-4">
+          <button
+            type="button"
+            onClick={() => setShowNotes(!showNotes)}
+            className="text-sm text-ink-muted transition-colors duration-normal hover:text-accent"
+            style={{ fontWeight: 500 }}
+          >
+            {showNotes ? "Hide notes" : "Paste notes (optional)"}
+          </button>
+        </div>
+
+        {/* Collapsible notes textarea */}
+        {showNotes && (
+          <div className="mb-4 w-full">
+            <textarea
+              placeholder="Paste lecture notes, textbook excerpts, or any extra material here..."
+              className="w-full resize-y rounded-soft border border-hairline bg-paper p-4 text-sm text-ink placeholder:text-ink-quiet transition-colors duration-normal hover:border-hairline-strong focus:border-accent focus:outline-none focus:ring-[3px] focus:ring-accent-soft"
+              value={customText}
+              onChange={(e) => setCustomText(e.target.value)}
+              rows={4}
+              style={{ lineHeight: 1.7 }}
+            />
+            <p className="mt-1 text-xs text-ink-quiet">
+              This text will be used alongside web sources as teaching material.
+            </p>
+          </div>
+        )}
 
         <div className="flex flex-wrap items-center justify-center gap-2.5 pb-8 lg:flex-nowrap lg:justify-normal">
           {suggestions.map((item) => (

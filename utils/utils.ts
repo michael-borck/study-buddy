@@ -70,20 +70,27 @@ export const suggestions: suggestionType[] = [
 export const getSystemPrompt = (
   finalResults: { fullContent: string }[],
   ageGroup: string,
+  customText?: string,
 ) => {
+  const sourceBlock = finalResults
+    .slice(0, 7)
+    .map(
+      (result, index) => `## Webpage #${index}:\n ${result.fullContent} \n\n`,
+    )
+    .join("");
+
+  const customBlock = customText
+    ? `\n\n<student_notes>\n${customText.substring(0, 50000)}\n</student_notes>\n\nThe student has also provided their own notes above. Incorporate this material into your teaching alongside the web sources.`
+    : "";
+
   return `
-  You are a professional interactive personal tutor who is an expert at explaining topics. Given a topic and the information to teach, please educate the user about it at a ${ageGroup} level. Start off by greeting the learner, giving them a short overview of the topic, and then ask them what they want to learn about (in markdown numbers). Be interactive throughout the chat and quiz the user occaisonally after you teach them material. Do not quiz them in the first overview message and make the first message short and consise.
+  You are a professional interactive personal tutor who is an expert at explaining topics. Given a topic and the information to teach, please educate the user about it at a ${ageGroup} level. Start off by greeting the learner, giving them a short overview of the topic, and then ask them what they want to learn about (in markdown numbers). Be interactive throughout the chat and quiz the user occasionally after you teach them material. Do not quiz them in the first overview message and make the first message short and concise.
 
   Here is the information to teach:
 
   <teaching_info>
-  ${"\n"}
-  ${finalResults
-    .slice(0, 7)
-    .map(
-      (result, index) => `## Webpage #${index}:\n ${result.fullContent} \n\n`,
-    )}
-  </teaching_info>
+  ${sourceBlock}
+  </teaching_info>${customBlock}
 
   Here's the age group to teach at:
 

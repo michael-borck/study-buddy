@@ -4,1477 +4,554 @@ import { useState } from "react";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 
-// Documentation content (you could also load this from markdown files)
 const docsContent = {
   overview: {
-    title: "Documentation Overview",
+    title: "Overview",
     content: `
 # Study Buddy Documentation
 
-Welcome to Study Buddy's comprehensive documentation! Everything you need to know about using and configuring your AI personal tutor.
+Welcome to Study Buddy — an open-source AI personal tutor that runs on your computer.
 
-## Quick Navigation
+## What Study Buddy does
 
-**For New Users:**
-- Start with the [User Guide](#user-guide) to learn the basics
-- Check out [Features](#features) to see what's possible
-- Configure your [Settings](#settings) for optimal experience
+Type a topic, get a grounded tutor. Study Buddy searches the web for sources, reads them, and uses that content to teach you — reducing hallucinations and keeping answers factual. When the session ends, you take away what you learned. Like a real tutor.
 
-**For Advanced Users:**
-- Explore [Technical Details](#technical) for architecture info
-- Review [Troubleshooting](#troubleshooting) for common issues
-- Learn about [Keyboard Shortcuts](#shortcuts) for faster usage
+## Quick start
 
-**For Developers:**
-- Check the [API Documentation](#api) for integration details
-- Review [Design System](#design) for UI components
-- Visit our [GitHub repository](https://github.com/michael-borck/study-buddy) for source code
+**Step 1: Set up an AI**
+- Install Ollama from ollama.com (free, runs locally)
+- Pull a model: ollama pull llama3.1:8b
+- Or go to Settings and enter a secret key for a cloud provider
 
-## About This Documentation
+**Step 2: Start learning**
+- Type a topic in the main input
+- Choose your education level
+- Pick a teaching strategy (Explain, Quiz me, Socratic, etc.)
+- Press the arrow button or hit Enter
 
-This documentation is available both within the app and on GitHub for your convenience. All information is kept up-to-date with the latest version of Study Buddy.
+**Step 3: Have a conversation**
+- The tutor will teach you based on web sources
+- Ask follow-up questions
+- Switch strategies mid-conversation if you want
+- Use the microphone button for voice input
+- Click the speaker icon to hear responses read aloud
 
-Study Buddy is an open-source AI personal tutor that runs locally on your computer, providing personalized learning experiences while maintaining complete privacy.
+## Privacy
+
+Study Buddy is private by design. When using Ollama locally, your questions never leave your machine. Web search queries go to your chosen search engine (DuckDuckGo by default). No accounts, no data collection, no subscriptions.
+
+## Navigation
+
+Use the sidebar to explore specific topics:
+- **User Guide** — How to use the app step by step
+- **Features** — Learning strategies, audio, notes, and more
+- **Settings** — Configuring your AI provider, search, and audio
+- **Troubleshooting** — Solutions for common problems
+- **Technical** — Architecture and API details for developers
     `
   },
-  
+
   "user-guide": {
     title: "User Guide",
     content: `
 # User Guide
 
-Learn how to use Study Buddy effectively for your learning goals.
+Learn how to use Study Buddy effectively.
 
-## Getting Started
+## The learning flow
 
-### First Steps
-1. **Configure AI Provider**: Go to Settings and choose OpenAI, Together AI, or a custom endpoint
-2. **Add API Key**: Enter your API key for the chosen provider
-3. **Select Search Engine**: Choose your preferred search provider (or disable for chat-only mode)
-4. **Set Education Level**: Pick your default learning level
+Study Buddy has three phases:
 
-### Basic Usage
+### 1. Landing page
 
-#### Starting a Learning Session
-1. **Enter a Topic**: Type what you want to learn about in the main input field
-2. **Select Education Level**: Choose from Elementary to Graduate level
-3. **Generate Tutor**: Click the button to start your personalized session
+This is where you set up your session:
 
-#### Education Levels Explained
-- **Elementary (Ages 6-11)**: Simple explanations with basic vocabulary
-- **Middle School (Ages 11-14)**: Intermediate complexity with examples
-- **High School (Ages 14-18)**: Advanced concepts with detailed analysis
-- **Undergraduate**: College-level depth and academic rigor
-- **Graduate**: Research-level discussions and advanced theory
+- **Topic input** — Type what you want to learn about (e.g. "Photosynthesis" or "How do databases work?")
+- **Education level** — Choose from Elementary School through Graduate. This controls how complex the explanations are.
+- **Topic suggestions** — Click one of the quick-start topics (Basketball, Machine Learning, Personal Finance) to fill in the input.
+- **Teaching strategy** — Choose how the tutor should interact with you (see Features for details).
+- **Make me think** — Tick this to add reflection prompts to every response.
+- **Search the web** — On by default. Untick to skip web search.
+- **Paste your own material** — Click to open a text area where you can paste lecture notes, textbook excerpts, or other material.
 
-## Tips for Better Learning
+When you paste notes, you can choose:
+- **Add to web search results** — Your notes are used alongside web sources
+- **Use only my notes** — Web search is skipped; the tutor teaches only from your material
 
-### Asking Effective Questions
-- **Be Specific**: "Explain photosynthesis" vs "How do plants make food?"
-- **Set Context**: "I'm a high school student learning about..."
-- **Request Examples**: "Can you give me a real-world example?"
+### 2. Preparation phase
 
-### Making the Most of Conversations
-- **Follow Up**: Ask clarifying questions about concepts you don't understand
-- **Connect Ideas**: "How does this relate to what we just discussed?"
-- **Test Knowledge**: Ask the AI to quiz you on the material
-- **Request Summaries**: "Can you summarize the key points?"
+After you press the submit button, Study Buddy shows a progress screen:
 
-## Privacy and Security
+- **Searching for sources** — Finds relevant web pages
+- **Reading web pages** — Extracts the content
+- **Summarising sources to fit** — Only appears if the content is too large for your AI model
+- **Preparing your tutor** — Builds the teaching prompt
 
-Study Buddy is designed with privacy as a core principle:
-- **Local Storage**: Your conversations are stored locally on your device
-- **No Tracking**: We don't collect usage data or analytics
-- **Open Source**: The entire codebase is available for inspection
-- **Transparent Sources**: All information sources are clearly cited
+If web search is off, the search and reading steps are skipped.
+
+### 3. Chat
+
+The main learning experience:
+
+- The tutor greets you and presents the topic
+- You ask follow-up questions by typing or using the microphone
+- The tutor responds based on the source material
+- You can switch teaching strategies using the small buttons above the input
+- Hover over a tutor response to see the speaker icon — click it to hear the response read aloud
+
+## Source attribution
+
+Below the topic heading, you will see a line like:
+
+"Based on 5 web sources" or "Based on your notes"
+
+Click "View sources" to expand the list of web pages that were used. This tells you where the information came from.
+
+## When there are no sources
+
+If you turn off web search and do not paste notes, the tutor teaches from its own knowledge. A warning appears:
+
+"No web sources or notes provided. The tutor is teaching from its own knowledge, which may not always be accurate. Check important facts independently."
+
+The AI model may get things wrong when it has no sources to ground its answers. Use this mode with caution.
+
+## Tips for better sessions
+
+- **Be specific with your topic.** "Explain how photosynthesis converts CO2 to glucose" works better than just "photosynthesis."
+- **Use Quiz me** to test yourself after learning a concept.
+- **Paste your lecture notes** and let the tutor explain them at your level.
+- **Try different strategies.** If Explain feels passive, switch to Socratic or Devil's advocate.
+- **Turn on "Make me think"** to force yourself to engage with every response.
     `
   },
-  
+
   features: {
-    title: "Features Overview", 
+    title: "Features",
     content: `
-# Features Overview
+# Features
 
-Study Buddy provides comprehensive AI-powered tutoring with flexible configuration options.
+## Learning strategies
 
-## Core Features
+Study Buddy offers five teaching strategies. You choose one on the landing page and can switch at any time during the conversation.
 
-### 🎓 Personalized AI Tutoring
-- **Adaptive Learning Levels**: Content adjusts to your chosen education level
-- **Interactive Conversations**: Natural chat interface with context awareness
-- **Quiz Integration**: Test your knowledge with built-in assessments
-- **Follow-up Support**: Ask questions and dive deeper into topics
+### Explain (default)
+The tutor teaches the topic with clear explanations, examples, and analogies appropriate for your education level. It checks understanding before moving on. This is the most familiar mode — like a patient teacher explaining a concept.
 
-### 🔍 Intelligent Research
-- **Multi-Engine Search**: Bing, Google (Serper), DuckDuckGo, SearXNG, Brave
-- **Source Verification**: See where information comes from
-- **Content Processing**: Automatic web page content extraction
-- **Real-time Updates**: Access to current information online
+### Quiz me
+The tutor becomes a quiz master. It asks you questions drawn from the source material, one at a time. If you answer wrong, it gives you a hint — not the answer. After 2-3 wrong attempts, it guides you to the answer. It keeps a running score. This is active recall, the most evidence-backed learning technique.
 
-### 🛡️ Privacy-First Design
-- **Local Processing**: Your conversations stay on your device
-- **No Analytics**: No tracking or data collection
-- **Open Source**: Transparent and auditable code
-- **User Control**: Complete control over data and settings
+### Socratic
+The tutor never gives direct answers. Instead, it responds with questions that guide your thinking: "What do you think happens when...?", "If that were true, what would follow?" This forces you to reason through concepts rather than passively absorbing them. Best for conceptual topics.
 
-### ⚙️ Flexible Configuration
-- **Multiple AI Providers**: OpenAI, Together AI, or custom endpoints
-- **Search Options**: Multiple search engines or disable search entirely
-- **Model Selection**: Choose specific AI models for different needs
-- **Customizable Interface**: Adjust settings to your preferences
+### Devil's advocate
+The tutor takes the opposing view to whatever you say. If you state a common position, it challenges you to defend it. When you make a strong argument, it acknowledges it. This sharpens your thinking and is excellent for essay prep, debate prep, or any topic with multiple valid perspectives.
 
-## Advanced Features
+### Perspectives
+The tutor presents the topic through at least three different professional lenses — for example, how a marketer, engineer, and legal counsel would each think about the same issue. Then it asks which perspective resonates with you and why. Good for business topics, ethics, and policy.
 
-### 🔧 Developer-Friendly
-- **Cross-Platform**: Windows, macOS, Linux support
-- **API Architecture**: RESTful design with streaming support
-- **Open Source**: MIT license for maximum flexibility
-- **Extensible**: Plugin-friendly architecture
+## Make me think (reflection prompts)
 
-### 📱 Modern Experience
-- **Responsive Design**: Works on all screen sizes
-- **Keyboard Shortcuts**: Power user features
-- **Accessibility**: Screen reader and keyboard navigation support
-- **Fast Performance**: Streaming responses and efficient caching
+When turned on, every tutor response ends with a bold reflection prompt:
+- "Does this match what you expected?"
+- "Can you explain this back to me in your own words?"
+- "What still feels unclear?"
+- "How does this connect to something you already know?"
 
-## AI Provider Options
+These prompts interrupt passive reading and push you to actively engage with the material. They rotate so you do not see the same one twice in a row.
 
-### OpenAI
-- GPT-3.5, GPT-4, and newer models
-- High-quality responses with broad knowledge
-- Commercial API with usage-based pricing
+## Audio
 
-### Together AI  
-- Open-source models like Llama 3.1
-- Cost-effective option with good performance
-- Supports various model sizes and capabilities
+### Voice input (microphone)
+Click the microphone button next to the text input to speak your question instead of typing. Press it once to start recording, press again to stop. Your spoken words appear in the text input, where you can edit them before sending.
 
-### Custom Endpoints
-- Use any OpenAI-compatible API
-- Support for local models (Ollama, etc.)
-- Self-hosted or third-party providers
+Two voice input methods are available (configurable in Settings):
+- **Online (Google)** — Fast and accurate. Uses the browser's built-in speech recognition. Your audio is processed by Google's servers (no account needed).
+- **Local (Whisper)** — Fully private. Runs a speech recognition model on your computer. Requires a one-time 40 MB download. Slightly slower.
 
-## Search Engine Options
+### Read aloud (speaker)
+Hover over any tutor response to see a speaker icon in the top right corner. Click it to have the response read aloud using your computer's built-in voices. Click again to stop.
 
-### Commercial APIs
-- **Bing**: High-quality results, fast responses
-- **Serper**: Google search results via API
-- **Brave**: Independent search with privacy focus
+You can also turn on "Read responses aloud automatically" in Settings, and every new tutor response will be read aloud as soon as it finishes.
 
-### Free Options
-- **DuckDuckGo**: Privacy-focused, no API key required
-- **SearXNG**: Self-hosted open-source search
+Voice selection (male or female) is available in Settings.
 
-### Disabled Mode
-- Chat-only experience without web search
-- Faster responses, relies on AI training data
+## Paste your own notes
+
+Click "Paste your own material" on the landing page to open a text area. You can paste lecture notes, textbook excerpts, assignment briefs, or any other text. The tutor will use this material alongside web sources (or instead of web sources if you choose "Use only my notes").
+
+This means you do not need to upload files in specific formats. Just copy and paste text. The tutor works with whatever you give it.
+
+## Auto-summarise
+
+If the total content (web sources plus your notes) is too large for your AI model's context window, Study Buddy automatically summarises the web sources to fit. You will see a "Summarising sources to fit..." step in the preparation phase when this happens. You do not need to configure anything.
+
+## Web search toggle
+
+On the landing page, you can untick "Search the web" to skip web search entirely. This is useful when:
+- You want the tutor to teach only from your pasted notes
+- You are offline
+- You want a quick conversation without waiting for sources
     `
   },
-  
+
   settings: {
-    title: "Settings Guide",
+    title: "Settings",
     content: `
-# Settings Guide
+# Settings
 
-Configure Study Buddy to work best for your needs and preferences.
+Access Settings from the navigation bar at the top of the app.
 
-## AI Provider Configuration
+## AI Provider
 
-### OpenAI Setup
-1. **Get API Key**: Visit [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
-2. **Create Key**: Click "Create new secret key"
-3. **Copy Key**: Save it securely (you won't see it again)
-4. **Enter in Settings**: Paste into AI Provider section
-5. **Test Connection**: Verify it works before saving
+### Provider
+Choose which AI service to use:
+- **Ollama (Local)** — Free. Runs on your computer. Recommended for privacy.
+- **OpenAI** — Requires a secret key. Uses GPT models.
+- **Anthropic (Claude)** — Requires a secret key.
+- **Google (Gemini)** — Requires a secret key.
+- **Groq** — Requires a secret key. Fast inference.
+- **Together AI** — Requires a secret key. Open-source models.
 
-**Recommended Models:**
-- **GPT-3.5-turbo**: Fast and cost-effective
-- **GPT-4**: Higher quality but slower and more expensive
-- **GPT-4-turbo**: Balance of quality and speed
+### Secret key
+Your authentication key for cloud providers. Leave empty for local Ollama (unless your Ollama instance requires authentication).
 
-### Together AI Setup
-1. **Sign Up**: Visit [api.together.xyz](https://api.together.xyz/)
-2. **Get API Key**: Generate API key from dashboard
-3. **Choose Model**: Popular options include:
-   - **Llama-3.1-8B-Instruct-Turbo**: Fast and efficient
-   - **Llama-3.1-70B-Instruct-Turbo**: Higher quality responses
-   - **Mixtral-8x7B-Instruct-v0.1**: Good balance of speed/quality
+This key is stored only on your computer in the app's local storage. It is never sent anywhere except to the provider you chose.
 
-### Custom Endpoint Setup
-1. **Base URL**: Enter your custom API endpoint
-2. **API Key**: Provide authentication key if required
-3. **Model**: Specify model name your endpoint supports
-4. **Test**: Verify connection works properly
+### Server address
+The URL where your AI provider is running. For Ollama, this is usually http://localhost:11434. For cloud providers, the default is filled in automatically.
 
-**Compatible Services:**
-- Ollama (local models)
-- LM Studio
-- Text Generation WebUI
-- Azure OpenAI
-- AWS Bedrock (with proxy)
+### AI Brain
+The specific model to use. Click the "Refresh" button to see available models from your provider, or type a model name directly. For Ollama, common choices include llama3.1:8b, mistral, and gemma2.
 
-## Search Engine Configuration
+## Web Search
 
-### Bing Search
-1. **Get API Key**: Visit [portal.azure.com](https://portal.azure.com)
-2. **Create Resource**: Search for "Bing Search v7"
-3. **Get Keys**: Copy key from resource page
-4. **Enter in Settings**: Paste into Search Engine section
+### Search provider
+Choose how Study Buddy finds web sources:
+- **DuckDuckGo (Free)** — No secret key needed. Good default.
+- **Brave Search** — Requires a secret key.
+- **Serper (Google Search)** — Requires a secret key.
+- **Bing Search** — Requires a secret key.
+- **SearXNG (Self-hosted)** — Requires a server address.
+- **Disabled** — No web search. The tutor uses only your notes or its own knowledge.
 
-### Serper (Google)
-1. **Sign Up**: Visit [serper.dev](https://serper.dev/)
-2. **Get API Key**: Generate key from dashboard
-3. **Check Credits**: Monitor usage to avoid limits
+Use the "Test" button to verify your search configuration is working.
 
-### SearXNG Setup
-1. **Find Instance**: Visit [searx.space](https://searx.space/) for public instances
-2. **Choose Server**: Select fast, reliable instance
-3. **Enter URL**: Use format like https://searx.example.com
-4. **Test Search**: Verify instance works
+## Defaults
 
-**Self-Hosting SearXNG:**
-Docker setup:
-docker run -d --name searxng
-  -p 8080:8080
-  searxng/searxng
+### Default education level
+The education level that is pre-selected when you start a new conversation. You can still change it each time.
 
-### DuckDuckGo
-- **No Setup Required**: Works immediately
-- **Privacy Focused**: No tracking or personal data collection
-- **Rate Limited**: May be slower during high usage
+## Audio
 
-### Brave Search
-1. **Get API Key**: Visit [api.search.brave.com](https://api.search.brave.com/)
-2. **Subscribe**: Choose appropriate plan
-3. **Generate Key**: Create API key from dashboard
+### Tutor voice
+Choose Male or Female. This uses your computer's built-in voices. Quality varies by operating system — macOS generally has the best voices.
 
-## Default Settings
+### Read responses aloud automatically
+When turned on, every new tutor response is read aloud as soon as it finishes. You can always click the speaker icon on individual responses regardless of this setting.
 
-### Education Level
-Set your preferred default education level:
-- **Elementary**: Simple explanations for young learners
-- **Middle School**: Intermediate complexity
-- **High School**: Advanced concepts with examples
-- **Undergraduate**: College-level depth
-- **Graduate**: Research and advanced theory
+### Voice input method
+Choose how the microphone button works:
 
-This setting is remembered and applied automatically to new conversations.
+**Online (Google, via browser)**
+Uses your browser's built-in speech recognition, which sends audio to Google's servers for processing. Fast and accurate. No account or secret key needed. This is the same technology used by voice typing in Google Docs.
 
-### Advanced Options
+**Local (Whisper, private)**
+Runs a Whisper speech recognition model entirely on your computer. Your audio never leaves your machine. Requires a one-time download of about 40 MB. Transcription takes a few seconds per phrase instead of being instant.
 
-#### Connection Timeouts
-- Default: 30 seconds for AI responses
-- Default: 10 seconds for search queries
-- Adjust if you have slow internet connection
+You can download the Whisper model in advance from the Settings page, or it will download automatically the first time you use the microphone with Local mode selected.
 
-#### Rate Limiting
-- Built-in delays prevent overwhelming services
-- SearXNG: 2-second delays between requests
-- Commercial APIs: Respect provider limits
+## Saving settings
 
-#### Caching
-- Search results cached for 15 minutes
-- Model lists cached for 1 hour
-- Clear cache by restarting application
-
-## Security Best Practices
-
-### API Key Management
-- **Never Share**: Keep API keys private
-- **Rotate Regularly**: Change keys periodically
-- **Monitor Usage**: Check provider dashboards for unusual activity
-- **Revoke if Compromised**: Immediately revoke exposed keys
-
-### Local Data Protection
-- Settings stored in user directory
-- Conversations saved locally only
-- No cloud synchronization by default
-
-### Network Security
-- All connections use HTTPS
-- API keys transmitted securely
-- No telemetry or tracking data sent
-
-## Troubleshooting Settings
-
-### Connection Issues
-1. **Check API Key**: Ensure correct key without extra spaces
-2. **Verify Internet**: Test with other applications
-3. **Try Different Provider**: Switch temporarily to isolate issue
-4. **Check Firewall**: Ensure ports 80/443 are open
-
-### Model Discovery Problems
-1. **Manual Entry**: Type model name instead of using discovery
-2. **Check Permissions**: Ensure API key has model access
-3. **Provider Status**: Check if service is experiencing issues
-
-### Search Problems
-1. **Test Different Engine**: Try multiple search providers
-2. **Check API Quotas**: Verify you haven't exceeded limits
-3. **SearXNG Issues**: Try different instance from searx.space
-
-### Settings Not Saving
-1. **File Permissions**: Ensure app can write to user directory
-2. **Disk Space**: Verify sufficient storage available
-3. **Antivirus**: Check if security software blocks file writes
-4. **Reset Config**: Delete settings file and reconfigure
+Click "Save and apply" to save your changes. Settings take effect immediately — no restart needed. Click "Reset to defaults" to restore all settings to their original values.
     `
   },
-  
+
   troubleshooting: {
     title: "Troubleshooting",
     content: `
-# Troubleshooting Guide
+# Troubleshooting
 
-Quick solutions for common issues with Study Buddy.
+## Quick checklist
 
-## Quick Diagnostics
+1. **Check Settings** — Is your AI provider configured with the right server address and secret key?
+2. **Test the connection** — Click the Refresh button next to AI Brain to see if your provider responds.
+3. **Restart the app** — Close and reopen Study Buddy.
+4. **Check your internet** — Needed for web search and cloud AI providers.
 
-### First Steps
-1. **Check Settings**: Verify AI provider and search engine are configured
-2. **Test Connection**: Use built-in connection test in Settings
-3. **Restart App**: Close and reopen Study Buddy
-4. **Check Internet**: Ensure stable network connection
+## Common problems
 
-## Common Issues
+### Nothing happens after I submit a topic
+- Check that your AI provider is running. If using Ollama, make sure it is started (run "ollama serve" in a terminal).
+- Check the server address in Settings. For Ollama, it should be http://localhost:11434.
+- Try the Refresh button to verify the connection.
 
-### "API Key Required" Error
-**Problem**: Can't start conversations
-**Solutions**:
-1. Go to Settings → AI Provider
-2. Enter valid API key for your chosen provider
-3. Click "Test Connection" to verify
-4. Save settings and try again
+### The tutor gives very short or unhelpful answers
+- Try a larger model. Small models (under 7B parameters) may struggle with complex topics or strategies like Quiz and Socratic.
+- Make sure web search is turned on so the tutor has source material to work from.
+- Try the Explain strategy first — it is the most reliable with small models.
 
-**Getting API Keys**:
-- **OpenAI**: [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
-- **Together AI**: [api.together.xyz](https://api.together.xyz/)
+### Quiz me mode still gives explanations instead of questions
+- Small local models sometimes ignore instructions. Try a larger model (13B+ parameters) or a cloud provider.
+- The quiz prompt is designed to be forceful, but very small models may still default to explaining.
 
-### "Connection Failed" Error
-**Problem**: Can't connect to AI service
-**Common Causes**:
+### Search returns no results
+- Check your internet connection.
+- If using DuckDuckGo, try again in a moment (it rate-limits frequent requests).
+- Try a different search provider in Settings.
+- Use the Test button to verify your search configuration.
 
-1. **Invalid API Key**:
-   - Check for typos or extra spaces
-   - Verify key hasn't been revoked
-   - Ensure sufficient credits/quota
+### The microphone button does not work
+- Make sure you have given the app permission to use your microphone. Your operating system may show a permission prompt.
+- If using Local (Whisper) mode, the model needs to download first (about 40 MB). Check the console for download progress.
+- Try switching to Online mode in Settings to test if the issue is with Whisper specifically.
 
-2. **Network Issues**:
-   - Test internet connection
-   - Try different network
-   - Check firewall settings
+### Read aloud does not produce any sound
+- Check that your computer's volume is turned up.
+- Some operating systems have limited built-in voices. macOS generally works best.
+- Try switching between Male and Female in Settings to find a working voice.
 
-3. **Service Outage**:
-   - Check provider status pages
-   - Try again later
-   - Switch to backup provider
+### The app says "Could not find a production build"
+- This is an Electron startup issue. Run "npm run build" first, then try again.
+- For development, use "npm run electron-dev" which handles this automatically.
 
-### Search Not Working
-**Problem**: No search results or search errors
-**Solutions by Engine**:
+### Settings are not saving
+- Check that the app can write to your user directory.
+- Try the "Reset to defaults" button and reconfigure.
+- Settings are stored in your browser's local storage and in the app's data directory.
 
-**Bing/Serper**: Verify API key and check quota
-**DuckDuckGo**: Wait if rate limited, try again
-**SearXNG**: Check server URL, try different instance
-**Brave**: Verify API key and credit balance
-
-### Slow Performance
-**Problem**: App feels sluggish
-**Optimizations**:
-1. **Use Faster Models**: GPT-3.5 vs GPT-4
-2. **Disable Search**: For simple questions
-3. **Check Internet Speed**: Use speedtest.net
-4. **Close Other Apps**: Free up system resources
-5. **Restart Application**: Clear memory usage
-
-### Settings Not Saving
-**Problem**: Configuration resets after restart
-**Solutions**:
-1. **Check Permissions**: Ensure app can write files
-2. **Verify Disk Space**: Need space for config files
-3. **Disable Antivirus**: Temporarily to test file writing
-4. **Reset Configuration**: Delete settings file and reconfigure
-
-## Error Messages
-
-### HTTP Error Codes
-- **401 Unauthorized**: Invalid API key
-- **403 Forbidden**: API key lacks permissions
-- **429 Too Many Requests**: Rate limit exceeded
-- **500 Internal Server Error**: Provider service issue
-- **503 Service Unavailable**: Service temporarily down
-
-### Application Errors
-- **"Failed to Load Settings"**: File permission or corruption issue
-- **"Model Discovery Failed"**: API connection problem
-- **"Search Configuration Error"**: Search engine setup issue
-
-## Platform-Specific Issues
-
-### Windows
-- **App Won't Start**: Run as Administrator
-- **Antivirus Blocking**: Add Study Buddy to exclusions
-- **Missing Dependencies**: Install Visual C++ Redistributables
+## Platform-specific issues
 
 ### macOS
-- **Security Warning**: Right-click → Open to bypass Gatekeeper
-- **Permission Denied**: Check System Preferences → Security & Privacy
+- **Security warning on first launch** — Right-click the app, then click Open to bypass Gatekeeper.
+- **Microphone permission** — Go to System Settings, then Privacy & Security, then Microphone. Make sure Study Buddy is allowed.
+
+### Windows
+- **App does not start** — Try running as Administrator.
+- **Antivirus blocks the app** — Add Study Buddy to your antivirus exclusions.
 
 ### Linux
-- **AppImage Issues**: Make executable with chmod +x
-- **Missing FUSE**: Install with sudo apt install fuse
-- **Permission Errors**: Check file ownership and permissions
+- **AppImage does not run** — Make it executable: chmod +x StudyBuddy-*.AppImage
+- **Missing FUSE** — Install with: sudo apt install fuse
 
-## Advanced Troubleshooting
+## Getting help
 
-### Enable Debug Mode
-**Electron App**: Run from terminal to see detailed logs
-**Web Version**: Open browser Developer Tools (F12)
-
-### Reset Configuration
-If all else fails:
-1. **Backup API Keys**: Note them down
-2. **Delete Config Folder**:
-   - Windows: %APPDATA%/study-buddy/
-   - macOS: ~/Library/Application Support/study-buddy/
-   - Linux: ~/.config/study-buddy/
-3. **Restart App**: Reconfigure from scratch
-
-### Network Diagnostics
-Test API connectivity:
-
-# Test OpenAI
-curl -H "Authorization: Bearer YOUR_KEY" https://api.openai.com/v1/models
-
-# Test connectivity
-ping api.openai.com
-
-
-## Getting More Help
-
-### Self-Service
-1. **Check Other Docs**: Review User Guide and Features
-2. **Settings Help**: Built-in tooltips and examples
-3. **About Page**: Version and feature information
-
-### Community Support
-1. **GitHub Issues**: [Report bugs](https://github.com/michael-borck/study-buddy/issues)
-2. **Discussions**: [Ask questions](https://github.com/michael-borck/study-buddy/discussions)
-3. **Feature Requests**: [Suggest improvements](https://github.com/michael-borck/study-buddy/issues/new)
-
-### Reporting Issues
-Include these details:
-- Operating system and version
-- Study Buddy version (from About page)
-- Exact error messages
-- Steps to reproduce the problem
-- Which AI provider and search engine you're using
-
-**Privacy Note**: Never share API keys publicly when reporting issues.
+- **GitHub Issues** — Report bugs at github.com/michael-borck/study-buddy/issues
+- **Discussions** — Ask questions at github.com/michael-borck/study-buddy/discussions
     `
   },
-  
+
   shortcuts: {
     title: "Keyboard Shortcuts",
     content: `
 # Keyboard Shortcuts
 
-Speed up your Study Buddy experience with these keyboard shortcuts.
+## Chat
 
-## Global Shortcuts
-
-| Shortcut | Action | Description |
-|----------|--------|-------------|
-| **Ctrl/Cmd + ,** | Open Settings | Quick access to configuration |
-| **Ctrl/Cmd + N** | New Conversation | Start fresh chat session |
-| **Ctrl/Cmd + R** | Refresh Page | Reload current page |
-| **Escape** | Close Modal | Dismiss open dialogs |
-
-## Chat Interface
-
-| Shortcut | Action | Description |
-|----------|--------|-------------|
-| **Enter** | Send Message | Submit your question or response |
-| **Shift + Enter** | New Line | Add line break in message |
-| **Ctrl/Cmd + A** | Select All | Select all text in input |
-| **Ctrl/Cmd + Z** | Undo | Undo last text change |
+| Shortcut | Action |
+|----------|--------|
+| **Enter** | Send your message |
+| **Shift + Enter** | New line in your message |
 
 ## Navigation
 
-| Shortcut | Action | Description |
-|----------|--------|-------------|
-| **Tab** | Next Element | Move to next interactive element |
-| **Shift + Tab** | Previous Element | Move to previous element |
-| **Space** | Activate Button | Click focused button |
-| **Arrow Keys** | Navigate Lists | Move through dropdown options |
+| Shortcut | Action |
+|----------|--------|
+| **Tab** | Move to the next interactive element |
+| **Shift + Tab** | Move to the previous element |
+| **Space** | Activate the focused button |
+| **Escape** | Close open panels or stop audio |
 
-## Text Editing
+## Text editing
 
-| Shortcut | Action | Description |
-|----------|--------|-------------|
-| **Ctrl/Cmd + C** | Copy | Copy selected text |
-| **Ctrl/Cmd + V** | Paste | Paste from clipboard |
-| **Ctrl/Cmd + X** | Cut | Cut selected text |
-| **Ctrl/Cmd + A** | Select All | Select all text |
+| Shortcut | Action |
+|----------|--------|
+| **Ctrl/Cmd + C** | Copy selected text |
+| **Ctrl/Cmd + V** | Paste from clipboard |
+| **Ctrl/Cmd + A** | Select all text in the input |
+| **Ctrl/Cmd + Z** | Undo last text change |
 
-## Settings Page
+## Tips
 
-| Shortcut | Action | Description |
-|----------|--------|-------------|
-| **Tab** | Next Field | Move to next input field |
-| **Enter** | Submit Form | Save current settings |
-| **Escape** | Cancel Changes | Discard unsaved changes |
-
-## Browser-Specific (Web Version)
-
-| Shortcut | Action | Description |
-|----------|--------|-------------|
-| **F5** | Refresh | Reload the page |
-| **Ctrl/Cmd + Shift + I** | Dev Tools | Open browser developer tools |
-| **Ctrl/Cmd + L** | Address Bar | Focus on URL bar |
-| **F11** | Full Screen | Toggle fullscreen mode |
-
-## Accessibility Shortcuts
-
-| Shortcut | Action | Description |
-|----------|--------|-------------|
-| **Alt + Text** | Focus Element | Jump to element with access key |
-| **Shift + F10** | Context Menu | Open right-click menu |
-| **Ctrl + Home** | Top of Page | Jump to page beginning |
-| **Ctrl + End** | Bottom of Page | Jump to page end |
-
-## Tips for Efficiency
-
-### Quick Settings Access
-- Use **Ctrl/Cmd + ,** to rapidly access settings
-- Make configuration changes without leaving your conversation
-- Test connections immediately with keyboard navigation
-
-### Faster Messaging
-- **Enter** to send, **Shift + Enter** for new lines
-- Use **Ctrl/Cmd + A** to select all text for editing
-- **Escape** to quickly close any open dialogs
-
-### Navigation Flow
-- **Tab** through interface elements in logical order
-- **Space** to activate buttons and checkboxes
-- **Arrow keys** to navigate dropdown menus
-
-### Text Selection
-- **Ctrl/Cmd + A** to select all text in current field
-- **Shift + Arrow** to extend text selection
-- **Ctrl/Cmd + Left/Right** to jump by words
-
-## Customization
-
-### Browser Extensions
-Some browser extensions add additional shortcuts:
-- Password managers: Auto-fill API keys
-- Text expanders: Quick topic templates
-- Accessibility tools: Enhanced navigation
-
-### Operating System
-Leverage OS-level shortcuts:
-- **Windows**: Win + V for clipboard history
-- **macOS**: Cmd + Space for Spotlight search
-- **Linux**: Alt + F2 for run dialog
-
-## Troubleshooting Shortcuts
-
-### When Shortcuts Don't Work
-1. **Check Focus**: Ensure correct element is focused
-2. **Browser Conflicts**: Some browsers override shortcuts
-3. **Extension Conflicts**: Disable extensions temporarily
-4. **Keyboard Layout**: Verify correct layout is active
-
-### Alternative Methods
-If keyboard shortcuts fail:
-- Right-click for context menus
-- Use mouse for navigation
-- Check Settings for alternative input methods
-
-## Power User Tips
-
-### Rapid Configuration
-1. **Ctrl/Cmd + ,** → Settings
-2. **Tab** through fields quickly
-3. **Enter** to save and return
-
-### Efficient Learning Flow
-1. Enter topic with typed input
-2. **Tab** to education level dropdown
-3. **Arrow keys** to select level
-4. **Tab** to Generate button
-5. **Enter** to start learning
-
-### Quick Topic Switching
-1. **Ctrl/Cmd + N** for new conversation
-2. Type new topic immediately
-3. **Enter** to generate new tutor
-4. Continue learning without mouse
-
-Remember: Keyboard shortcuts make Study Buddy more accessible and efficient for all users!
+- **Enter** sends your message. Use **Shift + Enter** if you need a line break.
+- **Tab** through the strategy buttons to switch strategies with the keyboard.
+- Use **Ctrl/Cmd + F** to search within the current page (useful in long tutor responses).
     `
   },
-  
+
   technical: {
     title: "Technical Overview",
     content: `
 # Technical Overview
 
-Understanding Study Buddy's architecture and technical implementation.
+## Architecture
+
+Study Buddy is a hybrid desktop application:
 
-## Architecture Overview
+- **Frontend**: Next.js 14 with React, TypeScript, and Tailwind CSS
+- **Desktop**: Electron wraps the Next.js app as a native application
+- **Design**: Studio Calm design system (shared with Talk Buddy)
+- **AI**: Provider-agnostic — supports Ollama, OpenAI, Anthropic, Google, Groq, Together AI
+- **Search**: DuckDuckGo (default), Brave, Bing, Serper, SearXNG
+- **Audio**: Web Speech API for TTS/STT, optional Transformers.js for local Whisper STT
 
-Study Buddy is built as a hybrid desktop application using:
+## How a session works
 
-### Frontend Stack
-- **Next.js 14**: React framework with App Router
-- **TypeScript**: Type-safe JavaScript development
-- **Tailwind CSS**: Utility-first CSS framework
-- **React Components**: Modern functional components with hooks
+### 1. Search
+User submits a topic. The /api/getSources endpoint queries the configured search engine and returns up to 9 URLs.
 
-### Backend Stack
-- **Next.js API Routes**: Serverless API endpoints
-- **Node.js Runtime**: Server-side JavaScript execution
-- **Streaming APIs**: Real-time response handling
-- **Zod**: Runtime type validation
+### 2. Parse
+The /api/getParsedSources endpoint fetches each URL, extracts readable text using Mozilla Readability, and cleans it.
 
-### Desktop Integration
-- **Electron 36**: Cross-platform desktop framework
-- **Electron Builder**: Application packaging
-- **Native Menus**: Platform-specific UI integration
+### 3. Auto-summarise (conditional)
+If total content exceeds 20,000 characters, the /api/summariseSources endpoint sends each source through the LLM with a "summarise in 200-300 words" prompt. Sources are summarised in parallel.
 
-## Data Flow
+### 4. System prompt construction
+The getSystemPrompt function in utils/utils.ts builds the system message from:
+- Parsed (or summarised) source content
+- User-pasted notes (if any)
+- Education level
+- Teaching strategy prompt (from utils/strategies.ts)
+- Reflection prompt (if "Make me think" is enabled)
 
-### Chat Interaction Flow
+### 5. Streaming chat
+The /api/getChat endpoint sends the messages to the configured LLM provider and streams the response back via Server-Sent Events.
 
-User Input → React Component → API Route → AI Provider → Stream Response → UI Update
+### 6. Mid-conversation strategy switching
+When the user changes strategy or toggles reflection prompts during a conversation, the system prompt (messages[0]) is rebuilt with the new strategy. The conversation history is preserved.
 
+## Teaching strategies
 
-### Search Integration Flow
+Strategies are defined in utils/strategies.ts. Each strategy is a prompt paragraph that tells the LLM how to behave. The Quiz and Socratic strategies use forceful "CRITICAL INSTRUCTION" formatting to ensure small local models follow them.
 
-User Query → Search API → Content Parsing → AI Context → Enhanced Response
+## Audio architecture
 
+### Text-to-Speech
+Uses the browser's speechSynthesis API. Voices are provided by the operating system. The app heuristically groups available English voices into male and female categories by name.
 
-### Settings Management Flow
+### Speech-to-Text (Web)
+Uses the browser's SpeechRecognition API (webkit-prefixed in Chromium). Audio is sent to Google's servers for processing. Returns interim and final transcription results.
 
-User Settings → localStorage → File System (Electron) → Runtime Configuration
+### Speech-to-Text (Whisper)
+Uses @xenova/transformers to run the Whisper tiny model (~40 MB) in the browser via ONNX Runtime WebAssembly. Audio is recorded via MediaRecorder, converted to a 16kHz Float32Array, and fed to the model. Fully local — no network calls.
 
+## Project structure
 
-## API Architecture
+study-buddy/
+- app/ — Next.js App Router
+  - api/getChat/ — LLM streaming endpoint
+  - api/getSources/ — Web search endpoint
+  - api/getParsedSources/ — Content extraction
+  - api/summariseSources/ — LLM-based source summarisation
+  - api/models/ — Model discovery
+  - api/settings/ — Settings persistence
+  - settings/ — Settings page
+  - about/ — About page
+  - docs/ — This documentation
+  - legal/ — Licences and acknowledgments
+  - page.tsx — Main tutor interface
+- components/ — React components
+  - Header, Footer, Hero — Landing page
+  - Chat — Conversation view with audio controls
+  - FinalInputArea — Follow-up input
+  - InitialInputArea — Topic input
+  - PreparationPhase — Progress steps
+- utils/
+  - providers/ — LLM provider abstractions (Ollama, OpenAI, etc.)
+  - strategies.ts — Teaching strategy definitions
+  - speech.ts — TTS, STT, audio recording
+  - settings.ts — Settings management
+  - utils.ts — System prompt builder, text cleaning
+- main.js — Electron main process
 
-### Core Endpoints
+## API endpoints
 
-#### /api/getChat
-- **Purpose**: Stream AI responses
-- **Method**: POST
-- **Input**: Messages array
-- **Output**: Server-sent events stream
+### POST /api/getChat
+Streams an AI response. Accepts a messages array. Returns Server-Sent Events.
 
-#### /api/getSources
-- **Purpose**: Search for relevant sources
-- **Method**: POST  
-- **Input**: Question string
-- **Output**: Array of source objects
+### POST /api/getSources
+Searches the web. Accepts a question string. Returns an array of {name, url} objects.
 
-#### /api/settings
-- **Purpose**: Manage configuration
-- **Methods**: GET (retrieve), POST (update)
-- **Features**: API key protection, validation
+### POST /api/getParsedSources
+Fetches and extracts text from URLs. Accepts a sources array. Returns sources with fullContent.
 
-### Streaming Implementation
+### POST /api/summariseSources
+Summarises source content via the LLM. Accepts a sources array with fullContent. Returns sources with summarised fullContent.
 
-Study Buddy uses Server-Sent Events (SSE) for real-time AI responses:
+### GET/POST /api/settings
+Retrieves or updates application settings.
 
+### POST /api/models
+Discovers available models from the configured provider.
 
-// Streaming response pattern
-const stream = new ReadableStream({
-  async start(controller) {
-    // Send chunks as they arrive
-    for await (const chunk of aiResponse) {
-      controller.enqueue(chunk);
-    }
-    controller.close();
-  }
-});
+## Configuration headers
 
-
-## AI Provider Integration
-
-### OpenAI Integration
-- **Models**: GPT-3.5, GPT-4, and newer models
-- **Authentication**: Bearer token with API key
-- **Streaming**: Native streaming support
-- **Rate Limits**: Respects OpenAI's rate limiting
-
-### Together AI Integration
-- **Models**: Llama 3.1, Mixtral, and other open-source models
-- **Authentication**: API key in headers
-- **Streaming**: Compatible with OpenAI format
-- **Cost**: Generally more cost-effective than OpenAI
-
-### Custom Endpoint Support
-- **Compatibility**: Any OpenAI-compatible API
-- **Examples**: Ollama, LM Studio, Azure OpenAI
-- **Configuration**: Custom base URL and model names
-
-## Search Engine Integration
-
-### Multi-Engine Support
-
-**Commercial APIs:**
-- **Bing**: Microsoft's search API with high-quality results
-- **Serper**: Google search results via third-party API
-- **Brave**: Independent search index
-
-**Free Options:**
-- **DuckDuckGo**: HTML scraping with privacy focus
-- **SearXNG**: Self-hosted open-source metasearch
-
-### Content Processing Pipeline
-
-1. **Query Execution**: Search multiple sources
-2. **Result Filtering**: Remove irrelevant or blocked sites
-3. **Content Extraction**: Parse HTML to extract text
-4. **Context Preparation**: Format for AI consumption
-
-## Security Architecture
-
-### API Key Protection
-
-// Frontend: Keys never exposed
-const safeSettings = {
-  ...settings,
-  llmApiKey: '', // Redacted
-  searchApiKey: '', // Redacted
-};
-
-// Backend: Secure handling
-const apiKey = getSettings().llmApiKey;
-if (!apiKey) throw new Error('API key required');
-
-
-### Input Validation
-- **Zod Schemas**: Runtime type checking
-- **Sanitization**: Clean user inputs
-- **Rate Limiting**: Prevent API abuse
-
-### Local Data Storage
-- **No External Storage**: All data stays local
-- **Encrypted Preferences**: Sensitive settings protection
-- **User Control**: Complete data ownership
-
-## Performance Optimization
-
-### Streaming Responses
-- **Real-time Updates**: Show responses as generated
-- **Reduced Latency**: Immediate feedback to users
-- **Memory Efficient**: Process chunks without full buffering
-
-### Caching Strategy
-- **Search Results**: 15-minute cache for repeated queries
-- **Model Lists**: 1-hour cache for provider discovery
-- **Static Assets**: Browser caching for images/CSS
-
-### Resource Management
-- **Memory Cleanup**: Proper stream cleanup and garbage collection
-- **Connection Pooling**: Reuse HTTP connections
-- **Bundle Optimization**: Code splitting and tree shaking
-
-## Development Tools
-
-### Build System
-
-# Development
-npm run dev              # Next.js dev server
-npm run electron-dev     # Electron with hot reload
-
-# Production
-npm run build           # Next.js production build
-npm run build-electron  # Electron packages
-
-
-### Code Quality
-- **TypeScript**: Static type checking
-- **ESLint**: Code linting and formatting
-- **Prettier**: Code formatting
-- **Husky**: Git hooks for quality gates
-
-### Testing Strategy
-- **Unit Tests**: Component and utility testing
-- **Integration Tests**: API endpoint testing
-- **E2E Tests**: Full user workflow testing
-- **Manual Testing**: Cross-platform verification
-
-## Deployment Architecture
-
-### Platform Builds
-- **Windows**: NSIS installer and portable executable
-- **macOS**: DMG package with Apple Silicon support
-- **Linux**: AppImage and Debian packages
-
-### Distribution Strategy
-- **GitHub Releases**: Automated builds via GitHub Actions
-- **Auto-updater**: Built-in update mechanism
-- **Version Management**: Semantic versioning
-
-### Configuration Management
-
-User Data Directories:
-- Windows: %APPDATA%/study-buddy/
-- macOS: ~/Library/Application Support/study-buddy/
-- Linux: ~/.config/study-buddy/
-
-Contains:
-- settings.json (user preferences)
-- conversations/ (chat history)
-- cache/ (temporary data)
-
-
-## Monitoring and Debugging
-
-### Development Mode
-- **Console Logging**: Detailed operation logs
-- **Error Boundaries**: Graceful error handling
-- **DevTools Integration**: Browser debugging tools
-
-### Production Monitoring
-- **Error Tracking**: Local error logging
-- **Performance Metrics**: Response time monitoring
-- **Health Checks**: Service availability verification
-
-## Extensibility
-
-### Plugin Architecture
-Study Buddy is designed for future extensibility:
-
-- **Provider Plugins**: Add new AI providers
-- **Search Plugins**: Integrate additional search engines
-- **UI Themes**: Customizable appearance
-- **Custom Prompts**: User-defined prompt templates
-
-### API Compatibility
-- **OpenAI Standard**: Compatible with OpenAI API format
-- **RESTful Design**: Standard HTTP/JSON interfaces
-- **Webhook Support**: Future integration capabilities
-
-## Open Source Benefits
-
-### Transparency
-- **Full Source Code**: Available on GitHub
-- **Security Audits**: Community review and verification
-- **No Hidden Features**: Complete functionality visibility
-
-### Community Contributions
-- **Bug Reports**: Community-driven issue identification
-- **Feature Requests**: User-directed development
-- **Code Contributions**: Community improvements and fixes
-- **Documentation**: Collaborative knowledge building
-
-### Licensing
-- **MIT License**: Maximum freedom for use and modification
-- **Commercial Use**: Permitted for business applications
-- **Modification Rights**: Full right to customize and extend
-- **Distribution**: Can be redistributed with attribution
+All API endpoints accept an X-StudyBuddy-Settings header containing JSON-encoded settings. This allows the frontend to pass runtime settings (including secret keys) to the backend without storing them server-side.
     `
   },
-  
+
   development: {
-    title: "Development Guide",
+    title: "Development",
     content: `
 # Development Guide
 
-Quick development setup and workflow information for Study Buddy.
+## Prerequisites
 
-## Getting Started
-
-### Prerequisites
 - Node.js 18+
-- npm or yarn
+- npm
 - (Optional) Ollama for local AI
 
-### Quick Start
+## Quick start
 
-Development with hot reload:
+# Clone and install
+git clone https://github.com/michael-borck/study-buddy.git
+cd study-buddy
+npm install
+
+# Run in development mode (Next.js + Electron with hot reload)
 npm run electron-dev
 
-Or run components separately:
-npm run dev        # Next.js only
-npm run electron   # Electron only (after Next.js is running)
+# Or run Next.js only (opens in browser at localhost:3000)
+npm run dev
 
-## Development Scripts
+## Scripts
 
 | Command | Description |
 |---------|-------------|
 | npm run dev | Start Next.js development server |
-| npm run electron | Launch Electron app (needs Next.js running) |
-| npm run electron-dev | **Recommended**: Start both Next.js and Electron with hot reload |
+| npm run electron-dev | Start Next.js + Electron with hot reload |
 | npm run build | Build Next.js for production |
 | npm run dist | Build Electron distributables |
 | npm run lint | Run ESLint |
 
-## Configuration
+## Environment variables
 
-### Environment Variables
-Copy .env.example to .env.local and configure:
+You can configure defaults via environment variables, but most users will use the in-app Settings page instead.
 
-AI Provider (default: ollama)
-LLM_PROVIDER=ollama
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=llama3.1:8b
+| Variable | Default | Description |
+|----------|---------|-------------|
+| LLM_PROVIDER | ollama | AI provider name |
+| OLLAMA_BASE_URL | http://localhost:11434 | Ollama server address |
+| OLLAMA_MODEL | llama3.1:8b | Default model |
+| SEARCH_ENGINE | disabled | Search engine |
 
-Search (default: disabled)
-SEARCH_ENGINE=disabled
+## Code style
 
-### Settings UI
-Access settings at http://localhost:3000/settings or use the Settings link in the app header.
-
-## Project Structure
-
-study-buddy/
-├── app/                    # Next.js App Router
-│   ├── api/               # API routes
-│   │   ├── getChat/       # LLM streaming endpoint
-│   │   ├── getSources/    # Search endpoint
-│   │   └── getParsedSources/ # Content parsing
-│   ├── settings/          # Settings page
-│   └── page.tsx          # Main app page
-├── components/            # React components
-├── utils/
-│   └── providers/         # LLM provider abstractions
-├── main.js               # Electron main process
-└── .github/workflows/    # CI/CD workflows
-
-## Debugging
-
-### Electron DevTools
-In development, DevTools open automatically. In production builds, use:
-- **macOS/Linux**: Cmd/Ctrl + Shift + I
-- **Windows**: F12
-
-### Common Issues
-
-1. **Port conflicts**: Next.js auto-increments ports (3000 → 3001 → 3002...)
-2. **Ollama not found**: Ensure Ollama is running on localhost:11434
-3. **Build failures**: Check npm run build works before npm run dist
+- TypeScript strict mode
+- ESLint + Prettier
+- Tailwind CSS utility-first
+- Studio Calm design tokens (see app/globals.css)
 
 ## Contributing
 
-### Code Style
-- ESLint configuration enforced
-- Prettier for formatting
-- TypeScript strict mode
-- Conventional commit messages
-
-### Pull Request Process
 1. Fork the repository
-2. Create feature branch: git checkout -b feature/amazing-feature
-3. Commit changes: git commit -m 'Add amazing feature'
-4. Push branch: git push origin feature/amazing-feature
-5. Open Pull Request
+2. Create a feature branch
+3. Make your changes
+4. Run npm run build to verify
+5. Open a pull request
 
-For complete development setup, see the full Development Setup guide.
+See the GitHub repository for full contribution guidelines.
     `
   },
-
-  icons: {
-    title: "Icon Generation Guide",
-    content: `
-# Icon Generation Guide 🎓
-
-Complete guide for generating Study Buddy's graduation cap icons.
-
-## Required Icon Sizes
-
-### Web (favicon)
-- app/favicon.ico - 16x16, 32x32 (multi-size ICO file)
-
-### Electron (for cross-platform builds)
-- build/icons/icon.icns (macOS) - Multi-size ICNS file
-- build/icons/icon.ico (Windows) - Multi-size ICO file
-- build/icons/icon.png (Linux) - 512x512 PNG (Electron will auto-scale)
-
-### Additional sizes for Linux distributions
-- build/icons/16x16.png through build/icons/1024x1024.png
-
-## How to Generate Icons from 🎓 Emoji
-
-### Option 1: Online Tools (Recommended)
-1. Go to https://favicon.io/emoji-favicons/graduation-cap/
-2. Download the graduation cap emoji favicon package
-3. Extract and use the generated files
-
-### Option 2: Manual Creation
-1. **Create base image:**
-   - Open image editor (Figma, Canva, GIMP, etc.)
-   - Create 1024x1024 canvas with transparent background
-   - Add graduation cap emoji 🎓 at large size
-   - Center it with some padding around edges
-   - Export as PNG
-
-2. **Generate multiple sizes:**
-   - Use online converter like https://icoconvert.com/
-   - Upload your 1024x1024 PNG
-   - Generate .ico files with multiple sizes (16, 32, 48, 64, 128, 256)
-   - Generate .icns file for macOS
-   - Generate individual PNG files for Linux
-
-### Option 3: Command Line (ImageMagick)
-If you have ImageMagick installed:
-
-ICO for Windows (multi-size)
-magick icon-1024.png -resize 256x256 -resize 128x128 -resize 64x64 -resize 48x48 -resize 32x32 -resize 16x16 build/icons/icon.ico
-
-Individual PNGs for Linux
-magick icon-1024.png -resize 16x16 build/icons/16x16.png
-magick icon-1024.png -resize 32x32 build/icons/32x32.png
-magick icon-1024.png -resize 48x48 build/icons/48x48.png
-# ... continue for all sizes
-
-## Package.json Configuration
-
-Once you have the icons, add this to your package.json build config:
-
-{
-  "build": {
-    "mac": {
-      "icon": "build/icons/icon.icns"
-    },
-    "win": {
-      "icon": "build/icons/icon.ico"
-    },
-    "linux": {
-      "icon": "build/icons/icon.png"
-    }
-  }
-}
-
-## File Structure
-
-study-buddy/
-├── app/
-│   └── favicon.ico          # Replace with graduation cap favicon
-├── build/
-│   └── icons/
-│       ├── icon.icns        # macOS (multi-size)
-│       ├── icon.ico         # Windows (multi-size)
-│       ├── icon.png         # Linux main (512x512)
-│       ├── 16x16.png        # Linux sizes
-│       ├── 32x32.png
-│       └── ... (all sizes)
-└── public/
-    └── favicon.ico          # Copy from app/ for consistency
-
-## Design Guidelines
-
-- **Style**: Clean graduation cap emoji 🎓 on transparent background
-- **Padding**: Leave ~15% padding around edges so icon doesn't touch edges
-- **Colors**: Use standard emoji colors (black cap, gold tassel)
-- **Background**: Transparent for all sizes
-- **Quality**: Vector-based or high-DPI source for clean scaling
-
-## Testing
-
-After generating icons:
-1. Test favicon in browser (should show in tab)
-2. Build Electron app: npm run electron-pack
-3. Check generated apps show graduation cap icon in:
-   - Windows: Taskbar, window title, file explorer
-   - macOS: Dock, Finder, window title
-   - Linux: Application menu, window manager
-
-## Quick Start
-
-The fastest way is to use https://favicon.io/emoji-favicons/graduation-cap/ and download the complete package, then organize the files according to the structure above.
-
-**Note**: Study Buddy already has generated graduation cap icons! This guide is for reference if you need to regenerate or customize them.
-    `
-  },
-
-  api: {
-    title: "API Reference",
-    content: `
-# API Reference
-
-Complete reference for Study Buddy's backend API endpoints.
-
-## Base Information
-
-**Base URL**: http://localhost:3000/api (Development)
-**Authentication**: None required (local application)
-**Content-Type**: application/json
-
-## Chat API
-
-### POST /api/getChat
-
-Stream AI responses for conversational tutoring.
-
-**Request Body:**
-json
-{
-  "messages": [
-    {
-      "role": "user" | "assistant" | "system",
-      "content": "string"
-    }
-  ]
-}
-
-
-**Headers:**
-
-Content-Type: application/json
-X-StudyBuddy-Settings: string (optional JSON-encoded settings)
-
-
-**Response:** Server-Sent Events stream
-
-data: {"type": "chunk", "content": "Partial response"}
-data: {"type": "chunk", "content": " continuation..."}
-data: {"type": "done"}
-
-
-**Example:**
-javascript
-const response = await fetch('/api/getChat', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    messages: [
-      { role: 'user', content: 'Explain quantum physics' }
-    ]
-  })
-});
-
-// Handle streaming
-const reader = response.body?.getReader();
-const decoder = new TextDecoder();
-
-while (true) {
-  const { done, value } = await reader.read();
-  if (done) break;
-  
-  const chunk = decoder.decode(value);
-  // Process streaming chunk
-}
-
-
-## Search API
-
-### POST /api/getSources
-
-Search for relevant information sources.
-
-**Request Body:**
-json
-{
-  "question": "string"
-}
-
-
-**Response:**
-json
-[
-  {
-    "name": "Page title or description",
-    "url": "https://example.com/page"
-  }
-]
-
-
-**Search Engines Supported:**
-- bing: Microsoft Bing API (requires API key)
-- serper: Google via Serper API (requires API key)
-- searxng: Self-hosted SearXNG (requires server URL)
-- duckduckgo: DuckDuckGo scraping (no API key)
-- brave: Brave Search API (requires API key)
-- disabled: No search functionality
-
-### POST /api/getParsedSources
-
-Extract content from source URLs.
-
-**Request Body:**
-json
-{
-  "sources": [
-    {
-      "name": "string",
-      "url": "string"
-    }
-  ]
-}
-
-
-**Response:**
-json
-[
-  {
-    "name": "string",
-    "url": "string", 
-    "fullContent": "Extracted text content"
-  }
-]
-
-
-## Settings API
-
-### GET /api/settings
-
-Retrieve current application settings.
-
-**Response:**
-json
-{
-  "llmProvider": "openai" | "together" | "custom",
-  "llmApiKey": "", // Always empty for security
-  "llmBaseUrl": "string",
-  "llmModel": "string",
-  "searchEngine": "bing" | "serper" | "searxng" | "duckduckgo" | "brave" | "disabled",
-  "searchApiKey": "", // Always empty for security
-  "searchUrl": "string",
-  "defaultEducationLevel": "string"
-}
-
-
-### POST /api/settings
-
-Update application settings.
-
-**Request Body:**
-json
-{
-  "llmProvider": "openai" | "together" | "custom",
-  "llmApiKey": "string",
-  "llmBaseUrl": "string", 
-  "llmModel": "string",
-  "searchEngine": "bing" | "serper" | "searxng" | "duckduckgo" | "brave" | "disabled",
-  "searchApiKey": "string",
-  "searchUrl": "string",
-  "defaultEducationLevel": "string"
-}
-
-
-**Response:**
-json
-{
-  "success": true,
-  "message": "Settings updated successfully"
-}
-
-
-## Error Handling
-
-### Standard Error Format
-All endpoints return errors in consistent format:
-
-json
-{
-  "error": "Human-readable error message",
-  "details": "Additional error details (optional)",
-  "code": 500 // HTTP status code (optional)
-}
-
-
-### Common HTTP Status Codes
-- **200**: Success
-- **400**: Bad Request (invalid input)
-- **401**: Unauthorized (invalid API key)
-- **429**: Too Many Requests (rate limited)
-- **500**: Internal Server Error
-- **503**: Service Unavailable
-
-### Example Error Responses
-
-**API Key Missing:**
-json
-{
-  "error": "API key required",
-  "details": "OpenAI API key not configured in settings"
-}
-
-
-**Service Unavailable:**
-json
-{
-  "error": "AI service unavailable", 
-  "details": "OpenAI API returned 503 status"
-}
-
-
-**Invalid Input:**
-json
-{
-  "error": "Invalid request format",
-  "details": "Messages array is required"
-}
-
-
-## Rate Limiting
-
-### Search APIs
-- **SearXNG**: 2-second delay between requests to same server
-- **DuckDuckGo**: Built-in delays to prevent IP blocking
-- **Commercial APIs**: Respect provider-specific rate limits
-
-### AI APIs
-- **OpenAI**: Follows OpenAI's tier-based rate limits
-- **Together AI**: Follows Together AI's rate limits
-- **Custom**: No built-in limits (configure at provider level)
-
-## Configuration Headers
-
-### X-StudyBuddy-Settings
-
-Pass runtime settings to override server configuration:
-
-javascript
-const settings = JSON.stringify({
-  llmProvider: 'openai',
-  llmApiKey: 'sk-...',
-  searchEngine: 'duckduckgo'
-});
-
-fetch('/api/getChat', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'X-StudyBuddy-Settings': settings
-  },
-  body: JSON.stringify({ messages })
-});
-
-
-This allows frontend components to temporarily override settings.
-
-## Advanced Usage Examples
-
-### Complete Learning Flow
-
-javascript
-// 1. Search for sources
-const sourcesRes = await fetch('/api/getSources', {
-  method: 'POST',
-  body: JSON.stringify({ 
-    question: 'machine learning basics' 
-  })
-});
-const { sources } = await sourcesRes.json();
-
-// 2. Parse source content  
-const parsedRes = await fetch('/api/getParsedSources', {
-  method: 'POST',
-  body: JSON.stringify({ sources })
-});
-const { sources: parsedSources } = await parsedRes.json();
-
-// 3. Start AI chat with context
-const messages = [
-  {
-    role: 'system',
-    content: 'Teaching context: ' + parsedSources.map(s => s.fullContent).join('\\n')
-  },
-  {
-    role: 'user',
-    content: 'Explain machine learning at a high school level'
-  }
-];
-
-const chatRes = await fetch('/api/getChat', {
-  method: 'POST', 
-  body: JSON.stringify({ messages })
-});
-
-// 4. Handle streaming response
-const reader = chatRes.body.getReader();
-// Process stream...
-
-
-### Settings Management
-
-javascript
-// Get current settings
-const settings = await fetch('/api/settings').then(r => r.json());
-
-// Update AI provider
-await fetch('/api/settings', {
-  method: 'POST',
-  body: JSON.stringify({
-    llmProvider: 'together',
-    llmApiKey: 'your-api-key',
-    llmModel: 'meta-llama/Llama-3.1-8B-Instruct-Turbo'
-  })
-});
-
-// Test new configuration
-const testRes = await fetch('/api/getChat', {
-  method: 'POST',
-  body: JSON.stringify({
-    messages: [{ role: 'user', content: 'Hello' }]
-  })
-});
-
-
-## WebSocket Alternative
-
-While Study Buddy uses SSE, WebSocket implementation would look like:
-
-javascript
-// Hypothetical WebSocket endpoint
-const ws = new WebSocket('ws://localhost:3000/api/chat-ws');
-
-ws.send(JSON.stringify({
-  type: 'chat',
-  messages: [{ role: 'user', content: 'Hello' }]
-}));
-
-ws.onmessage = (event) => {
-  const data = JSON.parse(event.data);
-  if (data.type === 'chunk') {
-    // Handle streaming chunk
-  } else if (data.type === 'error') {
-    // Handle error
-  } else if (data.type === 'done') {
-    // Response complete
-  }
-};
-
-
-## Testing APIs
-
-### Using curl
-
-bash
-# Test settings endpoint
-curl http://localhost:3000/api/settings
-
-# Test chat (note: streaming response)
-curl -X POST http://localhost:3000/api/getChat \\
-  -H "Content-Type: application/json" \\
-  -d '{"messages":[{"role":"user","content":"Hello"}]}'
-
-# Test search
-curl -X POST http://localhost:3000/api/getSources \\
-  -H "Content-Type: application/json" \\
-  -d '{"question":"photosynthesis"}'
-
-
-### Using Postman
-
-1. **Import Collection**: Create collection with base URL
-2. **Set Headers**: Content-Type: application/json
-3. **Test Streaming**: Enable streaming for chat endpoint
-4. **Environment Variables**: Store API keys securely
-
----
-
-*For implementation details, see the source code at [GitHub](https://github.com/michael-borck/study-buddy).*
-    `
-  }
 };
 
 const navigationItems = [
@@ -1484,10 +561,8 @@ const navigationItems = [
   { id: 'settings', title: 'Settings', icon: '⚙️' },
   { id: 'troubleshooting', title: 'Troubleshooting', icon: '🔧' },
   { id: 'shortcuts', title: 'Shortcuts', icon: '⌨️' },
-  { id: 'development', title: 'Development', icon: '👨‍💻' },
-  { id: 'icons', title: 'Icon Generation', icon: '🎨' },
   { id: 'technical', title: 'Technical', icon: '🔬' },
-  { id: 'api', title: 'API Reference', icon: '🔌' },
+  { id: 'development', title: 'Development', icon: '💻' },
 ];
 
 export default function DocsPage() {

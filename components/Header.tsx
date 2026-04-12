@@ -1,9 +1,12 @@
+import packageJson from "../package.json";
+
 const Header = () => {
   return (
     <div className="container flex h-[60px] shrink-0 items-center justify-between px-4 lg:h-[80px] lg:px-0">
       <a href="/" className="flex items-center gap-2">
         <span className="text-4xl">🎓</span>
         <span className="text-xl font-semibold text-ink">Study Buddy</span>
+        <span className="text-xs text-ink-quiet">v{packageJson.version}</span>
       </a>
       <nav className="flex items-center space-x-6">
         <a

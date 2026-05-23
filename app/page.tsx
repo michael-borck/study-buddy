@@ -3,24 +3,20 @@
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
-import PreparationPhase, { PrepStep } from "@/components/PreparationPhase";
+import PreparationPhase from "@/components/PreparationPhase";
 import { useState, useEffect, useCallback } from "react";
 import {
   createParser,
   ParsedEvent,
   ReconnectInterval,
 } from "eventsource-parser";
-import { getSystemPrompt } from "@/utils/utils";
-import { getStrategyById, nudgePrompt } from "@/utils/strategies";
+import { loadClientSettings } from "@/utils/settings";
+import {
+  prepareSession,
+  buildSessionPrompt,
+  type PrepStep,
+} from "@/utils/session";
 import Chat from "@/components/Chat";
-
-// Content budgets by context size setting (chars)
-// Leaves room for system prompt (~2K), strategy (~1K), and conversation
-const CONTENT_BUDGETS: Record<string, number> = {
-  small: 15000,   // ~4K tokens — fits 8K context models
-  medium: 60000,  // ~15K tokens — fits 32K context models
-  large: 300000,  // ~75K tokens — fits 128K+ context models
-};
 
 type Phase = "landing" | "preparing" | "chat";
 
@@ -50,51 +46,41 @@ export default function Home() {
     sttProvider: "web" as "web" | "whisper",
   });
 
-  // Keep parsed sources for rebuilding prompt on strategy change
+  // Keep parsed sources + processed notes for rebuilding the prompt on a
+  // strategy/nudge change mid-session.
   const [parsedSources, setParsedSources] = useState<
     { fullContent: string }[]
   >([]);
+  const [processedNotes, setProcessedNotes] = useState("");
 
   // Preparation phase steps
   const [prepSteps, setPrepSteps] = useState<PrepStep[]>([]);
 
   // Load defaults from settings on mount
   useEffect(() => {
-    try {
-      const savedSettings = localStorage.getItem("studybuddy-settings");
-      if (savedSettings) {
-        const settings = JSON.parse(savedSettings);
-        if (settings.defaultEducationLevel) {
-          setAgeGroup(settings.defaultEducationLevel);
-        }
-        // If search is disabled in settings, default the toggle off
-        if (settings.searchEngine === "disabled") {
-          setSearchWeb(false);
-        }
-        // Load audio settings
-        if (settings.voiceGender) setAudioSettings((prev) => ({ ...prev, voiceGender: settings.voiceGender }));
-        if (settings.autoRead !== undefined) setAudioSettings((prev) => ({ ...prev, autoRead: settings.autoRead }));
-        if (settings.sttProvider) setAudioSettings((prev) => ({ ...prev, sttProvider: settings.sttProvider }));
-      }
-    } catch (error) {
-      console.warn("Failed to load settings:", error);
+    if (typeof window === "undefined" || !localStorage.getItem("studybuddy-settings")) {
+      return;
     }
+    const settings = loadClientSettings();
+    setAgeGroup(settings.defaultEducationLevel);
+    // If search is disabled in settings, default the toggle off
+    if (settings.searchEngine === "disabled") {
+      setSearchWeb(false);
+    }
+    setAudioSettings({
+      voiceGender: settings.voiceGender as "male" | "female",
+      autoRead: settings.autoRead,
+      sttProvider: settings.sttProvider as "web" | "whisper",
+    });
   }, []);
 
   // Listen for settings changes
   useEffect(() => {
     const handleSettingsUpdate = () => {
-      try {
-        const savedSettings = localStorage.getItem("studybuddy-settings");
-        if (savedSettings) {
-          const settings = JSON.parse(savedSettings);
-          if (settings.defaultEducationLevel) {
-            setAgeGroup(settings.defaultEducationLevel);
-          }
-        }
-      } catch (error) {
-        console.warn("Failed to update education level:", error);
+      if (typeof window === "undefined" || !localStorage.getItem("studybuddy-settings")) {
+        return;
       }
+      setAgeGroup(loadClientSettings().defaultEducationLevel);
     };
 
     window.addEventListener("storage", handleSettingsUpdate);
@@ -119,29 +105,6 @@ export default function Home() {
     return headers;
   }, []);
 
-  const updateStep = (
-    index: number,
-    status: PrepStep["status"],
-    setter: React.Dispatch<React.SetStateAction<PrepStep[]>>,
-  ) => {
-    setter((prev) => prev.map((s, i) => (i === index ? { ...s, status } : s)));
-  };
-
-  // Build system prompt with current strategy/nudge settings
-  const buildSystemPrompt = useCallback(
-    (parsed: { fullContent: string }[], sid: string, nudge: boolean) => {
-      const strategy = getStrategyById(sid);
-      return getSystemPrompt(
-        parsed,
-        ageGroup,
-        customText || undefined,
-        strategy.prompt,
-        nudge ? nudgePrompt : undefined,
-      );
-    },
-    [ageGroup, customText],
-  );
-
   const handleInitialChat = async () => {
     const currentTopic = inputValue;
     setTopic(currentTopic);
@@ -149,216 +112,30 @@ export default function Home() {
     setPhase("preparing");
     setLoading(true);
 
-    // Determine if we should search — landing page toggle AND settings
-    let shouldSearch = searchWeb;
-    if (shouldSearch) {
-      try {
-        const savedSettings = localStorage.getItem("studybuddy-settings");
-        if (savedSettings) {
-          const settings = JSON.parse(savedSettings);
-          if (settings.searchEngine === "disabled") {
-            shouldSearch = false;
-          }
-        }
-      } catch {}
-    }
-
-    // Build initial steps
-    const steps: PrepStep[] = [
+    const prepared = await prepareSession(
       {
-        label: shouldSearch ? "Searching for sources..." : "Web search off",
-        status: shouldSearch ? "active" : "skipped",
+        topic: currentTopic,
+        notes: customText,
+        ageGroup,
+        strategyId,
+        nudge: nudgeEnabled,
+        searchWeb,
+        settings: loadClientSettings(),
       },
-      { label: "Reading web pages...", status: "waiting" },
-      { label: "Preparing your tutor...", status: "waiting" },
-    ];
-    setPrepSteps(steps);
-
-    const headers = getHeaders();
-    let fetchedSources: { name: string; url: string }[] = [];
-
-    // Step 1: Search
-    if (shouldSearch) {
-      try {
-        const sourcesResponse = await fetch("/api/getSources", {
-          method: "POST",
-          headers,
-          body: JSON.stringify({ question: currentTopic }),
-        });
-        if (sourcesResponse.ok) {
-          fetchedSources = await sourcesResponse.json();
-        }
-      } catch (e) {
-        console.error("Search failed:", e);
-      }
-      setSources(fetchedSources);
-      updateStep(0, "done", setPrepSteps);
-    }
-
-    // Step 2: Parse sources
-    let parsed: { name: string; url: string; fullContent: string }[] = [];
-    if (fetchedSources.length > 0) {
-      updateStep(1, "active", setPrepSteps);
-      try {
-        const parsedRes = await fetch("/api/getParsedSources", {
-          method: "POST",
-          headers,
-          body: JSON.stringify({ sources: fetchedSources }),
-        });
-        if (parsedRes.ok) {
-          parsed = await parsedRes.json();
-        }
-      } catch (e) {
-        console.error("Parsing failed:", e);
-      }
-      updateStep(1, "done", setPrepSteps);
-    } else {
-      updateStep(1, "skipped", setPrepSteps);
-    }
-
-    // ── Fit content to context budget ──────────────────────────────
-    let processedCustomText = customText || "";
-
-    // Determine content budget from settings
-    let contextSizeSetting = "small";
-    try {
-      const saved = localStorage.getItem("studybuddy-settings");
-      if (saved) {
-        const s = JSON.parse(saved);
-        if (s.contextSize) contextSizeSetting = s.contextSize;
-      }
-    } catch {}
-    const CONTENT_BUDGET = CONTENT_BUDGETS[contextSizeSetting] || CONTENT_BUDGETS.small;
-
-    const contentSize = () =>
-      parsed.reduce((sum, s) => sum + (s.fullContent?.length || 0), 0) +
-      processedCustomText.length;
-
-    // Step A: Summarise web sources if over budget
-    if (contentSize() > CONTENT_BUDGET && parsed.length > 0) {
-      setPrepSteps((prev) => [
-        ...prev.slice(0, 2),
-        { label: "Summarising sources to fit...", status: "active" },
-        prev[2],
-      ]);
-
-      try {
-        const summariseRes = await fetch("/api/summariseSources", {
-          method: "POST",
-          headers,
-          body: JSON.stringify({ sources: parsed }),
-        });
-        if (summariseRes.ok) {
-          parsed = await summariseRes.json();
-        }
-      } catch (e) {
-        console.error("Source summarisation failed:", e);
-      }
-
-      setPrepSteps((prev) =>
-        prev.map((s, i) => (i === 2 ? { ...s, status: "done" } : s)),
-      );
-    }
-
-    // Step B: If notes alone are still too large, chunk and summarise them
-    const notesBudget = CONTENT_BUDGET - parsed.reduce((sum, s) => sum + (s.fullContent?.length || 0), 0);
-    if (processedCustomText.length > Math.max(notesBudget, 4000)) {
-      setPrepSteps((prev) => {
-        // Add a notes step before the final "Preparing" step
-        const preparing = prev[prev.length - 1];
-        return [
-          ...prev.slice(0, -1),
-          { label: "Your notes are long — summarising to fit...", status: "active" },
-          preparing,
-        ];
-      });
-
-      // Chunk notes into ~8K pieces and summarise each
-      const chunkSize = 8000;
-      const chunks: { name: string; url: string; fullContent: string }[] = [];
-      for (let i = 0; i < processedCustomText.length; i += chunkSize) {
-        chunks.push({
-          name: `Notes part ${Math.floor(i / chunkSize) + 1}`,
-          url: "",
-          fullContent: processedCustomText.slice(i, i + chunkSize),
-        });
-      }
-
-      try {
-        const summariseRes = await fetch("/api/summariseSources", {
-          method: "POST",
-          headers,
-          body: JSON.stringify({ sources: chunks }),
-        });
-        if (summariseRes.ok) {
-          const summarised = await summariseRes.json();
-          processedCustomText = summarised
-            .map((s: { fullContent: string }) => s.fullContent)
-            .join("\n\n");
-        }
-      } catch (e) {
-        console.error("Notes summarisation failed:", e);
-      }
-
-      // Mark the step done
-      setPrepSteps((prev) =>
-        prev.map((s) =>
-          s.label.includes("notes are long") ? { ...s, status: "done" } : s,
-        ),
-      );
-    }
-
-    // Step C: If still over budget, take fewer sources
-    while (contentSize() > CONTENT_BUDGET && parsed.length > 3) {
-      parsed = parsed.slice(0, parsed.length - 1);
-    }
-
-    // Store for strategy switching
-    setParsedSources(parsed);
-
-    // Step 3: Prepare tutor
-    setPrepSteps((prev) =>
-      prev.map((s, i) =>
-        i === prev.length - 1 ? { ...s, status: "active" } : s,
-      ),
+      setPrepSteps,
     );
 
-    const hasContent = parsed.length > 0 || processedCustomText;
-    const strategy = getStrategyById(strategyId);
-    const nudge = nudgeEnabled ? nudgePrompt : undefined;
-
-    // Build system prompt — use processedCustomText (may have been summarised)
-    const buildPromptWithNotes = (
-      p: { fullContent: string }[],
-      sid: string,
-      n: boolean,
-    ) => {
-      const strat = getStrategyById(sid);
-      return getSystemPrompt(
-        p,
-        ageGroup,
-        processedCustomText || undefined,
-        strat.prompt,
-        n ? nudgePrompt : undefined,
-      );
-    };
-
-    const systemContent = hasContent
-      ? buildPromptWithNotes(parsed, strategyId, nudgeEnabled)
-      : `You are a professional interactive personal tutor. The student wants to learn about a topic at a ${ageGroup} level. You don't have specific source material for this topic, so teach from your own knowledge. Be upfront that you're teaching from general knowledge and may not have the latest information. Start by greeting the learner, giving a short overview, and asking what they want to learn about (in markdown numbers). Be interactive. Keep the first message short and concise. Please return answers in markdown.\n\n${strategy.prompt}${nudge ? "\n\n" + nudge : ""}`;
+    setSources(prepared.sources);
+    setParsedSources(prepared.content);
+    setProcessedNotes(prepared.processedNotes);
 
     const initialMessage = [
-      { role: "system", content: systemContent },
+      { role: "system", content: prepared.systemPrompt },
       { role: "user", content: currentTopic },
     ];
     setMessages(initialMessage);
 
-    setPrepSteps((prev) =>
-      prev.map((s, i) =>
-        i === prev.length - 1 ? { ...s, status: "done" } : s,
-      ),
-    );
-
+    // Brief pause so the completed steps are visible before switching.
     await new Promise((r) => setTimeout(r, 400));
     setPhase("chat");
 
@@ -420,15 +197,19 @@ export default function Home() {
     setLoading(false);
   };
 
-  // Mid-conversation strategy change
+  // Mid-conversation strategy change — rebuild from stored content + processed
+  // notes via the single prompt builder, so summarised notes are preserved.
   const handleStrategyChange = (newStrategyId: string) => {
     setStrategyId(newStrategyId);
     setMessages((prev) => {
       if (prev.length === 0) return prev;
-      const newSystemContent =
-        parsedSources.length > 0 || customText
-          ? buildSystemPrompt(parsedSources, newStrategyId, nudgeEnabled)
-          : prev[0].content;
+      const newSystemContent = buildSessionPrompt({
+        content: parsedSources,
+        notes: processedNotes,
+        ageGroup,
+        strategyId: newStrategyId,
+        nudge: nudgeEnabled,
+      });
       return [{ ...prev[0], content: newSystemContent }, ...prev.slice(1)];
     });
   };
@@ -437,10 +218,13 @@ export default function Home() {
     setNudgeEnabled(enabled);
     setMessages((prev) => {
       if (prev.length === 0) return prev;
-      const newSystemContent =
-        parsedSources.length > 0 || customText
-          ? buildSystemPrompt(parsedSources, strategyId, enabled)
-          : prev[0].content;
+      const newSystemContent = buildSessionPrompt({
+        content: parsedSources,
+        notes: processedNotes,
+        ageGroup,
+        strategyId,
+        nudge: enabled,
+      });
       return [{ ...prev[0], content: newSystemContent }, ...prev.slice(1)];
     });
   };

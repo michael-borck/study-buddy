@@ -1,9 +1,5 @@
 import { FC } from "react";
-
-export type PrepStep = {
-  label: string;
-  status: "waiting" | "active" | "done" | "skipped";
-};
+import type { PrepStep } from "@/utils/session";
 
 type PreparationPhaseProps = {
   topic: string;

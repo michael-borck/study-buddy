@@ -86,6 +86,24 @@ export default function Chat({
     return () => el.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const readAloud = useCallback(
+    (text: string, index: number) => {
+      if (speakingIndex === index && isSpeaking()) {
+        stopSpeaking();
+        setSpeakingIndex(null);
+        return;
+      }
+      const voice = pickDefaultVoice(audioSettings.voiceGender);
+      setSpeakingIndex(index);
+      speak(text, {
+        voice,
+        rate: 1.0,
+        onEnd: () => setSpeakingIndex(null),
+      });
+    },
+    [audioSettings.voiceGender, speakingIndex],
+  );
+
   // Auto-read new assistant messages
   useEffect(() => {
     if (!audioSettings.autoRead || disabled) return;
@@ -104,25 +122,7 @@ export default function Chat({
       }, 300);
       return () => clearTimeout(timer);
     }
-  }, [disabled, messages, audioSettings.autoRead]);
-
-  const readAloud = useCallback(
-    (text: string, index: number) => {
-      if (speakingIndex === index && isSpeaking()) {
-        stopSpeaking();
-        setSpeakingIndex(null);
-        return;
-      }
-      const voice = pickDefaultVoice(audioSettings.voiceGender);
-      setSpeakingIndex(index);
-      speak(text, {
-        voice,
-        rate: 1.0,
-        onEnd: () => setSpeakingIndex(null),
-      });
-    },
-    [audioSettings.voiceGender, speakingIndex],
-  );
+  }, [disabled, messages, audioSettings.autoRead, readAloud]);
 
   // Mic button handler
   const handleMic = useCallback(async () => {

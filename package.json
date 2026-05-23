@@ -16,6 +16,8 @@
     "lint": "next lint",
     "test": "vitest run",
     "test:watch": "vitest",
+    "preversion": "npm test",
+    "postversion": "git push --follow-tags",
     "electron": "cross-env NODE_ENV=development ELECTRON_DISABLE_SANDBOX=1 electron . --no-sandbox",
     "electron-dev": "cross-env NODE_ENV=development ELECTRON_DISABLE_SANDBOX=1 concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron . --no-sandbox\"",
     "build-electron": "next build && electron-builder",

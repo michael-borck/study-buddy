@@ -727,7 +727,7 @@ export default function SettingsPage() {
               <li><strong className="text-ink">Ollama (Recommended):</strong> Free local AI. Install from <a href="https://ollama.com" target="_blank" rel="noopener noreferrer" className="underline transition-colors duration-normal hover:text-accent">ollama.com</a></li>
               <li><strong className="text-ink">Find models:</strong> Click the Refresh button to see available models from your provider</li>
               <li><strong className="text-ink">Cloud providers:</strong> Require secret keys. Create accounts and add your keys above.</li>
-              <li><strong className="text-ink">Web search:</strong> Optional for enriched content. Disabled by default for privacy.</li>
+              <li><strong className="text-ink">Web search:</strong> Optional for enriched content. DuckDuckGo by default (free, no key); choose Disabled to turn it off.</li>
               <li><strong className="text-ink">SearXNG:</strong> Self-hosted search engine for privacy-conscious users.</li>
               <li><strong className="text-ink">Instant apply:</strong> Settings take effect straight away, no restart needed.</li>
             </ul>

@@ -3,37 +3,16 @@
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-
-interface Settings {
-  llmProvider: string;
-  llmApiKey: string;
-  llmBaseUrl: string;
-  llmModel: string;
-  searchEngine: string;
-  searchApiKey: string;
-  searchUrl: string;
-  defaultEducationLevel: string;
-  contextSize: string;
-  voiceGender: string;
-  autoRead: boolean;
-  sttProvider: string;
-}
+import {
+  AppSettings,
+  DEFAULT_SETTINGS,
+  CLIENT_SETTINGS_KEY,
+  loadClientSettings,
+  parseSettings,
+} from "@/utils/settings";
 
 export default function SettingsPage() {
-  const [settings, setSettings] = useState<Settings>({
-    llmProvider: "ollama",
-    llmApiKey: "",
-    llmBaseUrl: "",
-    llmModel: "",
-    searchEngine: "duckduckgo",
-    searchApiKey: "",
-    searchUrl: "",
-    defaultEducationLevel: "Middle School",
-    contextSize: "small",
-    voiceGender: "female",
-    autoRead: false,
-    sttProvider: "web",
-  });
+  const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
 
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -49,23 +28,17 @@ export default function SettingsPage() {
 
   const loadSettings = async () => {
     try {
-      const savedSettings = localStorage.getItem("studybuddy-settings");
-      if (savedSettings) {
-        const parsedSettings = JSON.parse(savedSettings);
-        setSettings(parsedSettings);
+      if (localStorage.getItem(CLIENT_SETTINGS_KEY)) {
+        setSettings(loadClientSettings());
       } else {
         const response = await fetch('/api/settings');
         if (response.ok) {
-          const backendSettings = await response.json();
-          setSettings(backendSettings);
+          setSettings(parseSettings(await response.json()));
         }
       }
     } catch (error) {
       console.error("Error loading settings:", error);
-      const savedSettings = localStorage.getItem("studybuddy-settings");
-      if (savedSettings) {
-        setSettings(JSON.parse(savedSettings));
-      }
+      setSettings(loadClientSettings());
     } finally {
       setLoading(false);
     }
@@ -73,7 +46,7 @@ export default function SettingsPage() {
 
   const handleSave = async () => {
     try {
-      localStorage.setItem("studybuddy-settings", JSON.stringify(settings));
+      localStorage.setItem(CLIENT_SETTINGS_KEY, JSON.stringify(settings));
 
       const response = await fetch('/api/settings', {
         method: 'POST',
@@ -271,21 +244,8 @@ export default function SettingsPage() {
   };
 
   const handleReset = () => {
-    localStorage.removeItem("studybuddy-settings");
-    setSettings({
-      llmProvider: "ollama",
-      llmApiKey: "",
-      llmBaseUrl: "http://localhost:11434",
-      llmModel: "llama3.1:8b",
-      searchEngine: "disabled",
-      searchApiKey: "",
-      searchUrl: "",
-      defaultEducationLevel: "Middle School",
-      contextSize: "small",
-      voiceGender: "female",
-      autoRead: false,
-      sttProvider: "web",
-    });
+    localStorage.removeItem(CLIENT_SETTINGS_KEY);
+    setSettings(DEFAULT_SETTINGS);
     setModels([]);
   };
 

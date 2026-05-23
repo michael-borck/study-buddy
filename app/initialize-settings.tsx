@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from 'react';
+import { CLIENT_SETTINGS_KEY, parseSettings } from '@/utils/settings';
 
 export default function InitializeSettings() {
   useEffect(() => {
@@ -21,17 +22,17 @@ export default function InitializeSettings() {
         }
         
         // Check localStorage as fallback
-        const savedSettings = localStorage.getItem("studybuddy-settings");
+        const savedSettings = localStorage.getItem(CLIENT_SETTINGS_KEY);
         if (savedSettings && !settingsToApply) {
           console.log('Using localStorage settings as fallback');
-          settingsToApply = JSON.parse(savedSettings);
+          settingsToApply = parseSettings(JSON.parse(savedSettings));
         }
-        
+
         if (settingsToApply) {
           console.log('Auto-initializing backend with settings...');
-          
+
           // Save to localStorage for frontend components to use
-          localStorage.setItem('studybuddy-settings', JSON.stringify(settingsToApply));
+          localStorage.setItem(CLIENT_SETTINGS_KEY, JSON.stringify(settingsToApply));
           console.log('✓ Settings saved to localStorage for frontend use');
           
           // Apply these settings to the backend immediately

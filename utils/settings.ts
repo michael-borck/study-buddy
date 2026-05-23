@@ -1,43 +1,57 @@
-// Settings management for Study Buddy
-// Handles both localStorage (frontend) and runtime (backend) settings
+// Settings management for Study Buddy.
+//
+// This module is the single owner of the settings schema. Three surfaces read
+// through it:
+//   - resolveSettings(request)   server, per-request, from the X-StudyBuddy-Settings header
+//   - loadSettings()             server, fallback to environment variables
+//   - loadClientSettings()       client, from localStorage
+//
+// Keep this module edge-safe: no Node-only imports (file persistence lives in
+// utils/file-settings.js, which is required lazily by the settings route).
 
-export interface AppSettings {
-  llmProvider: string;
-  llmApiKey: string;
-  llmBaseUrl: string;
-  llmModel: string;
-  searchEngine: string;
-  searchApiKey: string;
-  searchUrl: string;
-  defaultEducationLevel: string;
+import { z } from "zod";
+
+// The one schema. Every field carries its default, so DEFAULT_SETTINGS is
+// derived from it — there is no second list of defaults to drift out of sync.
+export const SettingsSchema = z.object({
+  llmProvider: z.string().default("ollama"),
+  llmApiKey: z.string().default(""),
+  llmBaseUrl: z.string().default("http://localhost:11434"),
+  llmModel: z.string().default("llama3.1:8b"),
+  searchEngine: z.string().default("duckduckgo"),
+  searchApiKey: z.string().default(""),
+  searchUrl: z.string().default(""),
+  defaultEducationLevel: z.string().default("Middle School"),
+  contextSize: z.string().default("small"),
+  voiceGender: z.string().default("female"),
+  autoRead: z.boolean().default(false),
+  sttProvider: z.string().default("web"),
+});
+
+export type AppSettings = z.infer<typeof SettingsSchema>;
+
+// Parsing an empty object fills every field from its .default().
+export const DEFAULT_SETTINGS: AppSettings = SettingsSchema.parse({});
+
+// localStorage key shared by every client-side reader/writer.
+export const CLIENT_SETTINGS_KEY = "studybuddy-settings";
+
+/**
+ * Validate an unknown blob into AppSettings, filling any missing field with its
+ * default and stripping unknown keys. Throws on type mismatch.
+ */
+export function parseSettings(raw: unknown): AppSettings {
+  return SettingsSchema.parse(raw ?? {});
 }
 
-export const DEFAULT_SETTINGS: AppSettings = {
-  llmProvider: "ollama",
-  llmApiKey: "",
-  llmBaseUrl: "http://localhost:11434",
-  llmModel: "llama3.1:8b",
-  searchEngine: "duckduckgo",
-  searchApiKey: "",
-  searchUrl: "",
-  defaultEducationLevel: "Middle School",
-};
-
-let runtimeSettings: AppSettings | null = null;
-
-export function getSettings(): AppSettings {
-  // Return runtime settings if available (from frontend)
-  if (runtimeSettings) {
-    console.log('Using runtime settings:', runtimeSettings.llmProvider);
-    return runtimeSettings;
-  }
-
-  console.log('No runtime settings, using environment variables');
-  
-  // Fallback to environment variables
+/**
+ * Server: build settings from environment variables. Used as the fallback when
+ * no per-request header (or stored file) is available.
+ */
+export function loadSettings(): AppSettings {
   const provider = process.env.LLM_PROVIDER || DEFAULT_SETTINGS.llmProvider;
-  
-  const settings = {
+
+  return parseSettings({
     llmProvider: provider,
     llmApiKey: getProviderApiKey(provider),
     llmBaseUrl: getProviderBaseUrl(provider),
@@ -45,26 +59,48 @@ export function getSettings(): AppSettings {
     searchEngine: process.env.SEARCH_ENGINE || DEFAULT_SETTINGS.searchEngine,
     searchApiKey: getSearchApiKey(),
     searchUrl: process.env.SEARXNG_URL || DEFAULT_SETTINGS.searchUrl,
-    defaultEducationLevel: process.env.DEFAULT_EDUCATION_LEVEL || DEFAULT_SETTINGS.defaultEducationLevel,
-  };
-  
-  console.log('Environment-based settings:', { 
-    provider: settings.llmProvider, 
-    baseUrl: settings.llmBaseUrl 
+    defaultEducationLevel:
+      process.env.DEFAULT_EDUCATION_LEVEL || DEFAULT_SETTINGS.defaultEducationLevel,
   });
-  
-  return settings;
 }
 
-export function updateSettings(newSettings: AppSettings) {
-  runtimeSettings = { ...newSettings };
-  console.log('Settings updated:', { provider: newSettings.llmProvider, hasApiKey: !!newSettings.llmApiKey });
+/**
+ * Server: resolve the settings for one request. Prefers the validated
+ * X-StudyBuddy-Settings header the frontend sends; falls back to the
+ * environment. Returns a value — never mutates shared state — so concurrent
+ * requests (including under the edge runtime) cannot read each other's config.
+ */
+export function resolveSettings(request: Request): AppSettings {
+  const header = request.headers.get("X-StudyBuddy-Settings");
+  if (header) {
+    try {
+      return parseSettings(JSON.parse(header));
+    } catch (e) {
+      console.warn("Invalid X-StudyBuddy-Settings header, falling back to env:", e);
+    }
+  }
+  return loadSettings();
+}
+
+/**
+ * Client: read settings from localStorage, validated and merged with defaults.
+ * Returns DEFAULT_SETTINGS when unavailable or malformed.
+ */
+export function loadClientSettings(): AppSettings {
+  if (typeof window === "undefined") return DEFAULT_SETTINGS;
+  try {
+    const raw = window.localStorage.getItem(CLIENT_SETTINGS_KEY);
+    if (raw) return parseSettings(JSON.parse(raw));
+  } catch (e) {
+    console.warn("Invalid stored settings, using defaults:", e);
+  }
+  return DEFAULT_SETTINGS;
 }
 
 function getProviderApiKey(provider: string): string {
   switch (provider.toLowerCase()) {
     case "openai": return process.env.OPENAI_API_KEY || "";
-    case "anthropic": 
+    case "anthropic":
     case "claude": return process.env.ANTHROPIC_API_KEY || "";
     case "google":
     case "gemini": return process.env.GOOGLE_API_KEY || "";

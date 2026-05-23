@@ -1,5 +1,5 @@
 import { createProvider, LLMStreamPayload } from "@/utils/providers";
-import { getSettings } from "@/utils/settings";
+import { resolveSettings } from "@/utils/settings";
 
 export const maxDuration = 60;
 
@@ -35,19 +35,8 @@ async function collectStreamText(stream: ReadableStream): Promise<string> {
 export async function POST(request: Request) {
   const { sources } = await request.json();
 
-  const settingsHeader = request.headers.get("X-StudyBuddy-Settings");
-  if (settingsHeader) {
-    try {
-      const frontendSettings = JSON.parse(settingsHeader);
-      const { updateSettings } = await import("@/utils/settings");
-      updateSettings(frontendSettings);
-    } catch (e) {
-      console.warn("Failed to parse frontend settings:", e);
-    }
-  }
-
-  const settings = getSettings();
-  const provider = createProvider();
+  const settings = resolveSettings(request);
+  const provider = createProvider(settings);
 
   const summaries = await Promise.all(
     sources.map(async (source: { name: string; url: string; fullContent: string }) => {

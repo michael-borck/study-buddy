@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getSettings } from "@/utils/settings";
+import { resolveSettings } from "@/utils/settings";
 
 let excludedSites = ["youtube.com"];
 
@@ -13,20 +13,7 @@ let lastGlobalRequest = 0;
 export async function POST(request: Request) {
   let { question } = await request.json();
 
-  // Apply frontend settings if provided
-  const settingsHeader = request.headers.get('X-StudyBuddy-Settings');
-  if (settingsHeader) {
-    try {
-      const frontendSettings = JSON.parse(settingsHeader);
-      const { updateSettings } = await import("@/utils/settings");
-      updateSettings(frontendSettings);
-      console.log('Applied frontend settings to search:', frontendSettings.searchEngine);
-    } catch (e) {
-      console.warn('Failed to parse frontend settings for search:', e);
-    }
-  }
-  
-  const settings = getSettings();
+  const settings = resolveSettings(request);
   const searchEngine = settings.searchEngine as "bing" | "serper" | "searxng" | "duckduckgo" | "brave" | "disabled";
   
   console.log('Using search engine:', searchEngine);

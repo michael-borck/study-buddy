@@ -5,7 +5,7 @@ import { AnthropicProvider } from "./anthropic";
 import { GroqProvider } from "./groq";
 import { GoogleProvider } from "./google";
 import { LLMProvider, ProviderConfig } from "./types";
-import { getSettings } from "../settings";
+import { AppSettings, loadSettings } from "../settings";
 
 export * from "./types";
 export { OllamaProvider } from "./ollama";
@@ -15,17 +15,15 @@ export { AnthropicProvider } from "./anthropic";
 export { GroqProvider } from "./groq";
 export { GoogleProvider } from "./google";
 
-export function createProvider(config?: ProviderConfig): LLMProvider {
-  // Use runtime settings if no config provided
-  if (!config) {
-    const settings = getSettings();
-    config = {
-      name: settings.llmProvider,
-      apiKey: settings.llmApiKey,
-      baseUrl: settings.llmBaseUrl,
-      defaultModel: settings.llmModel,
-    };
-  }
+export function createProvider(settings?: AppSettings): LLMProvider {
+  // Fall back to environment-derived settings when none are passed.
+  const resolved = settings ?? loadSettings();
+  const config: ProviderConfig = {
+    name: resolved.llmProvider,
+    apiKey: resolved.llmApiKey,
+    baseUrl: resolved.llmBaseUrl,
+    defaultModel: resolved.llmModel,
+  };
 
   switch (config.name.toLowerCase()) {
     case "ollama":

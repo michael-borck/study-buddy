@@ -1,5 +1,4 @@
 import { FC, KeyboardEvent } from "react";
-import TypeAnimation from "./TypeAnimation";
 import Image from "next/image";
 
 type TInputAreaProps = {
@@ -11,6 +10,7 @@ type TInputAreaProps = {
     React.SetStateAction<{ role: string; content: string }[]>
   >;
   handleChat: (messages?: { role: string; content: string }[]) => void;
+  onStop: () => void;
 };
 
 const FinalInputArea: FC<TInputAreaProps> = ({
@@ -20,9 +20,12 @@ const FinalInputArea: FC<TInputAreaProps> = ({
   messages,
   setMessages,
   handleChat,
+  onStop,
 }) => {
   function onSubmit() {
-    let latestMessages = [...messages, { role: "user", content: promptValue }];
+    const question = promptValue.trim();
+    if (!question || disabled) return;
+    let latestMessages = [...messages, { role: "user", content: question }];
     setPromptValue("");
     setMessages(latestMessages);
     handleChat(latestMessages);
@@ -60,26 +63,32 @@ const FinalInputArea: FC<TInputAreaProps> = ({
           style={{ outline: "none" }}
         />
       </div>
-      <button
-        disabled={disabled}
-        type="submit"
-        className="relative ml-3 flex size-[72px] shrink-0 items-center justify-center rounded-soft bg-ink text-paper transition-colors duration-normal hover:bg-accent disabled:pointer-events-none disabled:opacity-75"
-      >
-        {disabled && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <TypeAnimation />
-          </div>
-        )}
-
-        <Image
-          unoptimized
-          src={"/up-arrow.svg"}
-          alt="search"
-          width={24}
-          height={24}
-          className={disabled ? "invisible" : ""}
-        />
-      </button>
+      {disabled ? (
+        <button
+          type="button"
+          onClick={onStop}
+          title="Stop generating"
+          className="relative ml-3 flex size-[72px] shrink-0 items-center justify-center rounded-soft bg-ink text-paper transition-colors duration-normal hover:bg-error"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="6" y="6" width="12" height="12" rx="2" />
+          </svg>
+        </button>
+      ) : (
+        <button
+          type="submit"
+          title="Send"
+          className="relative ml-3 flex size-[72px] shrink-0 items-center justify-center rounded-soft bg-ink text-paper transition-colors duration-normal hover:bg-accent"
+        >
+          <Image
+            unoptimized
+            src={"/up-arrow.svg"}
+            alt="Send"
+            width={24}
+            height={24}
+          />
+        </button>
+      )}
     </form>
   );
 };

@@ -62,6 +62,8 @@ export default function Chat({
   audioSettings,
   chatError,
   onRetry,
+  onStop,
+  onNewTopic,
 }: {
   messages: { role: string; content: string }[];
   disabled: boolean;
@@ -85,6 +87,8 @@ export default function Chat({
   };
   chatError: string | null;
   onRetry: () => void;
+  onStop: () => void;
+  onNewTopic: () => void;
 }) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollableContainerRef = useRef<HTMLDivElement>(null);
@@ -94,6 +98,9 @@ export default function Chat({
   const [speakingIndex, setSpeakingIndex] = useState<number | null>(null);
   const recorderRef = useRef<{ stop: () => Promise<Blob> } | null>(null);
   const lastReadRef = useRef<number>(-1);
+
+  // Stop any read-aloud when the chat unmounts (e.g. starting a new topic).
+  useEffect(() => () => stopSpeaking(), []);
 
   function scrollToBottom() {
     messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
@@ -229,9 +236,18 @@ export default function Chat({
       <div className="flex grow flex-col overflow-hidden lg:p-4">
         {/* Topic + attribution */}
         <div className="mb-2">
-          <p className="text-xs font-medium uppercase tracking-widest text-ink-quiet">
-            <span className="font-semibold text-ink">Topic:</span> {topic}
-          </p>
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-xs font-medium uppercase tracking-widest text-ink-quiet">
+              <span className="font-semibold text-ink">Topic:</span> {topic}
+            </p>
+            <button
+              type="button"
+              onClick={onNewTopic}
+              className="shrink-0 rounded-soft border border-hairline px-3 py-1 text-xs font-medium text-ink-muted transition-colors duration-normal hover:border-hairline-strong hover:text-accent"
+            >
+              New topic
+            </button>
+          </div>
           {attribution && (
             <div className="mt-1">
               <span className="text-xs text-ink-quiet">{attribution}</span>
@@ -373,6 +389,7 @@ export default function Chat({
             handleChat={handleChat}
             messages={messages}
             setMessages={setMessages}
+            onStop={onStop}
           />
         </div>
         <button

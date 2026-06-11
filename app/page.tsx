@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import PreparationPhase from "@/components/PreparationPhase";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   createParser,
   ParsedEvent,
@@ -30,6 +30,7 @@ export default function Home() {
   );
   const [loading, setLoading] = useState(false);
   const [chatError, setChatError] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
   const [ageGroup, setAgeGroup] = useState("Middle School");
   const [customText, setCustomText] = useState("");
 
@@ -159,12 +160,15 @@ export default function Home() {
   const handleChat = async (msgs?: { role: string; content: string }[]) => {
     setLoading(true);
     setChatError(null);
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     try {
       const chatRes = await fetch("/api/getChat", {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify({ messages: msgs }),
+        signal: controller.signal,
       });
 
       if (!chatRes.ok) {
@@ -210,17 +214,40 @@ export default function Home() {
         parser.feed(chunkValue);
       }
     } catch (e) {
-      console.error("Chat request failed:", e);
-      setChatError(
-        "I couldn't reach your AI model. If you're using Ollama, make sure it's running on your computer.",
-      );
+      if (e instanceof DOMException && e.name === "AbortError") {
+        // User stopped generation — keep whatever has streamed so far.
+      } else {
+        console.error("Chat request failed:", e);
+        setChatError(
+          "I couldn't reach your AI model. If you're using Ollama, make sure it's running on your computer.",
+        );
+      }
     } finally {
+      abortRef.current = null;
       setLoading(false);
     }
   };
 
+  const handleStop = () => {
+    abortRef.current?.abort();
+  };
+
   const handleRetry = () => {
     handleChat(messages);
+  };
+
+  const handleNewTopic = () => {
+    abortRef.current?.abort();
+    setPhase("landing");
+    setTopic("");
+    setInputValue("");
+    setMessages([]);
+    setSources([]);
+    setParsedSources([]);
+    setProcessedNotes("");
+    setPrepSteps([]);
+    setChatError(null);
+    setLoading(false);
   };
 
   // Mid-conversation strategy change — rebuild from stored content + processed
@@ -319,6 +346,8 @@ export default function Home() {
               audioSettings={audioSettings}
               chatError={chatError}
               onRetry={handleRetry}
+              onStop={handleStop}
+              onNewTopic={handleNewTopic}
             />
           </div>
         )}

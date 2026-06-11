@@ -26,7 +26,9 @@ const InitialInputArea: FC<TInputAreaProps> = ({
         return;
       } else {
         e.preventDefault();
-        handleInitialChat();
+        if (promptValue.trim()) {
+          handleInitialChat();
+        }
       }
     }
   };

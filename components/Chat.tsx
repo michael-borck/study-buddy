@@ -14,6 +14,37 @@ import {
   isWhisperLoaded,
 } from "@/utils/speech";
 
+function ChatErrorNotice({
+  message,
+  onRetry,
+}: {
+  message: string;
+  onRetry: () => void;
+}) {
+  return (
+    <div className="not-prose rounded-soft border border-error/30 bg-error/5 px-4 py-3">
+      <p className="text-sm text-ink" style={{ lineHeight: 1.6 }}>
+        {message}
+      </p>
+      <div className="mt-2 flex items-center gap-4">
+        <button
+          type="button"
+          onClick={onRetry}
+          className="rounded-soft border border-hairline px-3 py-1 text-sm font-medium text-ink transition-colors duration-normal hover:border-hairline-strong hover:text-accent"
+        >
+          Try again
+        </button>
+        <a
+          href="/settings"
+          className="text-sm text-ink-muted underline transition-colors duration-normal hover:text-accent"
+        >
+          Check settings
+        </a>
+      </div>
+    </div>
+  );
+}
+
 export default function Chat({
   messages,
   disabled,
@@ -29,6 +60,8 @@ export default function Chat({
   nudgeEnabled,
   onNudgeChange,
   audioSettings,
+  chatError,
+  onRetry,
 }: {
   messages: { role: string; content: string }[];
   disabled: boolean;
@@ -50,6 +83,8 @@ export default function Chat({
     autoRead: boolean;
     sttProvider: "web" | "whisper";
   };
+  chatError: string | null;
+  onRetry: () => void;
 }) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollableContainerRef = useRef<HTMLDivElement>(null);
@@ -275,7 +310,14 @@ export default function Chat({
                   </p>
                 ),
               )}
+              {chatError && (
+                <ChatErrorNotice message={chatError} onRetry={onRetry} />
+              )}
               <div ref={messagesEndRef} />
+            </div>
+          ) : chatError ? (
+            <div className="py-5">
+              <ChatErrorNotice message={chatError} onRetry={onRetry} />
             </div>
           ) : (
             <div className="flex w-full flex-col gap-4 py-5">

@@ -26,7 +26,13 @@ export async function POST(request: Request) {
     });
   } catch (e) {
     console.error("LLM stream error:", e);
-    return new Response("Error. Answer stream failed.", { status: 202 });
+    return new Response(
+      JSON.stringify({
+        error: "Could not reach the AI model",
+        details: e instanceof Error ? e.message : "Unknown error",
+      }),
+      { status: 502, headers: { "Content-Type": "application/json" } },
+    );
   }
 }
 

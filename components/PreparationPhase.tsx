@@ -31,7 +31,9 @@ const PreparationPhase: FC<PreparationPhaseProps> = ({ topic, steps }) => {
                     ? "font-medium text-ink"
                     : step.status === "skipped"
                       ? "text-ink-quiet line-through"
-                      : "text-ink-quiet"
+                      : step.status === "failed"
+                        ? "text-error"
+                        : "text-ink-quiet"
               }`}
             >
               {step.label}
@@ -55,6 +57,13 @@ const StepIndicator: FC<{ status: PrepStep["status"] }> = ({ status }) => {
     return (
       <span className="flex h-5 w-5 shrink-0 items-center justify-center">
         <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-accent" />
+      </span>
+    );
+  }
+  if (status === "failed") {
+    return (
+      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-error/10 text-xs text-error">
+        &#10005;
       </span>
     );
   }

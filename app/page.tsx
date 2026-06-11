@@ -29,6 +29,7 @@ export default function Home() {
     [],
   );
   const [loading, setLoading] = useState(false);
+  const [chatError, setChatError] = useState<string | null>(null);
   const [ageGroup, setAgeGroup] = useState("Middle School");
   const [customText, setCustomText] = useState("");
 
@@ -106,95 +107,120 @@ export default function Home() {
   }, []);
 
   const handleInitialChat = async () => {
-    const currentTopic = inputValue;
+    const currentTopic = inputValue.trim();
+    if (!currentTopic) return;
     setTopic(currentTopic);
     setInputValue("");
+    setChatError(null);
     setPhase("preparing");
     setLoading(true);
 
-    const prepared = await prepareSession(
-      {
-        topic: currentTopic,
-        notes: customText,
-        ageGroup,
-        strategyId,
-        nudge: nudgeEnabled,
-        searchWeb,
-        settings: loadClientSettings(),
-      },
-      setPrepSteps,
-    );
+    try {
+      const prepared = await prepareSession(
+        {
+          topic: currentTopic,
+          notes: customText,
+          ageGroup,
+          strategyId,
+          nudge: nudgeEnabled,
+          searchWeb,
+          settings: loadClientSettings(),
+        },
+        setPrepSteps,
+      );
 
-    setSources(prepared.sources);
-    setParsedSources(prepared.content);
-    setProcessedNotes(prepared.processedNotes);
+      setSources(prepared.sources);
+      setParsedSources(prepared.content);
+      setProcessedNotes(prepared.processedNotes);
 
-    const initialMessage = [
-      { role: "system", content: prepared.systemPrompt },
-      { role: "user", content: currentTopic },
-    ];
-    setMessages(initialMessage);
+      const initialMessage = [
+        { role: "system", content: prepared.systemPrompt },
+        { role: "user", content: currentTopic },
+      ];
+      setMessages(initialMessage);
 
-    // Brief pause so the completed steps are visible before switching.
-    await new Promise((r) => setTimeout(r, 400));
-    setPhase("chat");
+      // Brief pause so the completed steps are visible before switching.
+      await new Promise((r) => setTimeout(r, 400));
+      setPhase("chat");
 
-    await handleChat(initialMessage);
-    setLoading(false);
+      await handleChat(initialMessage);
+    } catch (e) {
+      console.error("Session preparation failed:", e);
+      setChatError(
+        "Something went wrong while preparing your session. Please try again.",
+      );
+      setInputValue(currentTopic);
+      setPhase("landing");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChat = async (msgs?: { role: string; content: string }[]) => {
     setLoading(true);
+    setChatError(null);
 
-    const chatRes = await fetch("/api/getChat", {
-      method: "POST",
-      headers: getHeaders(),
-      body: JSON.stringify({ messages: msgs }),
-    });
+    try {
+      const chatRes = await fetch("/api/getChat", {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ messages: msgs }),
+      });
 
-    if (!chatRes.ok) {
-      throw new Error(chatRes.statusText);
-    }
-
-    const data = chatRes.body;
-    if (!data) {
-      return;
-    }
-
-    const onParse = (event: ParsedEvent | ReconnectInterval) => {
-      if (event.type === "event") {
-        const data = event.data;
-        try {
-          const text = JSON.parse(data).text ?? "";
-          setMessages((prev) => {
-            const lastMessage = prev[prev.length - 1];
-            if (lastMessage.role === "assistant") {
-              return [
-                ...prev.slice(0, -1),
-                { ...lastMessage, content: lastMessage.content + text },
-              ];
-            } else {
-              return [...prev, { role: "assistant", content: text }];
-            }
-          });
-        } catch (e) {
-          console.error(e);
-        }
+      if (!chatRes.ok) {
+        throw new Error(chatRes.statusText);
       }
-    };
 
-    const reader = data.getReader();
-    const decoder = new TextDecoder();
-    const parser = createParser(onParse);
-    let done = false;
+      const data = chatRes.body;
+      if (!data) {
+        return;
+      }
 
-    while (!done) {
-      const { value, done: doneReading } = await reader.read();
-      done = doneReading;
-      const chunkValue = decoder.decode(value);
-      parser.feed(chunkValue);
+      const onParse = (event: ParsedEvent | ReconnectInterval) => {
+        if (event.type === "event") {
+          const data = event.data;
+          try {
+            const text = JSON.parse(data).text ?? "";
+            setMessages((prev) => {
+              const lastMessage = prev[prev.length - 1];
+              if (lastMessage.role === "assistant") {
+                return [
+                  ...prev.slice(0, -1),
+                  { ...lastMessage, content: lastMessage.content + text },
+                ];
+              } else {
+                return [...prev, { role: "assistant", content: text }];
+              }
+            });
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      };
+
+      const reader = data.getReader();
+      const decoder = new TextDecoder();
+      const parser = createParser(onParse);
+      let done = false;
+
+      while (!done) {
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+        const chunkValue = decoder.decode(value);
+        parser.feed(chunkValue);
+      }
+    } catch (e) {
+      console.error("Chat request failed:", e);
+      setChatError(
+        "I couldn't reach your AI model. If you're using Ollama, make sure it's running on your computer.",
+      );
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
+  };
+
+  const handleRetry = () => {
+    handleChat(messages);
   };
 
   // Mid-conversation strategy change — rebuild from stored content + processed
@@ -234,6 +260,23 @@ export default function Home() {
       <Header />
 
       <main className="flex grow flex-col px-4 pb-4">
+        {phase === "landing" && chatError && (
+          <div className="mx-auto mt-6 w-full max-w-3xl rounded-soft border border-error/30 bg-error/5 px-4 py-3">
+            <div className="flex items-start justify-between gap-3">
+              <p className="text-sm text-ink" style={{ lineHeight: 1.6 }}>
+                {chatError}
+              </p>
+              <button
+                onClick={() => setChatError(null)}
+                className="shrink-0 text-ink-quiet transition-colors duration-normal hover:text-ink"
+                title="Dismiss"
+              >
+                &times;
+              </button>
+            </div>
+          </div>
+        )}
+
         {phase === "landing" && (
           <Hero
             promptValue={inputValue}
@@ -274,6 +317,8 @@ export default function Home() {
               nudgeEnabled={nudgeEnabled}
               onNudgeChange={handleNudgeChange}
               audioSettings={audioSettings}
+              chatError={chatError}
+              onRetry={handleRetry}
             />
           </div>
         )}

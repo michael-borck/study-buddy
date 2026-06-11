@@ -7,6 +7,7 @@ import {
   AppSettings,
   DEFAULT_SETTINGS,
   CLIENT_SETTINGS_KEY,
+  EDUCATION_LEVELS,
   loadClientSettings,
   parseSettings,
 } from "@/utils/settings";
@@ -525,12 +526,9 @@ export default function SettingsPage() {
                 onChange={(e) => setSettings({...settings, defaultEducationLevel: e.target.value})}
                 className={inputClasses}
               >
-                <option value="Elementary School">Elementary School</option>
-                <option value="Middle School">Middle School</option>
-                <option value="High School">High School</option>
-                <option value="College">College</option>
-                <option value="Undergrad">Undergrad</option>
-                <option value="Graduate">Graduate</option>
+                {EDUCATION_LEVELS.map((level) => (
+                  <option key={level} value={level}>{level}</option>
+                ))}
               </select>
               <p className="mt-1 text-sm text-ink-quiet">
                 This will be the default level when starting a new conversation. You can still change it each time.

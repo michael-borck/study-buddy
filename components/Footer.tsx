@@ -51,7 +51,13 @@ const Footer = () => {
         </div>
       </div>
       <p className="mt-2 text-xs text-ink-quiet lg:mt-0">
-        Study Buddy &middot; part of the Buddy suite
+        Study Buddy &middot; part of the Buddy suite &middot;{" "}
+        <a
+          href="/legal"
+          className="underline transition-colors duration-normal hover:text-accent"
+        >
+          Legal
+        </a>
       </p>
     </div>
   );

@@ -375,7 +375,7 @@ export default function Chat({
             onChange={(e) => onNudgeChange(e.target.checked)}
             className="h-3 w-3 cursor-pointer rounded-sm accent-accent"
           />
-          Reflect
+          Make me think
         </label>
       </div>
 

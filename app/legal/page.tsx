@@ -125,16 +125,6 @@ export default function LegalPage() {
 
               <div className="rounded-soft border border-hairline p-4">
                 <h3 className="font-semibold text-ink">
-                  <a href="https://react-hot-toast.com/" target="_blank" rel="noopener noreferrer" className="underline transition-colors duration-normal hover:text-accent">
-                    React Hot Toast
-                  </a>
-                </h3>
-                <p className="text-sm text-ink-quiet">Tim Neutkens &middot; MIT Licence</p>
-                <p className="mt-1 text-sm text-ink-muted">React notifications library</p>
-              </div>
-
-              <div className="rounded-soft border border-hairline p-4">
-                <h3 className="font-semibold text-ink">
                   <a href="https://github.com/remarkjs/react-markdown" target="_blank" rel="noopener noreferrer" className="underline transition-colors duration-normal hover:text-accent">
                     React Markdown
                   </a>

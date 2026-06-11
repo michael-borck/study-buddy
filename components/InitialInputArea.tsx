@@ -1,6 +1,7 @@
 import { FC, KeyboardEvent } from "react";
 import TypeAnimation from "./TypeAnimation";
 import Image from "next/image";
+import { EDUCATION_LEVELS } from "@/utils/settings";
 
 type TInputAreaProps = {
   promptValue: string;
@@ -26,7 +27,9 @@ const InitialInputArea: FC<TInputAreaProps> = ({
         return;
       } else {
         e.preventDefault();
-        handleInitialChat();
+        if (promptValue.trim()) {
+          handleInitialChat();
+        }
       }
     }
   };
@@ -58,13 +61,11 @@ const InitialInputArea: FC<TInputAreaProps> = ({
             className="h-full rounded-r-soft border-0 bg-paper px-2 text-sm font-medium text-ink focus:ring-0 sm:text-base"
             value={ageGroup}
             onChange={(e) => setAgeGroup(e.target.value)}
+            aria-label="Education level"
           >
-            <option>Elementary School</option>
-            <option>Middle School</option>
-            <option>High School</option>
-            <option>College</option>
-            <option>Undergrad</option>
-            <option>Graduate</option>
+            {EDUCATION_LEVELS.map((level) => (
+              <option key={level}>{level}</option>
+            ))}
           </select>
         </div>
       </div>
@@ -82,12 +83,14 @@ const InitialInputArea: FC<TInputAreaProps> = ({
         <Image
           unoptimized
           src={"/up-arrow.svg"}
-          alt="search"
+          alt="Start learning"
           width={24}
           height={24}
           className={disabled ? "invisible" : ""}
         />
-        <span className="ml-2 font-medium text-paper sm:hidden">Search</span>
+        <span className="ml-2 font-medium text-paper sm:hidden">
+          Start learning
+        </span>
       </button>
     </form>
   );

@@ -36,12 +36,31 @@ export const DEFAULT_SETTINGS: AppSettings = SettingsSchema.parse({});
 // localStorage key shared by every client-side reader/writer.
 export const CLIENT_SETTINGS_KEY = "studybuddy-settings";
 
+// The education levels offered everywhere a level can be picked.
+export const EDUCATION_LEVELS = [
+  "Elementary School",
+  "Middle School",
+  "High School",
+  "University",
+  "Graduate",
+];
+
+// Levels stored by older versions, mapped to their current equivalent.
+const LEGACY_EDUCATION_LEVELS: Record<string, string> = {
+  College: "University",
+  Undergrad: "University",
+};
+
 /**
  * Validate an unknown blob into AppSettings, filling any missing field with its
  * default and stripping unknown keys. Throws on type mismatch.
  */
 export function parseSettings(raw: unknown): AppSettings {
-  return SettingsSchema.parse(raw ?? {});
+  const parsed = SettingsSchema.parse(raw ?? {});
+  parsed.defaultEducationLevel =
+    LEGACY_EDUCATION_LEVELS[parsed.defaultEducationLevel] ??
+    parsed.defaultEducationLevel;
+  return parsed;
 }
 
 /**
@@ -111,7 +130,7 @@ function getProviderApiKey(provider: string): string {
   }
 }
 
-function getProviderBaseUrl(provider: string): string {
+export function getProviderBaseUrl(provider: string): string {
   switch (provider.toLowerCase()) {
     case "ollama": return process.env.OLLAMA_BASE_URL || DEFAULT_SETTINGS.llmBaseUrl;
     case "openai": return process.env.OPENAI_BASE_URL || "https://api.openai.com";

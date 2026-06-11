@@ -16,7 +16,7 @@ import { AppSettings } from "./settings";
 
 export type PrepStep = {
   label: string;
-  status: "waiting" | "active" | "done" | "skipped";
+  status: "waiting" | "active" | "done" | "skipped" | "failed";
 };
 
 export type Source = { name: string; url: string };
@@ -109,17 +109,26 @@ export async function prepareSession(
   // Step 1: search
   let sources: Source[] = [];
   if (shouldSearch) {
+    let searchOk = false;
     try {
       const res = await fetch("/api/getSources", {
         method: "POST",
         headers,
         body: JSON.stringify({ question: topic }),
       });
-      if (res.ok) sources = await res.json();
+      if (res.ok) {
+        sources = await res.json();
+        searchOk = true;
+      }
     } catch (e) {
       console.error("Search failed:", e);
     }
-    steps[0].status = "done";
+    if (searchOk) {
+      steps[0].status = "done";
+    } else {
+      steps[0].status = "failed";
+      steps[0].label = "Search failed — continuing without web sources";
+    }
     emit();
   }
 
@@ -128,21 +137,36 @@ export async function prepareSession(
   if (sources.length > 0) {
     steps[1].status = "active";
     emit();
+    let parseOk = false;
     try {
       const res = await fetch("/api/getParsedSources", {
         method: "POST",
         headers,
         body: JSON.stringify({ sources }),
       });
-      if (res.ok) parsed = await res.json();
+      if (res.ok) {
+        parsed = await res.json();
+        parseOk = true;
+      }
     } catch (e) {
       console.error("Parsing failed:", e);
     }
-    steps[1].status = "done";
+    if (parseOk) {
+      steps[1].status = "done";
+    } else {
+      steps[1].status = "failed";
+      steps[1].label = "Couldn't read web pages — continuing without them";
+    }
     emit();
   } else {
     steps[1].status = "skipped";
     emit();
+  }
+
+  // If nothing could be parsed, the session isn't actually grounded in these
+  // sources — don't report them for attribution.
+  if (parsed.length === 0) {
+    sources = [];
   }
 
   // ── Fit content to the context budget ──────────────────────────────

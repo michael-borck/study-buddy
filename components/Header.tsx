@@ -24,13 +24,6 @@ const Header = () => {
           About
         </a>
         <a
-          href="/legal"
-          className="text-ink-muted transition-colors duration-normal hover:text-ink"
-          style={{ fontWeight: 500 }}
-        >
-          Legal
-        </a>
-        <a
           href="/settings"
           className="text-ink-muted transition-colors duration-normal hover:text-ink"
           style={{ fontWeight: 500 }}

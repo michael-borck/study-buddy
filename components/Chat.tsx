@@ -14,6 +14,37 @@ import {
   isWhisperLoaded,
 } from "@/utils/speech";
 
+function ChatErrorNotice({
+  message,
+  onRetry,
+}: {
+  message: string;
+  onRetry: () => void;
+}) {
+  return (
+    <div className="not-prose rounded-soft border border-error/30 bg-error/5 px-4 py-3">
+      <p className="text-sm text-ink" style={{ lineHeight: 1.6 }}>
+        {message}
+      </p>
+      <div className="mt-2 flex items-center gap-4">
+        <button
+          type="button"
+          onClick={onRetry}
+          className="rounded-soft border border-hairline px-3 py-1 text-sm font-medium text-ink transition-colors duration-normal hover:border-hairline-strong hover:text-accent"
+        >
+          Try again
+        </button>
+        <a
+          href="/settings"
+          className="text-sm text-ink-muted underline transition-colors duration-normal hover:text-accent"
+        >
+          Check settings
+        </a>
+      </div>
+    </div>
+  );
+}
+
 export default function Chat({
   messages,
   disabled,
@@ -29,6 +60,10 @@ export default function Chat({
   nudgeEnabled,
   onNudgeChange,
   audioSettings,
+  chatError,
+  onRetry,
+  onStop,
+  onNewTopic,
 }: {
   messages: { role: string; content: string }[];
   disabled: boolean;
@@ -50,6 +85,10 @@ export default function Chat({
     autoRead: boolean;
     sttProvider: "web" | "whisper";
   };
+  chatError: string | null;
+  onRetry: () => void;
+  onStop: () => void;
+  onNewTopic: () => void;
 }) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollableContainerRef = useRef<HTMLDivElement>(null);
@@ -59,6 +98,9 @@ export default function Chat({
   const [speakingIndex, setSpeakingIndex] = useState<number | null>(null);
   const recorderRef = useRef<{ stop: () => Promise<Blob> } | null>(null);
   const lastReadRef = useRef<number>(-1);
+
+  // Stop any read-aloud when the chat unmounts (e.g. starting a new topic).
+  useEffect(() => () => stopSpeaking(), []);
 
   function scrollToBottom() {
     messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
@@ -194,9 +236,18 @@ export default function Chat({
       <div className="flex grow flex-col overflow-hidden lg:p-4">
         {/* Topic + attribution */}
         <div className="mb-2">
-          <p className="text-xs font-medium uppercase tracking-widest text-ink-quiet">
-            <span className="font-semibold text-ink">Topic:</span> {topic}
-          </p>
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-xs font-medium uppercase tracking-widest text-ink-quiet">
+              <span className="font-semibold text-ink">Topic:</span> {topic}
+            </p>
+            <button
+              type="button"
+              onClick={onNewTopic}
+              className="shrink-0 rounded-soft border border-hairline px-3 py-1 text-xs font-medium text-ink-muted transition-colors duration-normal hover:border-hairline-strong hover:text-accent"
+            >
+              New topic
+            </button>
+          </div>
           {attribution && (
             <div className="mt-1">
               <span className="text-xs text-ink-quiet">{attribution}</span>
@@ -256,8 +307,9 @@ export default function Chat({
                     {/* Speaker button */}
                     <button
                       onClick={() => readAloud(message.content, index)}
-                      className="absolute right-0 top-0 rounded-soft p-1 text-ink-quiet opacity-0 transition-all duration-normal hover:text-accent group-hover:opacity-100"
+                      className="absolute right-0 top-0 rounded-soft p-1 text-ink-quiet opacity-0 transition-all duration-normal hover:text-accent focus:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100"
                       title={speakingIndex === index ? "Stop reading" : "Read aloud"}
+                      aria-label={speakingIndex === index ? "Stop reading" : "Read aloud"}
                     >
                       {speakingIndex === index ? (
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
@@ -275,7 +327,14 @@ export default function Chat({
                   </p>
                 ),
               )}
+              {chatError && (
+                <ChatErrorNotice message={chatError} onRetry={onRetry} />
+              )}
               <div ref={messagesEndRef} />
+            </div>
+          ) : chatError ? (
+            <div className="py-5">
+              <ChatErrorNotice message={chatError} onRetry={onRetry} />
             </div>
           ) : (
             <div className="flex w-full flex-col gap-4 py-5">
@@ -300,6 +359,7 @@ export default function Chat({
               type="button"
               onClick={() => onStrategyChange(s.id)}
               title={s.description}
+              aria-pressed={strategyId === s.id}
               className={`rounded-soft px-2 py-0.5 text-xs transition-colors duration-normal ${
                 strategyId === s.id
                   ? "bg-ink text-paper"
@@ -317,7 +377,7 @@ export default function Chat({
             onChange={(e) => onNudgeChange(e.target.checked)}
             className="h-3 w-3 cursor-pointer rounded-sm accent-accent"
           />
-          Reflect
+          Make me think
         </label>
       </div>
 
@@ -331,6 +391,7 @@ export default function Chat({
             handleChat={handleChat}
             messages={messages}
             setMessages={setMessages}
+            onStop={onStop}
           />
         </div>
         <button
@@ -343,6 +404,7 @@ export default function Chat({
               : "border border-hairline text-ink-muted hover:border-hairline-strong hover:text-accent"
           } disabled:cursor-not-allowed disabled:opacity-50`}
           title={isRecording ? "Stop recording" : "Voice input"}
+          aria-label={isRecording ? "Stop recording" : "Voice input"}
         >
           {isRecording ? (
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">

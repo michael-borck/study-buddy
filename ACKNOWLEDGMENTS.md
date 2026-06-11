@@ -55,12 +55,6 @@ Study Buddy is built upon the incredible work of many open source projects and c
 - **Description**: Completely unstyled, fully accessible UI components for React
 - **Version**: 2.1.2
 
-### **[React Hot Toast](https://react-hot-toast.com/)**
-- **Maintainer**: Tim Neutkens
-- **License**: MIT
-- **Description**: Smoking hot React notifications
-- **Version**: 2.4.1
-
 ### **[React Markdown](https://github.com/remarkjs/react-markdown)**
 - **Maintainer**: Titus Wormer
 - **License**: MIT

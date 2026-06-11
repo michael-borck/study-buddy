@@ -7,6 +7,7 @@ import {
   AppSettings,
   DEFAULT_SETTINGS,
   CLIENT_SETTINGS_KEY,
+  EDUCATION_LEVELS,
   loadClientSettings,
   parseSettings,
 } from "@/utils/settings";
@@ -63,20 +64,15 @@ export default function SettingsPage() {
       }
     } catch (error) {
       console.error("Error saving settings:", error);
-      alert("Failed to save settings. Please try again.");
+      setTestResult({
+        type: 'error',
+        message: 'Failed to save settings. Please try again.'
+      });
+      setTimeout(() => setTestResult(null), 5000);
     }
   };
 
   const refreshModels = async () => {
-    if (!settings.llmBaseUrl) {
-      setTestResult({
-        type: 'error',
-        message: 'Please enter a server address first'
-      });
-      setTimeout(() => setTestResult(null), 3000);
-      return;
-    }
-
     setLoadingModels(true);
     setTestResult(null);
     try {
@@ -393,7 +389,7 @@ export default function SettingsPage() {
                 <button
                   type="button"
                   onClick={refreshModels}
-                  disabled={loadingModels || !settings.llmBaseUrl}
+                  disabled={loadingModels}
                   className="rounded-soft border border-hairline px-4 py-3 text-ink transition-colors duration-normal hover:border-hairline-strong hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {loadingModels ? "..." : "Refresh"}
@@ -525,12 +521,9 @@ export default function SettingsPage() {
                 onChange={(e) => setSettings({...settings, defaultEducationLevel: e.target.value})}
                 className={inputClasses}
               >
-                <option value="Elementary School">Elementary School</option>
-                <option value="Middle School">Middle School</option>
-                <option value="High School">High School</option>
-                <option value="College">College</option>
-                <option value="Undergrad">Undergrad</option>
-                <option value="Graduate">Graduate</option>
+                {EDUCATION_LEVELS.map((level) => (
+                  <option key={level} value={level}>{level}</option>
+                ))}
               </select>
               <p className="mt-1 text-sm text-ink-quiet">
                 This will be the default level when starting a new conversation. You can still change it each time.
@@ -650,15 +643,28 @@ export default function SettingsPage() {
                       onClick={async () => {
                         const { loadWhisperModel, isWhisperLoaded } = await import("@/utils/speech");
                         if (isWhisperLoaded()) {
-                          alert("Whisper model is already downloaded and ready.");
+                          setTestResult({
+                            type: 'success',
+                            message: 'Whisper model is already downloaded and ready.'
+                          });
+                          setTimeout(() => setTestResult(null), 3000);
                           return;
                         }
-                        alert("Downloading Whisper model (~40 MB). This may take a minute. Check the console for progress.");
+                        setTestResult({
+                          type: 'warning',
+                          message: 'Downloading Whisper model (~40 MB). This may take a minute...'
+                        });
                         const ok = await loadWhisperModel((p) => {
                           console.log("Whisper download:", p.status, p.progress ? Math.round(p.progress) + "%" : "", p.file || "");
                         });
-                        if (ok) alert("Whisper model downloaded and ready to use.");
-                        else alert("Download failed. Check your internet connection and try again.");
+                        setTestResult(ok ? {
+                          type: 'success',
+                          message: 'Whisper model downloaded and ready to use.'
+                        } : {
+                          type: 'error',
+                          message: 'Download failed. Check your internet connection and try again.'
+                        });
+                        setTimeout(() => setTestResult(null), 5000);
                       }}
                       className="text-ink underline transition-colors duration-normal hover:text-accent"
                     >

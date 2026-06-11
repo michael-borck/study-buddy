@@ -297,6 +297,7 @@ export default function Home() {
                 onClick={() => setChatError(null)}
                 className="shrink-0 text-ink-quiet transition-colors duration-normal hover:text-ink"
                 title="Dismiss"
+                aria-label="Dismiss"
               >
                 &times;
               </button>

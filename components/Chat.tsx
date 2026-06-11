@@ -307,8 +307,9 @@ export default function Chat({
                     {/* Speaker button */}
                     <button
                       onClick={() => readAloud(message.content, index)}
-                      className="absolute right-0 top-0 rounded-soft p-1 text-ink-quiet opacity-0 transition-all duration-normal hover:text-accent group-hover:opacity-100"
+                      className="absolute right-0 top-0 rounded-soft p-1 text-ink-quiet opacity-0 transition-all duration-normal hover:text-accent focus:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100"
                       title={speakingIndex === index ? "Stop reading" : "Read aloud"}
+                      aria-label={speakingIndex === index ? "Stop reading" : "Read aloud"}
                     >
                       {speakingIndex === index ? (
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
@@ -358,6 +359,7 @@ export default function Chat({
               type="button"
               onClick={() => onStrategyChange(s.id)}
               title={s.description}
+              aria-pressed={strategyId === s.id}
               className={`rounded-soft px-2 py-0.5 text-xs transition-colors duration-normal ${
                 strategyId === s.id
                   ? "bg-ink text-paper"
@@ -402,6 +404,7 @@ export default function Chat({
               : "border border-hairline text-ink-muted hover:border-hairline-strong hover:text-accent"
           } disabled:cursor-not-allowed disabled:opacity-50`}
           title={isRecording ? "Stop recording" : "Voice input"}
+          aria-label={isRecording ? "Stop recording" : "Voice input"}
         >
           {isRecording ? (
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">

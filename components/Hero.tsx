@@ -90,6 +90,7 @@ const Hero: FC<THeroProps> = ({
                 onClick={dismissFirstRun}
                 className="shrink-0 text-ink-quiet transition-colors duration-normal hover:text-ink"
                 title="Dismiss"
+                aria-label="Dismiss"
               >
                 &times;
               </button>
@@ -123,7 +124,8 @@ const Hero: FC<THeroProps> = ({
         {/* Topic suggestions */}
         <div className="flex flex-wrap items-center justify-center gap-2 pb-5 lg:flex-nowrap lg:justify-normal">
           {suggestions.map((item) => (
-            <div
+            <button
+              type="button"
               className="flex h-[35px] cursor-pointer items-center justify-center gap-[5px] rounded-soft border border-hairline px-2.5 py-2 transition-colors duration-normal hover:border-hairline-strong"
               onClick={() => handleClickSuggestion(item?.name)}
               key={item.id}
@@ -138,7 +140,7 @@ const Hero: FC<THeroProps> = ({
               <span className="text-sm text-ink-muted" style={{ fontWeight: 400 }}>
                 {item.name}
               </span>
-            </div>
+            </button>
           ))}
         </div>
 
@@ -153,6 +155,7 @@ const Hero: FC<THeroProps> = ({
                 key={s.id}
                 type="button"
                 onClick={() => setStrategyId(s.id)}
+                aria-pressed={strategyId === s.id}
                 className={`rounded-soft px-3 py-1.5 text-sm transition-colors duration-normal ${
                   strategyId === s.id
                     ? "bg-ink text-paper"

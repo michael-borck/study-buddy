@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
+import { getProviderBaseUrl } from "@/utils/settings";
 
 export async function POST(request: Request) {
   try {
-    const { provider, baseUrl, apiKey } = await request.json();
-    
+    const { provider, baseUrl: rawBaseUrl, apiKey } = await request.json();
+
+    // Fall back to the provider's default server so users don't have to
+    // type a base URL just to list models.
+    const baseUrl = rawBaseUrl || getProviderBaseUrl(provider);
+
     let models: string[] = [];
-    
+
     switch (provider.toLowerCase()) {
       case "ollama":
         models = await getOllamaModels(baseUrl, apiKey);

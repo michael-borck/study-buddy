@@ -130,7 +130,7 @@ function getProviderApiKey(provider: string): string {
   }
 }
 
-function getProviderBaseUrl(provider: string): string {
+export function getProviderBaseUrl(provider: string): string {
   switch (provider.toLowerCase()) {
     case "ollama": return process.env.OLLAMA_BASE_URL || DEFAULT_SETTINGS.llmBaseUrl;
     case "openai": return process.env.OPENAI_BASE_URL || "https://api.openai.com";

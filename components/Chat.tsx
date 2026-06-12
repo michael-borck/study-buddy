@@ -73,7 +73,7 @@ export default function Chat({
   setMessages: React.Dispatch<
     React.SetStateAction<{ role: string; content: string }[]>
   >;
-  handleChat: () => void;
+  handleChat: (messages?: { role: string; content: string }[]) => void;
   topic: string;
   sources: { name: string; url: string }[];
   hasCustomText: boolean;
@@ -146,6 +146,16 @@ export default function Chat({
       });
     },
     [audioSettings.voiceGender, speakingIndex],
+  );
+
+  // Send a canned user message through the normal chat flow.
+  const sendQuickMessage = useCallback(
+    (content: string) => {
+      const latest = [...messages, { role: "user", content }];
+      setMessages(latest);
+      handleChat(latest);
+    },
+    [messages, setMessages, handleChat],
   );
 
   const copyMessage = useCallback(async (text: string, index: number) => {
@@ -350,6 +360,22 @@ export default function Chat({
                         )}
                       </button>
                     </div>
+                    {/* Quick action on the latest tutor message */}
+                    {index === displayMessages.length - 1 && !disabled && (
+                      <div className="not-prose mb-4 pl-10">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            sendQuickMessage(
+                              "Could you explain that again more simply? Short sentences and everyday words, please.",
+                            )
+                          }
+                          className="rounded-soft border border-hairline px-3 py-1 text-xs text-ink-muted transition-colors duration-normal hover:border-hairline-strong hover:text-accent"
+                        >
+                          Say it simpler
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <p

@@ -96,6 +96,7 @@ export default function Chat({
   const [showSources, setShowSources] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [speakingIndex, setSpeakingIndex] = useState<number | null>(null);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const recorderRef = useRef<{ stop: () => Promise<Blob> } | null>(null);
   const lastReadRef = useRef<number>(-1);
 
@@ -145,6 +146,19 @@ export default function Chat({
     },
     [audioSettings.voiceGender, speakingIndex],
   );
+
+  const copyMessage = useCallback(async (text: string, index: number) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedIndex(index);
+      setTimeout(
+        () => setCopiedIndex((prev) => (prev === index ? null : prev)),
+        1500,
+      );
+    } catch (e) {
+      console.error("Copy failed:", e);
+    }
+  }, []);
 
   // Auto-read new assistant messages
   useEffect(() => {
@@ -304,19 +318,37 @@ export default function Chat({
                     <ReactMarkdown className="w-full pl-10">
                       {message.content}
                     </ReactMarkdown>
-                    {/* Speaker button */}
-                    <button
-                      onClick={() => readAloud(message.content, index)}
-                      className="absolute right-0 top-0 rounded-soft p-1 text-ink-quiet opacity-0 transition-all duration-normal hover:text-accent focus:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100"
-                      title={speakingIndex === index ? "Stop reading" : "Read aloud"}
-                      aria-label={speakingIndex === index ? "Stop reading" : "Read aloud"}
-                    >
-                      {speakingIndex === index ? (
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
-                      ) : (
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0014 8.5v7a4.49 4.49 0 002.5-3.5zM14 3.23v2.06a6.51 6.51 0 010 13.42v2.06A8.51 8.51 0 0014 3.23z"/></svg>
-                      )}
-                    </button>
+                    {/* Copy + speaker buttons */}
+                    <div className="absolute right-0 top-0 flex items-center gap-1 opacity-0 transition-all duration-normal focus-within:opacity-100 group-hover:opacity-100">
+                      <button
+                        onClick={() => copyMessage(message.content, index)}
+                        className={`rounded-soft p-1 transition-colors duration-normal ${
+                          copiedIndex === index
+                            ? "text-accent"
+                            : "text-ink-quiet hover:text-accent"
+                        }`}
+                        title={copiedIndex === index ? "Copied" : "Copy"}
+                        aria-label={copiedIndex === index ? "Copied" : "Copy message"}
+                      >
+                        {copiedIndex === index ? (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        ) : (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => readAloud(message.content, index)}
+                        className="rounded-soft p-1 text-ink-quiet transition-colors duration-normal hover:text-accent"
+                        title={speakingIndex === index ? "Stop reading" : "Read aloud"}
+                        aria-label={speakingIndex === index ? "Stop reading" : "Read aloud"}
+                      >
+                        {speakingIndex === index ? (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+                        ) : (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0014 8.5v7a4.49 4.49 0 002.5-3.5zM14 3.23v2.06a6.51 6.51 0 010 13.42v2.06A8.51 8.51 0 0014 3.23z"/></svg>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <p

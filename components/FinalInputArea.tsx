@@ -1,4 +1,4 @@
-import { FC, KeyboardEvent } from "react";
+import { FC, KeyboardEvent, useEffect, useRef } from "react";
 import Image from "next/image";
 
 type TInputAreaProps = {
@@ -22,6 +22,16 @@ const FinalInputArea: FC<TInputAreaProps> = ({
   handleChat,
   onStop,
 }) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Grow with the content (up to a cap) instead of scrolling inside one row.
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
+  }, [promptValue]);
+
   function onSubmit() {
     const question = promptValue.trim();
     if (!question || disabled) return;
@@ -52,8 +62,9 @@ const FinalInputArea: FC<TInputAreaProps> = ({
     >
       <div className="flex w-full rounded-soft border border-hairline bg-paper transition-colors duration-normal hover:border-hairline-strong">
         <textarea
+          ref={textareaRef}
           placeholder="Follow up question"
-          className="block w-full resize-none rounded-l-soft border-r border-hairline bg-paper p-6 text-ink placeholder:text-ink-quiet"
+          className="block max-h-[200px] w-full resize-none rounded-l-soft border-r border-hairline bg-paper p-6 text-ink placeholder:text-ink-quiet"
           disabled={disabled}
           value={promptValue}
           onKeyDown={handleKeyDown}

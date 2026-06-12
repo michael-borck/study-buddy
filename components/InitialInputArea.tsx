@@ -1,4 +1,4 @@
-import { FC, KeyboardEvent } from "react";
+import { FC, KeyboardEvent, useEffect, useRef } from "react";
 import TypeAnimation from "./TypeAnimation";
 import Image from "next/image";
 import { EDUCATION_LEVELS } from "@/utils/settings";
@@ -21,6 +21,16 @@ const InitialInputArea: FC<TInputAreaProps> = ({
   ageGroup,
   setAgeGroup,
 }) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Grow with the content (up to a cap) instead of scrolling inside one row.
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
+  }, [promptValue]);
+
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter") {
       if (e.shiftKey) {
@@ -44,8 +54,9 @@ const InitialInputArea: FC<TInputAreaProps> = ({
     >
       <div className="flex w-full rounded-soft border border-hairline bg-paper transition-colors duration-normal hover:border-hairline-strong">
         <textarea
+          ref={textareaRef}
           placeholder="Teach me about..."
-          className="block w-full resize-none rounded-l-soft border-r border-hairline bg-paper p-6 text-sm text-ink placeholder:text-ink-quiet sm:text-base"
+          className="block max-h-[200px] w-full resize-none rounded-l-soft border-r border-hairline bg-paper p-6 text-sm text-ink placeholder:text-ink-quiet sm:text-base"
           disabled={disabled}
           value={promptValue}
           required

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { FC, useState, useEffect, useRef } from "react";
+import { FC, useState, useEffect, useRef, useCallback } from "react";
 import InitialInputArea from "./InitialInputArea";
 import { suggestions } from "@/utils/utils";
 import { strategies } from "@/utils/strategies";
@@ -56,6 +56,8 @@ const Hero: FC<THeroProps> = ({
     type: "loading" | "error";
     message: string;
   } | null>(null);
+  const [ollamaDown, setOllamaDown] = useState(false);
+  const [checking, setChecking] = useState(false);
   const [ollamaNoModels, setOllamaNoModels] = useState(false);
   const [recommendedModel, setRecommendedModel] = useState("llama3.1:8b");
   const [pullProgress, setPullProgress] = useState<{
@@ -74,57 +76,59 @@ const Hero: FC<THeroProps> = ({
   }, []);
 
   // Check the AI provider is reachable before the user invests in a session.
-  useEffect(() => {
-    let cancelled = false;
-
-    const check = async () => {
-      const settings = loadClientSettings();
-      const label = PROVIDER_LABELS[settings.llmProvider] || settings.llmProvider;
-      const warning =
-        settings.llmProvider === "ollama"
-          ? "I can't reach Ollama right now. Make sure it's running on your computer, or pick another provider in Settings."
-          : `I can't reach ${label} right now. Check your secret key and connection in Settings.`;
-      try {
-        const res = await fetch("/api/models", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            provider: settings.llmProvider,
-            baseUrl: settings.llmBaseUrl || undefined,
-            apiKey: settings.llmApiKey || undefined,
-          }),
-        });
-        if (cancelled) return;
-        if (res.ok) {
-          const data = await res.json().catch(() => ({ models: [] }));
-          const models: string[] = data.models || [];
-          setProviderWarning(null);
-          // Ollama is up but has nothing to run — offer a download.
-          setOllamaNoModels(
-            settings.llmProvider === "ollama" && models.length === 0,
-          );
-          setRecommendedModel(settings.llmModel || "llama3.1:8b");
-        } else {
-          setProviderWarning(warning);
-          setOllamaNoModels(false);
-        }
-      } catch {
-        if (!cancelled) {
-          setProviderWarning(warning);
-          setOllamaNoModels(false);
-        }
+  // For Ollama, an unreachable provider starts the guided setup journey
+  // (install → check again → download a model) instead of a plain warning.
+  const runProviderCheck = useCallback(async () => {
+    setChecking(true);
+    const settings = loadClientSettings();
+    const isOllama = settings.llmProvider === "ollama";
+    const label = PROVIDER_LABELS[settings.llmProvider] || settings.llmProvider;
+    try {
+      const res = await fetch("/api/models", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          provider: settings.llmProvider,
+          baseUrl: settings.llmBaseUrl || undefined,
+          apiKey: settings.llmApiKey || undefined,
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json().catch(() => ({ models: [] }));
+        const models: string[] = data.models || [];
+        setProviderWarning(null);
+        setOllamaDown(false);
+        // Ollama is up but has nothing to run — offer a download.
+        setOllamaNoModels(isOllama && models.length === 0);
+        setRecommendedModel(settings.llmModel || "llama3.1:8b");
+      } else {
+        throw new Error(`Provider check failed: ${res.status}`);
       }
-    };
-
-    check();
-    window.addEventListener("settingsChanged", check);
-    window.addEventListener("settingsLoaded", check);
-    return () => {
-      cancelled = true;
-      window.removeEventListener("settingsChanged", check);
-      window.removeEventListener("settingsLoaded", check);
-    };
+    } catch {
+      setOllamaNoModels(false);
+      if (isOllama) {
+        setOllamaDown(true);
+        setProviderWarning(null);
+      } else {
+        setOllamaDown(false);
+        setProviderWarning(
+          `I can't reach ${label} right now. Check your secret key and connection in Settings.`,
+        );
+      }
+    } finally {
+      setChecking(false);
+    }
   }, []);
+
+  useEffect(() => {
+    runProviderCheck();
+    window.addEventListener("settingsChanged", runProviderCheck);
+    window.addEventListener("settingsLoaded", runProviderCheck);
+    return () => {
+      window.removeEventListener("settingsChanged", runProviderCheck);
+      window.removeEventListener("settingsLoaded", runProviderCheck);
+    };
+  }, [runProviderCheck]);
 
   const dismissFirstRun = () => {
     setShowFirstRun(false);
@@ -187,7 +191,8 @@ const Hero: FC<THeroProps> = ({
         throw new Error("Download did not complete. Please try again.");
       }
       setPullProgress(null);
-      setOllamaNoModels(false);
+      // Re-probe so the banner clears only once the model is really there.
+      await runProviderCheck();
     } catch (e) {
       setPullProgress(null);
       setPullError(
@@ -238,8 +243,8 @@ const Hero: FC<THeroProps> = ({
     <>
       <div className="mx-auto mt-6 flex max-w-3xl flex-col items-center justify-center sm:mt-12">
 
-        {/* First-run banner */}
-        {showFirstRun && (
+        {/* First-run banner (suppressed while the guided Ollama setup is showing) */}
+        {showFirstRun && !ollamaDown && !ollamaNoModels && (
           <div className="mb-4 w-full rounded-soft border border-accent bg-accent-soft px-4 py-3">
             <div className="flex items-start justify-between gap-3">
               <p className="text-sm text-ink-muted" style={{ lineHeight: 1.6 }}>
@@ -274,8 +279,43 @@ const Hero: FC<THeroProps> = ({
           </div>
         )}
 
+        {/* Ollama isn't reachable — guided setup, no terminal needed */}
+        {ollamaDown && (
+          <div className="mb-4 w-full rounded-soft border border-hairline-strong bg-paper-warm px-4 py-4">
+            <p className="text-sm text-ink-muted" style={{ lineHeight: 1.6 }}>
+              <strong className="text-ink">Set up your AI tutor.</strong> Study
+              Buddy works with Ollama — free, private AI that runs on your own
+              computer. No account needed. Install it, then come back here.
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <a
+                href="https://ollama.com/download"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-soft bg-ink px-4 py-2 text-sm font-medium text-paper transition-colors duration-normal hover:bg-accent"
+              >
+                Get Ollama (free)
+              </a>
+              <button
+                type="button"
+                onClick={runProviderCheck}
+                disabled={checking}
+                className="rounded-soft border border-hairline px-4 py-2 text-sm font-medium text-ink-muted transition-colors duration-normal hover:border-hairline-strong hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {checking ? "Checking..." : "I've installed it — check again"}
+              </button>
+              <Link
+                href="/settings"
+                className="text-sm text-ink-muted underline transition-colors duration-normal hover:text-accent"
+              >
+                Use a cloud provider instead
+              </Link>
+            </div>
+          </div>
+        )}
+
         {/* Ollama is reachable but has no models — offer a one-click download */}
-        {!showFirstRun && !providerWarning && ollamaNoModels && (
+        {!providerWarning && ollamaNoModels && (
           <div className="mb-4 w-full rounded-soft border border-hairline-strong bg-paper-warm px-4 py-3">
             {pullProgress ? (
               <div>

@@ -2,7 +2,7 @@
 const isDev = process.env.NODE_ENV === 'development';
 
 // Import electron
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, shell } = require('electron');
 const fs = require('fs');
 const path = require('path');
 
@@ -174,12 +174,15 @@ app.on('activate', () => {
   }
 });
 
-// Security: Prevent new window creation
+// Security: open external links in the system browser, never as new
+// Electron windows. (The legacy 'new-window' event no longer fires on
+// modern Electron, so target="_blank" links were opening child windows.)
 app.on('web-contents-created', (event, contents) => {
-  contents.on('new-window', (event, navigationUrl) => {
-    event.preventDefault();
-    // Could open in external browser if needed
-    // require('electron').shell.openExternal(navigationUrl);
+  contents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('https://') || url.startsWith('http://')) {
+      shell.openExternal(url);
+    }
+    return { action: 'deny' };
   });
 });
 

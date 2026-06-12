@@ -1,4 +1,5 @@
 import ReactMarkdown from "react-markdown";
+import Link from "next/link";
 import FinalInputArea from "./FinalInputArea";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { strategies } from "@/utils/strategies";
@@ -34,12 +35,12 @@ function ChatErrorNotice({
         >
           Try again
         </button>
-        <a
+        <Link
           href="/settings"
           className="text-sm text-ink-muted underline transition-colors duration-normal hover:text-accent"
         >
           Check settings
-        </a>
+        </Link>
       </div>
     </div>
   );

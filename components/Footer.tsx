@@ -5,10 +5,10 @@ const Footer = () => {
   return (
     <div className="container flex min-h-[72px] flex-col items-center justify-between border-t border-hairline px-4 pb-3 pt-5 lg:min-h-[72px] lg:flex-row lg:px-0 lg:py-5">
       <div className="flex w-full items-center justify-between">
-        <a href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2">
           <span className="text-2xl">🎓</span>
           <span className="text-lg font-semibold text-ink">Study Buddy</span>
-        </a>
+        </Link>
         <div className="flex items-center gap-3">
           <Link href={"https://x.com/Michael_Borck"} target="_blank" title="Follow on X">
             <Image
@@ -52,12 +52,12 @@ const Footer = () => {
       </div>
       <p className="mt-2 text-xs text-ink-quiet lg:mt-0">
         Study Buddy &middot; part of the Buddy suite &middot;{" "}
-        <a
+        <Link
           href="/legal"
           className="underline transition-colors duration-normal hover:text-accent"
         >
           Legal
-        </a>
+        </Link>
       </p>
     </div>
   );

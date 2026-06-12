@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { FC, useState, useEffect } from "react";
 import InitialInputArea from "./InitialInputArea";
 import { suggestions } from "@/utils/utils";
@@ -78,12 +79,12 @@ const Hero: FC<THeroProps> = ({
                   Set up Ollama (free)
                 </a>{" "}
                 or go to{" "}
-                <a
+                <Link
                   href="/settings"
                   className="font-medium text-ink underline transition-colors duration-normal hover:text-accent"
                 >
                   Settings
-                </a>{" "}
+                </Link>{" "}
                 to add a cloud provider.
               </p>
               <button

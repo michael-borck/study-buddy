@@ -135,8 +135,25 @@ async function createWindow() {
   });
 }
 
+// Check GitHub releases for updates; downloads in the background and
+// notifies the user once the update is ready (applied on next launch).
+function checkForUpdates() {
+  if (isDev) return;
+  try {
+    const { autoUpdater } = require('electron-updater');
+    autoUpdater.checkForUpdatesAndNotify().catch((err) => {
+      console.error('Auto-update check failed:', err);
+    });
+  } catch (err) {
+    console.error('Auto-updater unavailable:', err);
+  }
+}
+
 // App event handlers
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  createWindow();
+  checkForUpdates();
+});
 
 app.on('window-all-closed', () => {
   // Close the server when all windows are closed

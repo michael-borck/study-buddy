@@ -82,9 +82,12 @@ jobs:
         files: |
           dist/*.exe
           dist/*.dmg
+          dist/*.zip
           dist/*.AppImage
           dist/*.deb
           dist/*.rpm
+          dist/*.blockmap
+          dist/latest*.yml
         generate_release_notes: true
         draft: false
         prerelease: false

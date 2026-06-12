@@ -4,6 +4,17 @@ import { FC, useState, useEffect } from "react";
 import InitialInputArea from "./InitialInputArea";
 import { suggestions } from "@/utils/utils";
 import { strategies } from "@/utils/strategies";
+import { loadClientSettings } from "@/utils/settings";
+
+const PROVIDER_LABELS: Record<string, string> = {
+  ollama: "Ollama",
+  openai: "OpenAI",
+  anthropic: "Anthropic",
+  google: "Google",
+  groq: "Groq",
+  openrouter: "OpenRouter",
+  together: "Together AI",
+};
 
 type THeroProps = {
   promptValue: string;
@@ -40,12 +51,50 @@ const Hero: FC<THeroProps> = ({
 }) => {
   const [showNotes, setShowNotes] = useState(false);
   const [showFirstRun, setShowFirstRun] = useState(false);
+  const [providerWarning, setProviderWarning] = useState<string | null>(null);
 
   useEffect(() => {
     const dismissed = localStorage.getItem("studybuddy-first-run-dismissed");
     if (dismissed !== "true") {
       setShowFirstRun(true);
     }
+  }, []);
+
+  // Check the AI provider is reachable before the user invests in a session.
+  useEffect(() => {
+    let cancelled = false;
+
+    const check = async () => {
+      const settings = loadClientSettings();
+      const label = PROVIDER_LABELS[settings.llmProvider] || settings.llmProvider;
+      const warning =
+        settings.llmProvider === "ollama"
+          ? "I can't reach Ollama right now. Make sure it's running on your computer, or pick another provider in Settings."
+          : `I can't reach ${label} right now. Check your secret key and connection in Settings.`;
+      try {
+        const res = await fetch("/api/models", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            provider: settings.llmProvider,
+            baseUrl: settings.llmBaseUrl || undefined,
+            apiKey: settings.llmApiKey || undefined,
+          }),
+        });
+        if (!cancelled) setProviderWarning(res.ok ? null : warning);
+      } catch {
+        if (!cancelled) setProviderWarning(warning);
+      }
+    };
+
+    check();
+    window.addEventListener("settingsChanged", check);
+    window.addEventListener("settingsLoaded", check);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("settingsChanged", check);
+      window.removeEventListener("settingsLoaded", check);
+    };
   }, []);
 
   const dismissFirstRun = () => {
@@ -96,6 +145,21 @@ const Hero: FC<THeroProps> = ({
                 &times;
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Provider connectivity warning (hidden while the first-run banner covers setup) */}
+        {!showFirstRun && providerWarning && (
+          <div className="mb-4 w-full rounded-soft border border-hairline-strong bg-paper-warm px-4 py-3">
+            <p className="text-sm text-ink-muted" style={{ lineHeight: 1.6 }}>
+              {providerWarning}{" "}
+              <Link
+                href="/settings"
+                className="font-medium text-ink underline transition-colors duration-normal hover:text-accent"
+              >
+                Open Settings
+              </Link>
+            </p>
           </div>
         )}
 

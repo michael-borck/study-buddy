@@ -88,20 +88,17 @@ jobs:
         security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k actions build.keychain
         rm certificate.p12
 
+    # Smoke build only: pack the unpacked app dir (verifies bundling and
+    # mac code-signing) without DMG/zip/notarization — those are slow,
+    # hdiutil is flaky on CI runners, and the Release workflow covers them
+    # at tag time. notarize.js skips itself when NOTARIZE_* vars are absent.
     - name: Build Electron app (with retry)
       uses: nick-fields/retry@v4
       with:
         timeout_minutes: 10
         max_attempts: 3
         retry_wait_seconds: 30
-        command: npm run dist
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # NOTARIZE_*-prefixed (not APPLE_*) so electron-builder doesn't fire its
-        # own buggy notarize wrapper; scripts/notarize.js reads these instead.
-        NOTARIZE_APPLE_ID: ${{ secrets.APPLE_ID }}
-        NOTARIZE_APPLE_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
-        NOTARIZE_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        command: npx electron-builder --dir --publish=never
         
     - name: Upload build artifacts
       uses: actions/upload-artifact@v7

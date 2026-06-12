@@ -56,6 +56,13 @@ const Hero: FC<THeroProps> = ({
     type: "loading" | "error";
     message: string;
   } | null>(null);
+  const [ollamaNoModels, setOllamaNoModels] = useState(false);
+  const [recommendedModel, setRecommendedModel] = useState("llama3.1:8b");
+  const [pullProgress, setPullProgress] = useState<{
+    status: string;
+    percent: number | null;
+  } | null>(null);
+  const [pullError, setPullError] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -87,9 +94,25 @@ const Hero: FC<THeroProps> = ({
             apiKey: settings.llmApiKey || undefined,
           }),
         });
-        if (!cancelled) setProviderWarning(res.ok ? null : warning);
+        if (cancelled) return;
+        if (res.ok) {
+          const data = await res.json().catch(() => ({ models: [] }));
+          const models: string[] = data.models || [];
+          setProviderWarning(null);
+          // Ollama is up but has nothing to run — offer a download.
+          setOllamaNoModels(
+            settings.llmProvider === "ollama" && models.length === 0,
+          );
+          setRecommendedModel(settings.llmModel || "llama3.1:8b");
+        } else {
+          setProviderWarning(warning);
+          setOllamaNoModels(false);
+        }
       } catch {
-        if (!cancelled) setProviderWarning(warning);
+        if (!cancelled) {
+          setProviderWarning(warning);
+          setOllamaNoModels(false);
+        }
       }
     };
 
@@ -110,6 +133,67 @@ const Hero: FC<THeroProps> = ({
 
   const handleClickSuggestion = (value: string) => {
     setPromptValue(value);
+  };
+
+  const startModelPull = async () => {
+    const settings = loadClientSettings();
+    const model = settings.llmModel || "llama3.1:8b";
+    setPullError(null);
+    setPullProgress({ status: "Starting download...", percent: null });
+    try {
+      const res = await fetch("/api/pullModel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model,
+          baseUrl: settings.llmBaseUrl || undefined,
+        }),
+      });
+      if (!res.ok || !res.body) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Download failed");
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffered = "";
+      let success = false;
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffered += decoder.decode(value, { stream: true });
+        const lines = buffered.split("\n");
+        buffered = lines.pop() || "";
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          let evt: { error?: string; status?: string; total?: number; completed?: number };
+          try {
+            evt = JSON.parse(line);
+          } catch {
+            continue;
+          }
+          if (evt.error) throw new Error(evt.error);
+          if (evt.status === "success") success = true;
+          setPullProgress({
+            status: evt.status || "Downloading...",
+            percent:
+              evt.total && evt.completed != null
+                ? Math.round((evt.completed / evt.total) * 100)
+                : null,
+          });
+        }
+      }
+      if (!success) {
+        throw new Error("Download did not complete. Please try again.");
+      }
+      setPullProgress(null);
+      setOllamaNoModels(false);
+    } catch (e) {
+      setPullProgress(null);
+      setPullError(
+        e instanceof Error ? e.message : "Download failed. Please try again.",
+      );
+    }
   };
 
   const importFile = async (file: File) => {
@@ -187,6 +271,47 @@ const Hero: FC<THeroProps> = ({
                 &times;
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Ollama is reachable but has no models — offer a one-click download */}
+        {!showFirstRun && !providerWarning && ollamaNoModels && (
+          <div className="mb-4 w-full rounded-soft border border-hairline-strong bg-paper-warm px-4 py-3">
+            {pullProgress ? (
+              <div>
+                <p className="text-sm text-ink-muted" style={{ lineHeight: 1.6 }}>
+                  Downloading <strong className="text-ink">{recommendedModel}</strong>
+                  {pullProgress.percent != null ? ` — ${pullProgress.percent}%` : ""}{" "}
+                  <span className="text-ink-quiet">({pullProgress.status})</span>
+                </p>
+                <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-ink/10">
+                  <div
+                    className="h-full rounded-full bg-accent transition-all duration-normal"
+                    style={{ width: `${pullProgress.percent ?? 2}%` }}
+                  />
+                </div>
+                <p className="mt-1 text-xs text-ink-quiet">
+                  This is a one-time download. You can keep this page open.
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-sm text-ink-muted" style={{ lineHeight: 1.6 }}>
+                  <strong className="text-ink">Almost there!</strong> Ollama is
+                  running, but no AI model is installed yet.
+                  {pullError && (
+                    <span className="block text-error">{pullError}</span>
+                  )}
+                </p>
+                <button
+                  type="button"
+                  onClick={startModelPull}
+                  className="shrink-0 rounded-soft bg-ink px-4 py-2 text-sm font-medium text-paper transition-colors duration-normal hover:bg-accent"
+                >
+                  Download {recommendedModel} (a few GB)
+                </button>
+              </div>
+            )}
           </div>
         )}
 

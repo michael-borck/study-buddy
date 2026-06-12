@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { FC, useState, useEffect } from "react";
+import { FC, useState, useEffect, useRef } from "react";
 import InitialInputArea from "./InitialInputArea";
 import { suggestions } from "@/utils/utils";
 import { strategies } from "@/utils/strategies";
@@ -52,6 +52,12 @@ const Hero: FC<THeroProps> = ({
   const [showNotes, setShowNotes] = useState(false);
   const [showFirstRun, setShowFirstRun] = useState(false);
   const [providerWarning, setProviderWarning] = useState<string | null>(null);
+  const [importStatus, setImportStatus] = useState<{
+    type: "loading" | "error";
+    message: string;
+  } | null>(null);
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const dismissed = localStorage.getItem("studybuddy-first-run-dismissed");
@@ -104,6 +110,42 @@ const Hero: FC<THeroProps> = ({
 
   const handleClickSuggestion = (value: string) => {
     setPromptValue(value);
+  };
+
+  const importFile = async (file: File) => {
+    const ext = file.name.toLowerCase().split(".").pop();
+    setImportStatus({ type: "loading", message: `Reading ${file.name}...` });
+    try {
+      let text = "";
+      if (ext === "pdf") {
+        const fd = new FormData();
+        fd.append("file", file);
+        const res = await fetch("/api/parseDocument", {
+          method: "POST",
+          body: fd,
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Could not read this file");
+        text = data.text;
+      } else if (ext === "txt" || ext === "md") {
+        text = (await file.text()).trim();
+      } else {
+        throw new Error("Only PDF, TXT and MD files are supported");
+      }
+      if (!text) throw new Error("No readable text found in this file");
+      setCustomText((prev) =>
+        prev
+          ? `${prev}\n\n--- From ${file.name} ---\n\n${text}`
+          : `--- From ${file.name} ---\n\n${text}`,
+      );
+      setImportStatus(null);
+    } catch (e) {
+      setImportStatus({
+        type: "error",
+        message:
+          e instanceof Error ? e.message : "Could not read this file",
+      });
+    }
   };
 
   const selectedStrategy = strategies.find((s) => s.id === strategyId) || strategies[0];
@@ -270,15 +312,60 @@ const Hero: FC<THeroProps> = ({
 
         {/* Collapsible notes textarea */}
         {showNotes && (
-          <div className="mb-4 w-full">
+          <div
+            className="mb-4 w-full"
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragActive(true);
+            }}
+            onDragLeave={() => setDragActive(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragActive(false);
+              const file = e.dataTransfer.files?.[0];
+              if (file) importFile(file);
+            }}
+          >
             <textarea
-              placeholder="Paste lecture notes, textbook excerpts, or any extra material here..."
-              className="w-full resize-y rounded-soft border border-hairline bg-paper p-4 text-sm text-ink placeholder:text-ink-quiet transition-colors duration-normal hover:border-hairline-strong focus:border-accent focus:outline-none focus:ring-[3px] focus:ring-accent-soft"
+              placeholder="Paste lecture notes or textbook excerpts here — or drop a PDF, TXT or MD file..."
+              className={`w-full resize-y rounded-soft border bg-paper p-4 text-sm text-ink placeholder:text-ink-quiet transition-colors duration-normal hover:border-hairline-strong focus:border-accent focus:outline-none focus:ring-[3px] focus:ring-accent-soft ${
+                dragActive ? "border-accent ring-[3px] ring-accent-soft" : "border-hairline"
+              }`}
               value={customText}
               onChange={(e) => setCustomText(e.target.value)}
               rows={4}
               style={{ lineHeight: 1.7 }}
             />
+            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.txt,.md"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) importFile(file);
+                  e.target.value = "";
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={importStatus?.type === "loading"}
+                className="text-xs text-ink-muted underline transition-colors duration-normal hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Attach a file (PDF, TXT, MD)
+              </button>
+              {importStatus && (
+                <span
+                  className={`text-xs ${
+                    importStatus.type === "error" ? "text-error" : "text-ink-quiet"
+                  }`}
+                >
+                  {importStatus.message}
+                </span>
+              )}
+            </div>
             <div className="mt-2 flex items-center justify-start gap-4">
               <label className="flex cursor-pointer items-center gap-1.5 text-xs text-ink-muted">
                 <input

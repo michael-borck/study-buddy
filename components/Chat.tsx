@@ -98,6 +98,8 @@ export default function Chat({
   const [isRecording, setIsRecording] = useState(false);
   const [speakingIndex, setSpeakingIndex] = useState<number | null>(null);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  // Index (in displayMessages) where the wrap-up summary is expected.
+  const [wrapUpIndex, setWrapUpIndex] = useState<number | null>(null);
   const recorderRef = useRef<{ stop: () => Promise<Blob> } | null>(null);
   const lastReadRef = useRef<number>(-1);
 
@@ -242,6 +244,34 @@ export default function Chat({
     }
   }, [isRecording, audioSettings.sttProvider, setPromptValue]);
 
+  const requestWrapUp = () => {
+    setWrapUpIndex(messages.slice(2).length + 1);
+    sendQuickMessage(
+      "We're wrapping up this session. Please write a summary I can keep as study notes: '## What we covered' with the key concepts as short bullet points, '## Where I struggled' if there was anything I found hard, and '## Suggested next topics' with 2-3 ideas. Use markdown. Don't ask any follow-up questions.",
+    );
+  };
+
+  const downloadSummary = (summary: string) => {
+    const date = new Date().toISOString().slice(0, 10);
+    const sourceLines = sources.length
+      ? `\n\n## Sources\n${sources.map((s) => `- [${s.name}](${s.url})`).join("\n")}\n`
+      : "";
+    const md = `# Study Buddy session: ${topic}\n\n_${date}_\n\n${summary}${sourceLines}`;
+    const slug =
+      topic
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 40) || "session";
+    const blob = new Blob([md], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `study-notes-${slug}-${date}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   // Build attribution text
   const sourceCount = sources.length;
   const ungrounded = sourceCount === 0 && !hasCustomText;
@@ -256,6 +286,13 @@ export default function Chat({
 
   const displayMessages = messages.slice(2);
 
+  // The wrap-up summary, once it has fully streamed.
+  const summaryMessage =
+    wrapUpIndex !== null && !disabled
+      ? displayMessages[wrapUpIndex]
+      : undefined;
+  const summaryReady = summaryMessage?.role === "assistant";
+
   return (
     <div className="mx-auto flex w-full max-w-3xl grow flex-col gap-4 overflow-hidden">
       <div className="flex grow flex-col overflow-hidden lg:p-4">
@@ -265,13 +302,35 @@ export default function Chat({
             <p className="text-xs font-medium uppercase tracking-widest text-ink-quiet">
               <span className="font-semibold text-ink">Topic:</span> {topic}
             </p>
-            <button
-              type="button"
-              onClick={onNewTopic}
-              className="shrink-0 rounded-soft border border-hairline px-3 py-1 text-xs font-medium text-ink-muted transition-colors duration-normal hover:border-hairline-strong hover:text-accent"
-            >
-              New topic
-            </button>
+            <div className="flex shrink-0 items-center gap-2">
+              {summaryReady ? (
+                <button
+                  type="button"
+                  onClick={() => downloadSummary(summaryMessage!.content)}
+                  className="rounded-soft bg-ink px-3 py-1 text-xs font-medium text-paper transition-colors duration-normal hover:bg-accent"
+                >
+                  Save summary
+                </button>
+              ) : (
+                wrapUpIndex === null && (
+                  <button
+                    type="button"
+                    onClick={requestWrapUp}
+                    disabled={disabled || displayMessages.length === 0}
+                    className="rounded-soft border border-hairline px-3 py-1 text-xs font-medium text-ink-muted transition-colors duration-normal hover:border-hairline-strong hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Wrap up
+                  </button>
+                )
+              )}
+              <button
+                type="button"
+                onClick={onNewTopic}
+                className="rounded-soft border border-hairline px-3 py-1 text-xs font-medium text-ink-muted transition-colors duration-normal hover:border-hairline-strong hover:text-accent"
+              >
+                New topic
+              </button>
+            </div>
           </div>
           {attribution && (
             <div className="mt-1">

@@ -65,7 +65,6 @@ const FinalInputArea: FC<TInputAreaProps> = ({
           ref={textareaRef}
           placeholder="Follow up question"
           className="block max-h-[200px] w-full resize-none rounded-l-soft border-r border-hairline bg-paper p-6 text-ink placeholder:text-ink-quiet"
-          disabled={disabled}
           value={promptValue}
           onKeyDown={handleKeyDown}
           required

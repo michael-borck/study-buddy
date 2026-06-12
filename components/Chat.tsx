@@ -397,12 +397,11 @@ export default function Chat({
         <button
           type="button"
           onClick={handleMic}
-          disabled={disabled}
           className={`flex h-[72px] w-[48px] shrink-0 items-center justify-center rounded-soft transition-colors duration-normal ${
             isRecording
               ? "bg-error text-paper"
               : "border border-hairline text-ink-muted hover:border-hairline-strong hover:text-accent"
-          } disabled:cursor-not-allowed disabled:opacity-50`}
+          }`}
           title={isRecording ? "Stop recording" : "Voice input"}
           aria-label={isRecording ? "Stop recording" : "Voice input"}
         >

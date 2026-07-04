@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study Buddy — Your Personal Tutor</title>
+  <meta name="description" content="Study Buddy is a privacy-first desktop app that turns any topic into a grounded tutoring session. It searches the web for real sources, reads them, and teaches you from that material — with an AI that runs on your own machine." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <nav class="topnav">
+    <div class="container topnav-inner">
+      <span class="brand">Study <span class="brand-accent">Buddy</span></span>
+      <div class="topnav-links">
+        <a href="user-guide.html">Documentation</a>
+        <a href="https://github.com/michael-borck/study-buddy">GitHub</a>
+        <a href="#download" class="nav-cta">Download</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero" id="top">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">A private, grounded AI tutor</p>
+        <h1>Your Personal <em>Tutor.</em></h1>
+        <p class="sub">Type a topic, get a grounded tutor. Study Buddy searches the web for
+          real sources, reads them, and teaches you from that material — at your level,
+          in your style. When the session ends, you take away what you learned.
+          Like a real tutor.</p>
+
+        <div class="download-block" id="download">
+          <a id="download-btn" class="btn btn-primary" href="https://github.com/michael-borck/study-buddy/releases/latest">Download</a>
+          <div class="platform-toggle" role="group" aria-label="Choose platform">
+            <button data-platform="mac" class="platform-btn">macOS</button>
+            <button data-platform="windows" class="platform-btn">Windows</button>
+            <button data-platform="linux" class="platform-btn">Linux</button>
+          </div>
+          <p class="version"><span id="version">&nbsp;</span> <a id="alt-arch" class="alt-arch" href="#" hidden></a></p>
+          <p class="all-releases"><a href="https://github.com/michael-borck/study-buddy/releases">All releases &amp; older versions →</a></p>
+        </div>
+
+        <p class="privacy-tag">Local-first. Your questions, notes, and learning never leave this device.</p>
+      </div>
+
+      <div class="hero-shots">
+        <!-- Screenshots auto-discovered from screenshots/study-buddy-1.png, -2.png, -3.png…
+             Drop a new numbered PNG in docs/screenshots/ and it joins the rotation. -->
+        <div class="carousel" id="carousel" aria-label="App screenshots">
+          <noscript><img src="screenshots/study-buddy-1.png" alt="Study Buddy home screen" /></noscript>
+        </div>
+        <div class="carousel-dots" id="carousel-dots"></div>
+      </div>
+    </div>
+  </header>
+
+  <section class="container steps">
+    <h2>How a session works</h2>
+    <div class="grid three">
+      <div class="card">
+        <div class="card-num">01</div>
+        <h3>Pick a topic</h3>
+        <p>Type anything — photosynthesis, basketball, machine learning — and choose
+          your level, from Elementary through Graduate. Or paste your own lecture
+          notes and learn from those.</p>
+      </div>
+      <div class="card">
+        <div class="card-num">02</div>
+        <h3>It reads real sources</h3>
+        <p>Study Buddy searches the web, reads the pages it finds, and teaches only
+          from that grounded material — reducing hallucinations and keeping
+          answers factual.</p>
+      </div>
+      <div class="card">
+        <div class="card-num">03</div>
+        <h3>Learn your way</h3>
+        <p>Eight teaching styles — Explain, Quiz me, Socratic, Devil's advocate,
+          Perspectives, Feynman, Spaced recall, Worked examples. Ask follow-ups;
+          the tutor stays in context.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="providers-band">
+    <div class="container">
+      <h2>Bring your own AI</h2>
+      <div class="grid three">
+        <div class="card plain">
+          <h3>Fully local, by default</h3>
+          <p>Point Study Buddy at Ollama and the tutor runs on your own laptop —
+            free, no key, no account. The app walks you through installing it and
+            downloading a model.</p>
+        </div>
+        <div class="card plain">
+          <h3>Or any major provider</h3>
+          <p>OpenAI, Anthropic Claude, Google Gemini, Groq, Together AI. Your key,
+            your choice, one settings tab each — you decide where your questions go.</p>
+        </div>
+        <div class="card plain">
+          <h3>Search you control</h3>
+          <p>Sources come from DuckDuckGo by default — free, no key needed. Prefer
+            Brave, Bing, Serper, or your own SearXNG instance? One setting.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="container privacy">
+    <div class="privacy-grid">
+      <div>
+        <h2>Privacy-first, by design</h2>
+        <p>Most AI tutoring tools want an account, your data, and a subscription.
+          Study Buddy runs on your computer, so what you don't understand yet
+          stays <em>your</em> business.</p>
+      </div>
+      <ul class="privacy-list">
+        <li><strong>No account, no telemetry.</strong> Install it and start learning.</li>
+        <li><strong>Sessions start fresh.</strong> No knowledge base, no embeddings, nothing stored on a server.</li>
+        <li><strong>Offline-capable.</strong> With Ollama, the AI itself runs on your machine.</li>
+        <li><strong>Open source.</strong> MIT-licensed, auditable, yours.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="container audience">
+    <div class="grid two">
+      <div class="card">
+        <h3>For students</h3>
+        <p>Open the app, type "photosynthesis", and have a private, grounded
+          conversation about it — then close the app and get back to studying.
+          No account to create, no subscription to cancel.</p>
+      </div>
+      <div class="card">
+        <h3>For ESL learners</h3>
+        <p>Plain language everywhere — "Secret key", not "API Key"; "AI Brain",
+          not "Model" — with generous whitespace and a calm visual style that
+          doesn't add cognitive load in a second language.</p>
+      </div>
+    </div>
+    <p class="docs-pointer">Full guides to features, settings, and troubleshooting live in the
+      <a href="user-guide.html">documentation</a>.</p>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <a href="user-guide.html">Documentation</a>
+      <a href="https://github.com/michael-borck/study-buddy">GitHub</a>
+      <a href="https://github.com/michael-borck/study-buddy/releases">Releases</a>
+      <span class="copyright">MIT © Michael Borck · part of the Buddy suite</span>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

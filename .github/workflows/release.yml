@@ -49,8 +49,8 @@ jobs:
     - name: Import macOS signing certificate
       if: matrix.os == 'macos-latest'
       env:
-        MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
-        MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+        MACOS_CERTIFICATE: ${{ secrets.CSC_LINK }}
+        MACOS_CERTIFICATE_PWD: ${{ secrets.CSC_KEY_PASSWORD }}
       run: |
         echo "$MACOS_CERTIFICATE" | base64 --decode > certificate.p12
         security create-keychain -p actions build.keychain
@@ -72,7 +72,7 @@ jobs:
         # NOTARIZE_*-prefixed (not APPLE_*) so electron-builder doesn't fire its
         # own buggy notarize wrapper; scripts/notarize.js reads these instead.
         NOTARIZE_APPLE_ID: ${{ secrets.APPLE_ID }}
-        NOTARIZE_APPLE_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+        NOTARIZE_APPLE_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
         NOTARIZE_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         
     - name: Upload release assets

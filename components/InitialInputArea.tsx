@@ -7,7 +7,6 @@ type TInputAreaProps = {
   promptValue: string;
   setPromptValue: React.Dispatch<React.SetStateAction<string>>;
   disabled?: boolean;
-  handleChat: (messages?: { role: string; content: string }[]) => void;
   ageGroup: string;
   setAgeGroup: React.Dispatch<React.SetStateAction<string>>;
   handleInitialChat: () => void;
@@ -56,7 +55,7 @@ const InitialInputArea: FC<TInputAreaProps> = ({
         <textarea
           ref={textareaRef}
           placeholder="Teach me about..."
-          className="block max-h-[200px] w-full resize-none rounded-l-soft border-r border-hairline bg-paper p-6 text-sm text-ink placeholder:text-ink-quiet sm:text-base"
+          className="block max-h-[200px] w-full resize-none rounded-l-soft border-r border-hairline bg-paper p-4 text-sm text-ink placeholder:text-ink-quiet sm:text-base"
           disabled={disabled}
           value={promptValue}
           required
@@ -83,7 +82,7 @@ const InitialInputArea: FC<TInputAreaProps> = ({
       <button
         disabled={disabled}
         type="submit"
-        className="relative flex size-[72px] w-[358px] shrink-0 items-center justify-center rounded-soft bg-ink text-paper transition-colors duration-normal hover:bg-accent disabled:pointer-events-none disabled:opacity-75 sm:ml-3 sm:w-[72px]"
+        className="relative flex h-[48px] w-full shrink-0 items-center justify-center rounded-soft bg-ink text-paper transition-colors duration-normal hover:bg-accent disabled:pointer-events-none disabled:opacity-75 sm:ml-3 sm:w-[48px]"
       >
         {disabled && (
           <div className="absolute inset-0 flex items-center justify-center">

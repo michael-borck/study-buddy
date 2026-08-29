@@ -1,6 +1,7 @@
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 import FinalInputArea from "./FinalInputArea";
+import { GradCapIcon } from "./GradCapIcon";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { strategies } from "@/utils/strategies";
 import {
@@ -384,7 +385,7 @@ export default function Chat({
               {displayMessages.map((message, index) =>
                 message.role === "assistant" ? (
                   <div className="group relative w-full" key={index}>
-                    <span className="absolute left-0 top-0 text-2xl">🎓</span>
+                    <GradCapIcon className="absolute left-0 top-1 h-5 w-5 text-accent" />
                     <ReactMarkdown className="w-full pl-10">
                       {message.content}
                     </ReactMarkdown>
@@ -515,7 +516,7 @@ export default function Chat({
         <button
           type="button"
           onClick={handleMic}
-          className={`flex h-[72px] w-[48px] shrink-0 items-center justify-center rounded-soft transition-colors duration-normal ${
+          className={`flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-soft transition-colors duration-normal ${
             isRecording
               ? "bg-error text-paper"
               : "border border-hairline text-ink-muted hover:border-hairline-strong hover:text-accent"

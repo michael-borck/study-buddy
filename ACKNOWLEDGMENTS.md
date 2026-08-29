@@ -49,12 +49,6 @@ Study Buddy is built upon the incredible work of many open source projects and c
 - **Description**: Beautiful typographic defaults for HTML you don't control
 - **Version**: 0.5.13
 
-### **[Headless UI for React](https://headlessui.com/)**
-- **Maintainer**: Tailwind Labs Inc.
-- **License**: MIT
-- **Description**: Completely unstyled, fully accessible UI components for React
-- **Version**: 2.1.2
-
 ### **[React Markdown](https://github.com/remarkjs/react-markdown)**
 - **Maintainer**: Titus Wormer
 - **License**: MIT
@@ -69,23 +63,11 @@ Study Buddy is built upon the incredible work of many open source projects and c
 - **Description**: The official Node.js library for the OpenAI API
 - **Version**: 4.52.7
 
-### **[Together AI SDK](https://github.com/togethercomputer/together-typescript)**
-- **Maintainer**: Together Computer
-- **License**: MIT
-- **Description**: TypeScript SDK for Together AI's API
-- **Version**: 0.6.0-alpha.3
-
 ### **[eventsource-parser](https://github.com/rexxars/eventsource-parser)**
 - **Maintainer**: Espen Hovlandsdal
 - **License**: MIT
 - **Description**: A streaming parser for server-sent events/eventsource streams
 - **Version**: 1.1.2
-
-### **[llama3-tokenizer-js](https://github.com/belladoreai/llama3-tokenizer-js)**
-- **Maintainer**: Belladore AI
-- **License**: MIT
-- **Description**: JavaScript tokenizer for Llama 3 models
-- **Version**: 1.1.3
 
 ## Data Validation & Parsing
 
@@ -94,12 +76,6 @@ Study Buddy is built upon the incredible work of many open source projects and c
 - **License**: MIT
 - **Description**: TypeScript-first schema declaration and validation library
 - **Version**: 3.23.8
-
-### **[zod-to-json-schema](https://github.com/StefanTerdell/zod-to-json-schema)**
-- **Maintainer**: Stefan Terdell
-- **License**: MIT
-- **Description**: Convert Zod schemas to JSON schemas
-- **Version**: 3.23.0
 
 ## Web Scraping & Content Processing
 

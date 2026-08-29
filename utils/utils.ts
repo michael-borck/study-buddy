@@ -1,7 +1,5 @@
-// import llama3Tokenizer from "llama3-tokenizer-js";
-
 export const cleanedText = (text: string) => {
-  let newText = text
+  return text
     .trim()
     .replace(/(\n){4,}/g, "\n\n\n")
     .replace(/\n\n/g, " ")
@@ -9,10 +7,6 @@ export const cleanedText = (text: string) => {
     .replace(/\t/g, "")
     .replace(/\n+(\s*\n)*/g, "\n")
     .substring(0, 100000);
-
-  // console.log(llama3Tokenizer.encode(newText).length);
-
-  return newText;
 };
 
 export async function fetchWithTimeout(

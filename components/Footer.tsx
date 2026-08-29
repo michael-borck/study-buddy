@@ -1,12 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
+import { GradCapIcon } from "./GradCapIcon";
 
 const Footer = () => {
   return (
     <div className="container flex min-h-[72px] flex-col items-center justify-between border-t border-hairline px-4 pb-3 pt-5 lg:min-h-[72px] lg:flex-row lg:px-0 lg:py-5">
       <div className="flex w-full items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <span className="text-2xl">🎓</span>
+          <GradCapIcon className="h-5 w-5 text-accent" />
           <span className="text-lg font-semibold text-ink">Study Buddy</span>
         </Link>
         <div className="flex items-center gap-3">

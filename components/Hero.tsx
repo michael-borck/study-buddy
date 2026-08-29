@@ -19,7 +19,6 @@ const PROVIDER_LABELS: Record<string, string> = {
 type THeroProps = {
   promptValue: string;
   setPromptValue: React.Dispatch<React.SetStateAction<string>>;
-  handleChat: (messages?: { role: string; content: string }[]) => void;
   ageGroup: string;
   setAgeGroup: React.Dispatch<React.SetStateAction<string>>;
   handleInitialChat: () => void;
@@ -36,7 +35,6 @@ type THeroProps = {
 const Hero: FC<THeroProps> = ({
   promptValue,
   setPromptValue,
-  handleChat,
   ageGroup,
   setAgeGroup,
   handleInitialChat,
@@ -387,7 +385,6 @@ const Hero: FC<THeroProps> = ({
             promptValue={promptValue}
             handleInitialChat={handleInitialChat}
             setPromptValue={setPromptValue}
-            handleChat={handleChat}
             ageGroup={ageGroup}
             setAgeGroup={setAgeGroup}
           />
@@ -418,25 +415,25 @@ const Hero: FC<THeroProps> = ({
 
         {/* Strategy selector */}
         <div className="mb-4 w-full">
-          <p className="mb-2 text-center text-xs font-medium uppercase tracking-widest text-ink-quiet">
-            How should I teach?
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            {strategies.map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => setStrategyId(s.id)}
-                aria-pressed={strategyId === s.id}
-                className={`rounded-soft px-3 py-1.5 text-sm transition-colors duration-normal ${
-                  strategyId === s.id
-                    ? "bg-ink text-paper"
-                    : "border border-hairline text-ink-muted hover:border-hairline-strong hover:text-ink"
-                }`}
-              >
-                {s.label}
-              </button>
-            ))}
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <label
+              htmlFor="strategy"
+              className="text-xs font-medium uppercase tracking-widest text-ink-quiet"
+            >
+              Teaching style
+            </label>
+            <select
+              id="strategy"
+              value={strategyId}
+              onChange={(e) => setStrategyId(e.target.value)}
+              className="rounded-soft border border-hairline bg-paper px-2 py-1.5 text-sm font-medium text-ink transition-colors duration-normal hover:border-hairline-strong focus:border-accent focus:outline-none focus:ring-[3px] focus:ring-accent-soft"
+            >
+              {strategies.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
           </div>
           <p className="mt-2 text-center text-xs text-ink-quiet">
             {selectedStrategy.description}
@@ -531,28 +528,11 @@ const Hero: FC<THeroProps> = ({
                 </span>
               )}
             </div>
-            <div className="mt-2 flex items-center justify-start gap-4">
-              <label className="flex cursor-pointer items-center gap-1.5 text-xs text-ink-muted">
-                <input
-                  type="radio"
-                  name="noteMode"
-                  checked={searchWeb}
-                  onChange={() => setSearchWeb(true)}
-                  className="h-3 w-3 cursor-pointer accent-accent"
-                />
-                Add to web search results
-              </label>
-              <label className="flex cursor-pointer items-center gap-1.5 text-xs text-ink-muted">
-                <input
-                  type="radio"
-                  name="noteMode"
-                  checked={!searchWeb}
-                  onChange={() => setSearchWeb(false)}
-                  className="h-3 w-3 cursor-pointer accent-accent"
-                />
-                Use only my notes
-              </label>
-            </div>
+            <p className="mt-2 text-xs text-ink-quiet">
+              {searchWeb
+                ? 'Your notes will be combined with web sources. Untick "Search the web" above to teach only from your notes.'
+                : "Web search is off — the tutor will teach only from your notes."}
+            </p>
           </div>
         )}
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 
@@ -364,21 +365,17 @@ Click "Save and apply" to save your changes. Settings take effect immediately �
 
 ## Navigation
 
-| Shortcut | Action |
-|----------|--------|
-| **Tab** | Move to the next interactive element |
-| **Shift + Tab** | Move to the previous element |
-| **Space** | Activate the focused button |
-| **Escape** | Close open panels or stop audio |
+- **Tab** — Move to the next interactive element
+- **Shift + Tab** — Move to the previous element
+- **Space** — Activate the focused button
+- **Escape** — Close open panels or stop audio
 
 ## Text editing
 
-| Shortcut | Action |
-|----------|--------|
-| **Ctrl/Cmd + C** | Copy selected text |
-| **Ctrl/Cmd + V** | Paste from clipboard |
-| **Ctrl/Cmd + A** | Select all text in the input |
-| **Ctrl/Cmd + Z** | Undo last text change |
+- **Ctrl/Cmd + C** — Copy selected text
+- **Ctrl/Cmd + V** — Paste from clipboard
+- **Ctrl/Cmd + A** — Select all text in the input
+- **Ctrl/Cmd + Z** — Undo last text change
 
 ## Tips
 
@@ -525,24 +522,20 @@ npm run dev
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| npm run dev | Start Next.js development server |
-| npm run electron-dev | Start Next.js + Electron with hot reload |
-| npm run build | Build Next.js for production |
-| npm run dist | Build Electron distributables |
-| npm run lint | Run ESLint |
+- **npm run dev** — Start Next.js development server
+- **npm run electron-dev** — Start Next.js + Electron with hot reload
+- **npm run build** — Build Next.js for production
+- **npm run dist** — Build Electron distributables
+- **npm run lint** — Run ESLint
 
 ## Environment variables
 
 You can configure defaults via environment variables, but most users will use the in-app Settings page instead.
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| LLM_PROVIDER | ollama | AI provider name |
-| OLLAMA_BASE_URL | http://localhost:11434 | Ollama server address |
-| OLLAMA_MODEL | llama3.1:8b | Default model |
-| SEARCH_ENGINE | disabled | Search engine |
+- **LLM_PROVIDER** — ollama (default) — AI provider name
+- **OLLAMA_BASE_URL** — http://localhost:11434 — Ollama server address
+- **OLLAMA_MODEL** — llama3.1:8b — Default model
+- **SEARCH_ENGINE** — disabled — Search engine
 
 ## Code style
 
@@ -565,14 +558,14 @@ See the GitHub repository for full contribution guidelines.
 };
 
 const navigationItems = [
-  { id: 'overview', title: 'Overview', icon: '📖' },
-  { id: 'user-guide', title: 'User Guide', icon: '👤' },
-  { id: 'features', title: 'Features', icon: '⭐' },
-  { id: 'settings', title: 'Settings', icon: '⚙️' },
-  { id: 'troubleshooting', title: 'Troubleshooting', icon: '🔧' },
-  { id: 'shortcuts', title: 'Shortcuts', icon: '⌨️' },
-  { id: 'technical', title: 'Technical', icon: '🔬' },
-  { id: 'development', title: 'Development', icon: '💻' },
+  { id: 'overview', title: 'Overview' },
+  { id: 'user-guide', title: 'User Guide' },
+  { id: 'features', title: 'Features' },
+  { id: 'settings', title: 'Settings' },
+  { id: 'troubleshooting', title: 'Troubleshooting' },
+  { id: 'shortcuts', title: 'Shortcuts' },
+  { id: 'technical', title: 'Technical' },
+  { id: 'development', title: 'Development' },
 ];
 
 export default function DocsPage() {
@@ -617,7 +610,6 @@ export default function DocsPage() {
                       : 'text-ink-muted hover:bg-accent-soft hover:text-ink'
                   }`}
                 >
-                  <span className="mr-3 text-lg">{item.icon}</span>
                   {item.title}
                 </button>
               ))}
@@ -660,63 +652,9 @@ export default function DocsPage() {
           <main className="flex-1">
             <div className="mx-auto max-w-4xl px-4 py-8 lg:px-8">
               <div className="rounded-soft border border-hairline p-8">
-                <div className="prose max-w-none">
-                  <div className="whitespace-pre-wrap leading-relaxed text-ink">
-                    {currentContent.content.split('\n').map((line, index) => {
-                      if (line.startsWith('# ')) {
-                        return <h1 key={index} className="mb-4 mt-8 text-3xl font-semibold text-ink first:mt-0">{line.substring(2)}</h1>;
-                      }
-                      if (line.startsWith('## ')) {
-                        return <h2 key={index} className="mb-3 mt-6 text-2xl font-semibold text-ink">{line.substring(3)}</h2>;
-                      }
-                      if (line.startsWith('### ')) {
-                        return <h3 key={index} className="mb-2 mt-5 text-xl font-medium text-ink">{line.substring(4)}</h3>;
-                      }
-
-                      if (line.startsWith('')) {
-                        return null;
-                      }
-
-                      if (line.startsWith('- ')) {
-                        return <li key={index} className="ml-4 text-ink-muted">{line.substring(2)}</li>;
-                      }
-
-                      if (line.includes('**')) {
-                        const parts = line.split('**');
-                        return (
-                          <p key={index} className="mb-2 text-ink-muted">
-                            {parts.map((part, i) =>
-                              i % 2 === 1 ? <strong key={i} className="font-semibold text-ink">{part}</strong> : part
-                            )}
-                          </p>
-                        );
-                      }
-
-                      if (line.includes('[') && line.includes('](')) {
-                        const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
-                        const parts = line.split(linkRegex);
-                        return (
-                          <p key={index} className="mb-2 text-ink-muted">
-                            {parts.map((part, i) => {
-                              if (i % 3 === 1) {
-                                return <a key={i} href={parts[i + 1]} className="text-ink underline transition-colors duration-normal hover:text-accent" target="_blank" rel="noopener noreferrer">{part}</a>;
-                              } else if (i % 3 === 2) {
-                                return null;
-                              }
-                              return part;
-                            })}
-                          </p>
-                        );
-                      }
-
-                      if (line.trim()) {
-                        return <p key={index} className="mb-2 text-ink-muted">{line}</p>;
-                      }
-
-                      return <div key={index} className="h-2" />;
-                    })}
-                  </div>
-                </div>
+                <ReactMarkdown className="prose prose-headings:text-ink prose-p:text-ink-muted prose-li:text-ink-muted prose-strong:text-ink prose-a:text-ink max-w-none">
+                  {currentContent.content}
+                </ReactMarkdown>
               </div>
             </div>
           </main>

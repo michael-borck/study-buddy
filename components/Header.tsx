@@ -1,11 +1,12 @@
 import Link from "next/link";
 import packageJson from "../package.json";
+import { GradCapIcon } from "./GradCapIcon";
 
 const Header = () => {
   return (
     <div className="container flex h-[60px] shrink-0 items-center justify-between px-4 lg:h-[80px] lg:px-0">
       <Link href="/" className="flex items-center gap-2">
-        <span className="text-4xl">🎓</span>
+        <GradCapIcon className="h-7 w-7 text-accent" />
         <span className="text-xl font-semibold text-ink">Study Buddy</span>
         <span className="text-xs text-ink-quiet">v{packageJson.version}</span>
       </Link>

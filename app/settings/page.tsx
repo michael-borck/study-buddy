@@ -396,7 +396,7 @@ export default function SettingsPage() {
                 </button>
               </div>
               {models.length > 0 && (
-                <p className="mt-1 text-sm text-accent">
+                <p className="mt-1 text-sm text-ink-muted">
                   Found {models.length} models. Select one or clear to type your own.
                 </p>
               )}
@@ -431,7 +431,7 @@ export default function SettingsPage() {
 
             {settings.searchEngine === "duckduckgo" && (
               <div className="mb-4">
-                <p className="mb-2 text-sm text-accent">DuckDuckGo is free and requires no secret key</p>
+                <p className="mb-2 text-sm text-ink-muted">DuckDuckGo is free and requires no secret key</p>
                 <button
                   type="button"
                   onClick={testSearch}

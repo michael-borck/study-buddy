@@ -115,16 +115,6 @@ export default function LegalPage() {
 
               <div className="rounded-soft border border-hairline p-4">
                 <h3 className="font-semibold text-ink">
-                  <a href="https://headlessui.com/" target="_blank" rel="noopener noreferrer" className="underline transition-colors duration-normal hover:text-accent">
-                    Headless UI
-                  </a>
-                </h3>
-                <p className="text-sm text-ink-quiet">Tailwind Labs Inc. &middot; MIT Licence</p>
-                <p className="mt-1 text-sm text-ink-muted">Unstyled, accessible UI components</p>
-              </div>
-
-              <div className="rounded-soft border border-hairline p-4">
-                <h3 className="font-semibold text-ink">
                   <a href="https://github.com/remarkjs/react-markdown" target="_blank" rel="noopener noreferrer" className="underline transition-colors duration-normal hover:text-accent">
                     React Markdown
                   </a>
@@ -151,32 +141,12 @@ export default function LegalPage() {
 
               <div className="rounded-soft border border-hairline p-4">
                 <h3 className="font-semibold text-ink">
-                  <a href="https://github.com/togethercomputer/together-typescript" target="_blank" rel="noopener noreferrer" className="underline transition-colors duration-normal hover:text-accent">
-                    Together AI SDK
-                  </a>
-                </h3>
-                <p className="text-sm text-ink-quiet">Together Computer &middot; MIT Licence</p>
-                <p className="mt-1 text-sm text-ink-muted">TypeScript SDK for Together AI&apos;s API</p>
-              </div>
-
-              <div className="rounded-soft border border-hairline p-4">
-                <h3 className="font-semibold text-ink">
                   <a href="https://github.com/rexxars/eventsource-parser" target="_blank" rel="noopener noreferrer" className="underline transition-colors duration-normal hover:text-accent">
                     eventsource-parser
                   </a>
                 </h3>
                 <p className="text-sm text-ink-quiet">Espen Hovlandsdal &middot; MIT Licence</p>
                 <p className="mt-1 text-sm text-ink-muted">Streaming parser for server-sent events</p>
-              </div>
-
-              <div className="rounded-soft border border-hairline p-4">
-                <h3 className="font-semibold text-ink">
-                  <a href="https://github.com/belladoreai/llama3-tokenizer-js" target="_blank" rel="noopener noreferrer" className="underline transition-colors duration-normal hover:text-accent">
-                    llama3-tokenizer-js
-                  </a>
-                </h3>
-                <p className="text-sm text-ink-quiet">Belladore AI &middot; MIT Licence</p>
-                <p className="mt-1 text-sm text-ink-muted">JavaScript tokeniser for Llama 3 models</p>
               </div>
             </div>
 

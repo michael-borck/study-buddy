@@ -64,7 +64,7 @@ const FinalInputArea: FC<TInputAreaProps> = ({
         <textarea
           ref={textareaRef}
           placeholder="Follow up question"
-          className="block max-h-[200px] w-full resize-none rounded-l-soft border-r border-hairline bg-paper p-6 text-ink placeholder:text-ink-quiet"
+          className="block max-h-[200px] w-full resize-none rounded-l-soft border-r border-hairline bg-paper p-4 text-ink placeholder:text-ink-quiet"
           value={promptValue}
           onKeyDown={handleKeyDown}
           required
@@ -78,7 +78,7 @@ const FinalInputArea: FC<TInputAreaProps> = ({
           type="button"
           onClick={onStop}
           title="Stop generating"
-          className="relative ml-3 flex size-[72px] shrink-0 items-center justify-center rounded-soft bg-ink text-paper transition-colors duration-normal hover:bg-error"
+          className="relative ml-3 flex size-[48px] shrink-0 items-center justify-center rounded-soft bg-ink text-paper transition-colors duration-normal hover:bg-error"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <rect x="6" y="6" width="12" height="12" rx="2" />
@@ -88,7 +88,7 @@ const FinalInputArea: FC<TInputAreaProps> = ({
         <button
           type="submit"
           title="Send"
-          className="relative ml-3 flex size-[72px] shrink-0 items-center justify-center rounded-soft bg-ink text-paper transition-colors duration-normal hover:bg-accent"
+          className="relative ml-3 flex size-[48px] shrink-0 items-center justify-center rounded-soft bg-ink text-paper transition-colors duration-normal hover:bg-accent"
         >
           <Image
             unoptimized

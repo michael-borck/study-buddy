@@ -19,33 +19,43 @@ exports.default = async function notarizing(context) {
     return;
   }
 
-  // Read NOTARIZE_*-prefixed env vars (not APPLE_*) so electron-builder's
-  // auto-detection doesn't fire its own buggy notarize wrapper alongside ours.
-  const appleId = process.env.NOTARIZE_APPLE_ID;
-  const appleIdPassword = process.env.NOTARIZE_APPLE_PASSWORD;
-  const teamId = process.env.NOTARIZE_APPLE_TEAM_ID;
-
-  if (!appleId || !appleIdPassword || !teamId) {
-    console.log(
-      "[notarize] Skipping — NOTARIZE_APPLE_ID / NOTARIZE_APPLE_PASSWORD / NOTARIZE_APPLE_TEAM_ID not all set",
-    );
-    return;
-  }
-
   const appName = context.packager.appInfo.productFilename;
   const appPath = `${appOutDir}/${appName}.app`;
   const appBundleId = context.packager.appInfo.id;
 
-  console.log(`[notarize] Notarizing ${appPath} (bundleId=${appBundleId}, teamId=${teamId})`);
+  const apiKeyPath = process.env.APPLE_API_KEY_PATH;
+  const apiKeyId = process.env.APPLE_API_KEY;
+  const apiIssuer = process.env.APPLE_API_ISSUER;
+  const appleId = process.env.NOTARIZE_APPLE_ID;
+  const appleIdPassword = process.env.NOTARIZE_APPLE_PASSWORD;
+  const teamId = process.env.NOTARIZE_APPLE_TEAM_ID;
 
-  await notarize({
-    tool: "notarytool",
-    appBundleId,
-    appPath,
-    appleId,
-    appleIdPassword,
-    teamId,
-  });
+  console.log(`[notarize] Notarizing ${appPath} (bundleId=${appBundleId})`);
+
+  if (apiKeyPath && apiKeyId && apiIssuer) {
+    console.log("[notarize] using App Store Connect API key");
+    await notarize({
+      tool: "notarytool",
+      appBundleId,
+      appPath,
+      appleApiKey: apiKeyPath,
+      appleApiKeyId: apiKeyId,
+      appleApiIssuer: apiIssuer,
+    });
+  } else if (appleId && appleIdPassword && teamId) {
+    console.log("[notarize] using Apple ID");
+    await notarize({
+      tool: "notarytool",
+      appBundleId,
+      appPath,
+      appleId,
+      appleIdPassword,
+      teamId,
+    });
+  } else {
+    console.log("[notarize] Skipping — no API key or Apple ID credentials");
+    return;
+  }
 
   console.log("[notarize] Notarisation accepted; stapling ticket");
 

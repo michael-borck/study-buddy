@@ -34,6 +34,8 @@ Study Buddy provides a comprehensive AI-powered tutoring experience with privacy
 - **SearXNG**: Self-hosted open-source metasearch engine
 - **Brave Search**: Independent search index with ad-free results
 - **Disabled**: Chat-only mode without web search
+- **Automatic fallback**: Try the next configured provider when one fails or returns nothing
+- **Usage and cost disclosure**: Free-tier notes, provider dashboard links, and per-provider test results
 
 **Content Processing**
 - Automatic web page content extraction

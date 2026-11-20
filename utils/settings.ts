@@ -19,8 +19,15 @@ export const SettingsSchema = z.object({
   llmBaseUrl: z.string().default("http://localhost:11434"),
   llmModel: z.string().default("llama3.1:8b"),
   searchEngine: z.string().default("duckduckgo"),
+  // Legacy single key, kept so older saved settings and headers still work.
   searchApiKey: z.string().default(""),
+  braveApiKey: z.string().default(""),
+  serperApiKey: z.string().default(""),
   searchUrl: z.string().default(""),
+  searchFallbackEnabled: z.boolean().default(true),
+  searchFallbackOrder: z
+    .string()
+    .default("brave,serper,searxng,duckduckgo"),
   defaultEducationLevel: z.string().default("Middle School"),
   contextSize: z.string().default("small"),
   voiceGender: z.string().default("female"),
@@ -69,6 +76,25 @@ export function parseSettings(raw: unknown): AppSettings {
     parsed.defaultEducationLevel;
   parsed.searchEngine =
     LEGACY_SEARCH_ENGINES[parsed.searchEngine] ?? parsed.searchEngine;
+
+  // The settings API masks keys with "***". Treat a masked value as absent so
+  // the server can fall back to its environment keys.
+  const cleanKey = (value: string) => (value === "***" ? "" : value);
+  parsed.searchApiKey = cleanKey(parsed.searchApiKey);
+  parsed.braveApiKey = cleanKey(parsed.braveApiKey);
+  parsed.serperApiKey = cleanKey(parsed.serperApiKey);
+
+  // Migrate the old single key to the provider it belonged to.
+  if (!parsed.braveApiKey && parsed.searchEngine === "brave" && parsed.searchApiKey) {
+    parsed.braveApiKey = parsed.searchApiKey;
+  }
+  if (!parsed.serperApiKey && parsed.searchEngine === "serper" && parsed.searchApiKey) {
+    parsed.serperApiKey = parsed.searchApiKey;
+  }
+
+  parsed.searchFallbackOrder =
+    parsed.searchFallbackOrder.trim() || DEFAULT_SETTINGS.searchFallbackOrder;
+
   return parsed;
 }
 
@@ -86,7 +112,13 @@ export function loadSettings(): AppSettings {
     llmModel: getProviderModel(provider),
     searchEngine: process.env.SEARCH_ENGINE || DEFAULT_SETTINGS.searchEngine,
     searchApiKey: getSearchApiKey(),
+    braveApiKey: process.env.BRAVE_API_KEY || "",
+    serperApiKey: process.env.SERPER_API_KEY || "",
     searchUrl: process.env.SEARXNG_URL || DEFAULT_SETTINGS.searchUrl,
+    searchFallbackEnabled:
+      process.env.SEARCH_FALLBACK_ENABLED !== "0",
+    searchFallbackOrder:
+      process.env.SEARCH_FALLBACK_ORDER || DEFAULT_SETTINGS.searchFallbackOrder,
     defaultEducationLevel:
       process.env.DEFAULT_EDUCATION_LEVEL || DEFAULT_SETTINGS.defaultEducationLevel,
   });
@@ -102,7 +134,16 @@ export function resolveSettings(request: Request): AppSettings {
   const header = request.headers.get("X-StudyBuddy-Settings");
   if (header) {
     try {
-      return parseSettings(JSON.parse(header));
+      const parsed = parseSettings(JSON.parse(header));
+      const env = loadSettings();
+      // A browser that has no local key can still use the server's key. This
+      // is what makes the hosted "try before you download" version work.
+      return {
+        ...parsed,
+        braveApiKey: parsed.braveApiKey || env.braveApiKey,
+        serperApiKey: parsed.serperApiKey || env.serperApiKey,
+        searchUrl: parsed.searchUrl || env.searchUrl,
+      };
     } catch (e) {
       console.warn("Invalid X-StudyBuddy-Settings header, falling back to env:", e);
     }

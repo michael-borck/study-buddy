@@ -9,10 +9,16 @@ Configure Study Buddy to work best for your needs and preferences.
 - **Together AI**: Cost-effective, supports open-source models
 - **Custom**: Use any OpenAI-compatible endpoint
 
-### 2. Configure Search Engine
+### 2. Configure Search
 - **DuckDuckGo**: Privacy-focused, no setup required
+- **Brave**: Keyed API with a monthly free allowance
+- **Serper**: Keyed Google results with a free trial
 - **SearXNG**: Self-hosted option for maximum privacy
 - **Disabled**: Chat-only mode without web search
+
+Study Buddy tries the primary provider first, then the fallback order
+(`brave,serper,searxng,duckduckgo` by default). Change the order in Settings,
+or turn fallback off.
 
 ### 3. Set Education Level
 Choose your default learning level from Elementary to Graduate.
@@ -62,13 +68,28 @@ For self-hosted or third-party AI services:
 - **Limitations**: May be rate-limited during heavy usage
 - **Best For**: Privacy-conscious users, no API costs
 
+### Brave Search
+1. **Account**: Sign up at [api-dashboard.search.brave.com](https://api-dashboard.search.brave.com/)
+2. **API Key**: Create a key in the dashboard
+3. **Credits**: $5 free credit each month, then $5 per 1,000 requests
+4. **Configure**: Paste the key into Brave API key in Settings
+
+**Features**: Independent index, privacy-focused, good default fallback
+
 ### Serper (Google Search)
 1. **Account**: Sign up at [serper.dev](https://serper.dev/)
 2. **API Key**: Generate from dashboard
-3. **Credits**: Monitor usage to avoid overages
-4. **Configure**: Enter key in settings
+3. **Credits**: 2,500 free queries, then prepaid credits
+4. **Configure**: Paste the key into Serper API key in Settings
 
 **Features**: Access to Google search results via API
+
+### Usage and costs
+Brave and Serper are paid services with free allowances. Search queries leave
+this device and go to the selected provider. Monitor usage and billing in the
+provider dashboard. SearXNG is free to self-host, but its upstream engines can
+rate-limit and suspend temporarily. Study Buddy cools down a rate-limited
+provider and tries the next one.
 
 ### SearXNG (Self-Hosted)
 For maximum privacy and control:

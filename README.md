@@ -97,7 +97,7 @@ study-buddy/
 - **Desktop:** Electron
 - **Design:** Studio Calm (shared with [Talk Buddy](https://github.com/michael-borck/talk-buddy))
 - **AI:** Ollama, OpenAI, Anthropic, Google, Groq, Together AI
-- **Search:** DuckDuckGo (default), Brave, Serper, SearXNG
+- **Search:** DuckDuckGo (default), Brave, Serper, SearXNG, with automatic fallback
 
 ### Build for distribution
 

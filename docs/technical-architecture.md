@@ -66,6 +66,11 @@ interface AppSettings {
   llmApiKey: string;
   llmBaseUrl: string;
   searchEngine: 'serper' | 'searxng' | 'duckduckgo' | 'brave';
+  braveApiKey: string;
+  serperApiKey: string;
+  searchUrl: string;
+  searchFallbackEnabled: boolean;
+  searchFallbackOrder: string;
   defaultEducationLevel: string;
 }
 ```
@@ -133,6 +138,12 @@ interface SourcesResponse {
 - **SearXNG**: Self-hosted open-source metasearch
 - **DuckDuckGo**: Privacy-focused search scraping
 - **Brave**: Independent search index API
+
+**Fallback chain**: the primary provider runs first, then the configured
+fallback order (`brave,serper,searxng,duckduckgo` by default). Unconfigured
+providers are skipped, rate-limited providers cool down for 60 seconds, and
+the first provider with usable results stops the chain. Results are
+deduplicated by normalised URL and cached briefly.
 
 #### `/api/settings`
 **Purpose**: Manage application configuration

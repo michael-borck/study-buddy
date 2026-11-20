@@ -1,11 +1,12 @@
-import { SearchConfig, SearchProvider, SearchResult } from "./types";
+import { SearchConfig, SearchOptions, SearchProvider, SearchResult } from "./types";
 
 // DuckDuckGo HTML scraping — free, no API key required.
 export class DuckDuckGoSearch implements SearchProvider {
   name = "duckduckgo";
   constructor(private config: SearchConfig) {}
 
-  async search(question: string): Promise<SearchResult[]> {
+  async search(question: string, options: SearchOptions = {}): Promise<SearchResult[]> {
+    const requested = Math.min(Math.max(options.limit ?? 9, 1), 30);
     const params = new URLSearchParams({
       q: question,
       t: "h_", // lite version
@@ -63,7 +64,7 @@ export class DuckDuckGoSearch implements SearchProvider {
         !this.config.excludedSites.some((s) => url.includes(s))
       ) {
         results.push({ name: title.substring(0, 200), url });
-        if (results.length >= 9) break;
+        if (results.length >= requested) break;
       }
     }
 

@@ -1,9 +1,15 @@
 import { z } from "zod";
-import { SearchConfig, SearchProvider, SearchResult } from "./types";
+import { SearchConfig, SearchOptions, SearchProvider, SearchResult } from "./types";
 
 const BraveSchema = z.object({
   web: z.object({
-    results: z.array(z.object({ title: z.string(), url: z.string() })),
+    results: z.array(
+      z.object({
+        title: z.string(),
+        url: z.string(),
+        description: z.string().optional(),
+      }),
+    ),
   }),
 });
 
@@ -11,13 +17,14 @@ export class BraveSearch implements SearchProvider {
   name = "brave";
   constructor(private config: SearchConfig) {}
 
-  async search(question: string): Promise<SearchResult[]> {
+  async search(question: string, options: SearchOptions = {}): Promise<SearchResult[]> {
     const apiKey = this.config.apiKey;
     if (!apiKey) throw new Error("Brave Search API key is required");
 
+    const requested = Math.min(Math.max(options.limit ?? 9, 1), 20);
     const params = new URLSearchParams({
       q: question,
-      count: "9",
+      count: String(requested),
       text_decorations: "false",
       search_lang: "en",
       country: "US",
@@ -44,7 +51,12 @@ export class BraveSearch implements SearchProvider {
     const data = BraveSchema.parse(await response.json());
     return data.web.results
       .filter((r) => !this.config.excludedSites.some((s) => r.url.includes(s)))
-      .slice(0, 9)
-      .map((r) => ({ name: r.title, url: r.url }));
+      .slice(0, requested)
+      .map((r, i) => ({
+        name: r.title,
+        url: r.url,
+        snippet: r.description,
+        position: i + 1,
+      }));
   }
 }

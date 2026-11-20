@@ -28,6 +28,8 @@ export async function GET() {
       ...settings,
       llmApiKey: settings.llmApiKey ? "***" : "",
       searchApiKey: settings.searchApiKey ? "***" : "",
+      braveApiKey: settings.braveApiKey ? "***" : "",
+      serperApiKey: settings.serperApiKey ? "***" : "",
     };
     return NextResponse.json(safeSettings);
   } catch (error) {

@@ -1,24 +1,18 @@
 import { NextResponse } from "next/server";
 import { resolveSettings } from "@/utils/settings";
-import { createSearchProvider } from "@/utils/search";
+import { searchWithFallback } from "@/utils/search";
 
 export async function POST(request: Request) {
   const { question } = await request.json();
   const settings = resolveSettings(request);
 
-  // No adapter => search disabled or unknown engine => no results.
-  const provider = createSearchProvider(settings);
-  if (!provider) {
-    return NextResponse.json([]);
-  }
-
   const finalQuestion = `what is ${question}`;
 
   try {
-    const results = await provider.search(finalQuestion);
-    return NextResponse.json(results);
+    const outcome = await searchWithFallback(settings, finalQuestion);
+    return NextResponse.json(outcome);
   } catch (e: any) {
-    console.error(`${provider.name} search failed:`, e);
+    console.error("Search chain failed:", e);
     return NextResponse.json(
       { error: e?.message || "Search failed" },
       { status: 500 },

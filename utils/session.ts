@@ -117,7 +117,10 @@ export async function prepareSession(
         body: JSON.stringify({ question: topic }),
       });
       if (res.ok) {
-        sources = await res.json();
+        const data = await res.json();
+        // Older servers returned a bare array; new servers return
+        // { results, attempts } so the UI can explain fallbacks.
+        sources = Array.isArray(data) ? data : data.results ?? [];
         searchOk = true;
       }
     } catch (e) {

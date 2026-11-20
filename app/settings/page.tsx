@@ -143,43 +143,21 @@ export default function SettingsPage() {
       return;
     }
 
-    if (settings.searchEngine === "searxng" && !settings.searchUrl) {
+    if (settings.searchEngine === "searxng" && !settings.searchUrl.trim()) {
       setTestResult({
         type: 'error',
-        message: 'Please enter a search server address first'
+        message: 'Please enter a SearXNG server address first'
       });
       setTimeout(() => setTestResult(null), 3000);
       return;
     }
 
-    if ((settings.searchEngine === "serper" || settings.searchEngine === "brave") && !settings.searchApiKey) {
-      const engineName = settings.searchEngine === "serper" ? "Serper" : "Brave";
-      setTestResult({
-        type: 'error',
-        message: `Please enter your ${engineName} secret key first`
-      });
-      setTimeout(() => setTestResult(null), 3000);
-      return;
-    }
+    // Brave and Serper without a key are reported by the chain as skipped,
+    // which lets the user test the fallback path too.
 
     setTestingSearch(true);
     setTestResult(null);
     try {
-      if (settings.searchEngine === "searxng") {
-        console.log(`Testing SearXNG connectivity to: ${settings.searchUrl}`);
-        try {
-          const testUrl = new URL(settings.searchUrl);
-          console.log(`Testing basic connectivity to: ${testUrl.origin}`);
-          const basicTest = await fetch(testUrl.origin, {
-            method: 'HEAD',
-            mode: 'no-cors',
-          });
-          console.log('Basic connectivity test completed');
-        } catch (basicError) {
-          console.warn('Basic connectivity test failed:', basicError);
-        }
-      }
-
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
       };
@@ -194,16 +172,38 @@ export default function SettingsPage() {
       });
 
       if (response.ok) {
-        const results = await response.json();
-        if (results && results.length > 0) {
+        const data = await response.json();
+        const results = Array.isArray(data) ? data : data.results ?? [];
+        const attempts: Array<{
+          provider: string;
+          status: string;
+          count: number;
+          error?: string;
+          reason?: string;
+        }> = Array.isArray(data) ? [] : data.attempts ?? [];
+        const summary = attempts
+          .map((attempt) => {
+            const detail =
+              attempt.status === 'ok'
+                ? ` (${attempt.count})`
+                : attempt.error
+                  ? ` (${attempt.error.slice(0, 80)})`
+                  : attempt.reason
+                    ? ` (${attempt.reason})`
+                    : '';
+            return `${attempt.provider}: ${attempt.status}${detail}`;
+          })
+          .join('; ');
+        const used = results[0]?.provider;
+        if (results.length > 0) {
           setTestResult({
             type: 'success',
-            message: `Search test successful! Found ${results.length} results using ${settings.searchEngine}.`
+            message: `Found ${results.length} results${used ? ` via ${used}` : ''}.${summary ? ` ${summary}` : ''}`
           });
         } else {
           setTestResult({
             type: 'warning',
-            message: 'Search connected but returned no results. This might be normal for the test query.'
+            message: `Search returned no results.${summary ? ` ${summary}` : ''}`
           });
         }
       } else {
@@ -411,92 +411,148 @@ export default function SettingsPage() {
             </div>
 
             <div className="mb-4">
-              <label className={labelClasses}>
-                Search provider
-              </label>
+              <label className={labelClasses}>Primary search provider</label>
               <select
                 value={settings.searchEngine}
-                onChange={(e) => setSettings({...settings, searchEngine: e.target.value})}
+                onChange={(e) => setSettings({ ...settings, searchEngine: e.target.value })}
                 className={inputClasses}
               >
-                {searchEngines.map(engine => (
+                {searchEngines.map((engine) => (
                   <option key={engine.value} value={engine.value}>
                     {engine.label}
                   </option>
                 ))}
               </select>
+              <p className="mt-1 text-sm text-ink-quiet">
+                The primary provider runs first. If it fails or returns nothing,
+                the fallback order below is tried.
+              </p>
             </div>
 
-            {settings.searchEngine === "duckduckgo" && (
-              <div className="mb-4">
-                <p className="mb-2 text-sm text-ink-muted">DuckDuckGo is free and requires no secret key</p>
-                <button
-                  type="button"
-                  onClick={testSearch}
-                  disabled={testingSearch}
-                  className="rounded-soft border border-hairline px-4 py-2 text-sm text-ink transition-colors duration-normal hover:border-hairline-strong hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {testingSearch ? "Testing..." : "Test DuckDuckGo search"}
-                </button>
+            <div className="mb-4 grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className={labelClasses}>Brave API key</label>
+                <input
+                  type="password"
+                  value={settings.braveApiKey}
+                  onChange={(e) => setSettings({ ...settings, braveApiKey: e.target.value })}
+                  placeholder="Brave Search API key"
+                  className={inputClasses}
+                />
               </div>
-            )}
+              <div>
+                <label className={labelClasses}>Serper API key</label>
+                <input
+                  type="password"
+                  value={settings.serperApiKey}
+                  onChange={(e) => setSettings({ ...settings, serperApiKey: e.target.value })}
+                  placeholder="Serper API key"
+                  className={inputClasses}
+                />
+              </div>
+            </div>
 
-            {settings.searchEngine === "searxng" && (
-              <div className="mb-4">
-                <label className={labelClasses}>
-                  Search server address
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="url"
-                    value={settings.searchUrl}
-                    onChange={(e) => setSettings({...settings, searchUrl: e.target.value})}
-                    placeholder="https://your-searxng-server.com"
-                    spellCheck={false}
-                    className={`flex-1 ${inputClasses}`}
-                  />
-                  <button
-                    type="button"
-                    onClick={testSearch}
-                    disabled={testingSearch || !settings.searchUrl}
-                    className="rounded-soft border border-hairline px-4 py-3 text-ink transition-colors duration-normal hover:border-hairline-strong hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {testingSearch ? "..." : "Test"}
-                  </button>
-                </div>
-                <p className="mt-1 text-sm text-ink-quiet">
-                  Click Test to check your SearXNG server connectivity
-                </p>
-              </div>
-            )}
+            <div className="mb-4">
+              <label className={labelClasses}>SearXNG server address (optional)</label>
+              <input
+                type="url"
+                value={settings.searchUrl}
+                onChange={(e) => setSettings({ ...settings, searchUrl: e.target.value })}
+                placeholder="https://your-searxng-server.com"
+                spellCheck={false}
+                className={inputClasses}
+              />
+            </div>
 
-            {(settings.searchEngine === "serper" || settings.searchEngine === "brave") && (
-              <div className="mb-4">
-                <label className={labelClasses}>
-                  {settings.searchEngine === "serper" ? "Serper secret key" : "Brave secret key"}
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="password"
-                    value={settings.searchApiKey}
-                    onChange={(e) => setSettings({...settings, searchApiKey: e.target.value})}
-                    placeholder="Enter your secret key"
-                    className={`flex-1 ${inputClasses}`}
-                  />
-                  <button
-                    type="button"
-                    onClick={testSearch}
-                    disabled={testingSearch || !settings.searchApiKey}
-                    className="rounded-soft border border-hairline px-4 py-3 text-ink transition-colors duration-normal hover:border-hairline-strong hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+            <label className="mb-4 flex cursor-pointer items-start gap-3">
+              <input
+                type="checkbox"
+                checked={settings.searchFallbackEnabled}
+                onChange={(e) =>
+                  setSettings({ ...settings, searchFallbackEnabled: e.target.checked })
+                }
+                className="mt-1"
+              />
+              <span>
+                <span className="block text-sm font-medium text-ink">
+                  Automatic fallback
+                </span>
+                <span className="block text-sm text-ink-quiet">
+                  Try the next configured provider when one fails or returns no results.
+                </span>
+              </span>
+            </label>
+
+            <div className="mb-4">
+              <label className={labelClasses}>Fallback order</label>
+              <input
+                type="text"
+                value={settings.searchFallbackOrder}
+                onChange={(e) =>
+                  setSettings({ ...settings, searchFallbackOrder: e.target.value })
+                }
+                disabled={!settings.searchFallbackEnabled}
+                placeholder="brave,serper,searxng,duckduckgo"
+                spellCheck={false}
+                className={`${inputClasses} disabled:cursor-not-allowed disabled:opacity-50`}
+              />
+              <p className="mt-1 text-sm text-ink-quiet">
+                Comma-separated. Brave and Serper need keys; SearXNG needs a URL;
+                DuckDuckGo is free. Remove a provider to disable it.
+              </p>
+            </div>
+
+            <div className="mb-4 rounded-soft border border-hairline bg-paper-warm p-4 text-sm text-ink-muted">
+              <p className="mb-2 font-medium text-ink">Usage, rate limits and cost</p>
+              <ul className="list-disc space-y-1 pl-5">
+                <li>
+                  Brave: $5 free credit each month, then $5 per 1,000 requests.{" "}
+                  <a
+                    className="underline decoration-dotted hover:text-accent"
+                    href="https://api-dashboard.search.brave.com/app/keys"
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    {testingSearch ? "..." : "Test"}
-                  </button>
-                </div>
-                <p className="mt-1 text-sm text-ink-quiet">
-                  Click Test to check your {settings.searchEngine === "serper" ? "Serper" : "Brave"} secret key
-                </p>
-              </div>
-            )}
+                    Brave dashboard
+                  </a>
+                </li>
+                <li>
+                  Serper: 2,500 free queries, then prepaid credits.{" "}
+                  <a
+                    className="underline decoration-dotted hover:text-accent"
+                    href="https://serper.dev/dashboard"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Serper dashboard
+                  </a>
+                </li>
+                <li>
+                  SearXNG: free to self-host, but upstream engines can rate-limit.{" "}
+                  <a
+                    className="underline decoration-dotted hover:text-accent"
+                    href="https://docs.searxng.org/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    SearXNG docs
+                  </a>
+                </li>
+                <li>
+                  Queries leave this device and go to the selected provider. Check
+                  the provider dashboard for current usage and billing.
+                </li>
+              </ul>
+            </div>
+
+            <button
+              type="button"
+              onClick={testSearch}
+              disabled={testingSearch}
+              className="rounded-soft border border-hairline px-4 py-2 text-sm text-ink transition-colors duration-normal hover:border-hairline-strong hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {testingSearch ? "Testing..." : "Test search"}
+            </button>
           </div>
 
           {/* Default Education Level Section */}

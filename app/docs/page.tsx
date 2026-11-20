@@ -239,12 +239,14 @@ The specific model to use. Click the "Refresh" button to see available models fr
 ### Search provider
 Choose how Study Buddy finds web sources:
 - **DuckDuckGo (Free)** — No secret key needed. Good default.
-- **Brave Search** — Requires a secret key.
-- **Serper (Google Search)** — Requires a secret key.
-- **SearXNG (Self-hosted)** — Requires a server address.
+- **Brave Search** — Requires an API key. About 1,000 free queries per month, then $5 per 1,000.
+- **Serper (Google Search)** — Requires an API key. 2,500 free queries, then prepaid credits.
+- **SearXNG (Self-hosted)** — Requires a server address. Free, but upstream engines can rate-limit.
 - **Disabled** — No web search. The tutor uses only your notes or its own knowledge.
 
-Use the "Test" button to verify your search configuration is working.
+Study Buddy tries the primary provider first. If it fails or returns nothing, it tries the next configured provider in the fallback order (Brave, Serper, SearXNG, DuckDuckGo by default). You can change the order or turn fallback off. The Test button reports which provider answered and what each one did.
+
+Search queries leave this device and go to the selected provider. Check the provider dashboard for current usage and billing.
 
 ## Defaults
 
@@ -397,13 +399,13 @@ Study Buddy is a hybrid desktop application:
 - **Desktop**: Electron wraps the Next.js app as a native application
 - **Design**: Studio Calm design system (shared with Talk Buddy)
 - **AI**: Provider-agnostic — supports Ollama, OpenAI, Anthropic, Google, Groq, Together AI
-- **Search**: DuckDuckGo (default), Brave, Serper, SearXNG
+- **Search**: DuckDuckGo (default), Brave, Serper, SearXNG, with automatic fallback
 - **Audio**: Web Speech API for TTS/STT, optional Transformers.js for local Whisper STT
 
 ## How a session works
 
 ### 1. Search
-User submits a topic. The /api/getSources endpoint queries the configured search engine and returns up to 9 URLs.
+User submits a topic. The /api/getSources endpoint queries the primary search provider, falls back through the configured order if needed, and returns up to 9 results plus per-provider attempt details.
 
 ### 2. Parse
 The /api/getParsedSources endpoint fetches each URL, extracts readable text using Mozilla Readability, and cleans it.
@@ -475,7 +477,7 @@ study-buddy/
 Streams an AI response. Accepts a messages array. Returns Server-Sent Events.
 
 ### POST /api/getSources
-Searches the web. Accepts a question string. Returns an array of {name, url} objects.
+Searches the web. Accepts a question string. Returns {results, attempts}: up to 9 {name, url, snippet?, provider?} results and a record of which providers ran, were skipped, or failed.
 
 ### POST /api/getParsedSources
 Fetches and extracts text from URLs. Accepts a sources array. Returns sources with fullContent.

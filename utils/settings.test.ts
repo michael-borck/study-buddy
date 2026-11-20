@@ -20,6 +20,33 @@ describe("parseSettings", () => {
     expect(s.searchEngine).toBe("duckduckgo");
   });
 
+  it("migrates a legacy single search key to the selected provider", () => {
+    expect(
+      parseSettings({ searchEngine: "brave", searchApiKey: "brave-key" })
+        .braveApiKey,
+    ).toBe("brave-key");
+    expect(
+      parseSettings({ searchEngine: "serper", searchApiKey: "serper-key" })
+        .serperApiKey,
+    ).toBe("serper-key");
+  });
+
+  it("treats masked keys as absent", () => {
+    const s = parseSettings({
+      searchEngine: "brave",
+      braveApiKey: "***",
+      serperApiKey: "***",
+    });
+    expect(s.braveApiKey).toBe("");
+    expect(s.serperApiKey).toBe("");
+  });
+
+  it("defaults automatic fallback on with the Brave-first order", () => {
+    const s = parseSettings({});
+    expect(s.searchFallbackEnabled).toBe(true);
+    expect(s.searchFallbackOrder).toBe("brave,serper,searxng,duckduckgo");
+  });
+
   it("strips unknown keys", () => {
     const s = parseSettings({ llmModel: "x", bogus: 1 } as Record<string, unknown>);
     expect(s.llmModel).toBe("x");

@@ -130,7 +130,7 @@ export default function AboutPage() {
               <li><strong className="text-ink">Desktop:</strong> Electron</li>
               <li><strong className="text-ink">Design:</strong> Studio Calm (shared with Talk Buddy)</li>
               <li><strong className="text-ink">AI:</strong> Ollama, OpenAI, Anthropic, Google, Groq, Together AI</li>
-              <li><strong className="text-ink">Search:</strong> DuckDuckGo (default), Brave, Serper, SearXNG</li>
+              <li><strong className="text-ink">Search:</strong> DuckDuckGo (default), Brave, Serper, SearXNG, with automatic fallback</li>
             </ul>
 
             {/* The Buddy suite */}

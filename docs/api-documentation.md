@@ -107,12 +107,26 @@ X-StudyBuddy-Settings: string (optional, JSON-encoded settings)
 **Response:**
 ```typescript
 {
-  sources: {
-    name: string;    // Page title or description
-    url: string;     // Source URL
-  }[]
+  results: {
+    name: string;       // Page title or description
+    url: string;        // Source URL
+    snippet?: string;   // Engine-supplied snippet
+    provider?: string;  // brave | serper | searxng | duckduckgo
+    position?: number;  // Rank within that provider
+  }[];
+  attempts: {
+    provider: string;
+    status: "ok" | "empty" | "error" | "skipped";
+    count: number;
+    latencyMs: number;
+    error?: string;
+    reason?: string;
+  }[];
 }
 ```
+
+The chain tries the primary provider, then the configured fallback order.
+Results are deduplicated by normalised URL and capped at 9 by default.
 
 **Error Response:**
 ```typescript
@@ -145,7 +159,8 @@ const response = await fetch('/api/getSources', {
 });
 
 const data = await response.json();
-console.log(data.sources); // Array of search results
+console.log(data.results);  // Search results
+console.log(data.attempts); // Which providers ran, were skipped, or failed
 ```
 
 #### `POST /api/getParsedSources`
@@ -187,8 +202,12 @@ Retrieve current application settings (API keys are redacted for security).
   llmBaseUrl: string;
   llmModel: string;
   searchEngine: "serper" | "searxng" | "duckduckgo" | "brave" | "disabled";
-  searchApiKey: "";     // Always empty for security
+  searchApiKey: "";     // Legacy single key, always empty for security
+  braveApiKey: "";      // Always empty for security
+  serperApiKey: "";     // Always empty for security
   searchUrl: string;
+  searchFallbackEnabled: boolean;
+  searchFallbackOrder: string; // e.g. "brave,serper,searxng,duckduckgo"
   defaultEducationLevel: string;
 }
 ```
@@ -206,7 +225,11 @@ Update application settings.
   llmModel?: string;
   searchEngine?: "serper" | "searxng" | "duckduckgo" | "brave" | "disabled";
   searchApiKey?: string;
+  braveApiKey?: string;
+  serperApiKey?: string;
   searchUrl?: string;
+  searchFallbackEnabled?: boolean;
+  searchFallbackOrder?: string;
   defaultEducationLevel?: string;
 }
 ```
@@ -313,7 +336,7 @@ const sourcesRes = await fetch('/api/getSources', {
   method: 'POST',
   body: JSON.stringify({ question: 'quantum physics basics' })
 });
-const { sources } = await sourcesRes.json();
+const { results: sources } = await sourcesRes.json();
 
 // 2. Parse source content
 const parsedRes = await fetch('/api/getParsedSources', {

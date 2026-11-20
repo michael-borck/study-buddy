@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { SearchConfig, SearchProvider, SearchResult } from "./types";
+import { SearchConfig, SearchOptions, SearchProvider, SearchResult } from "./types";
 
 const SearxngSchema = z.object({
   results: z.array(
@@ -64,9 +64,10 @@ export class SearxngSearch implements SearchProvider {
   name = "searxng";
   constructor(private config: SearchConfig) {}
 
-  async search(question: string): Promise<SearchResult[]> {
+  async search(question: string, options: SearchOptions = {}): Promise<SearchResult[]> {
     const baseUrl = this.config.url;
     if (!baseUrl) throw new Error("SEARXNG_URL is required when using SearXNG");
+    const requested = Math.min(Math.max(options.limit ?? 9, 1), 30);
 
     await applyRateLimit(baseUrl);
 
@@ -85,8 +86,13 @@ export class SearxngSearch implements SearchProvider {
     const data = SearxngSchema.parse(await response.json());
     return data.results
       .filter((r) => !this.config.excludedSites.some((s) => r.url.includes(s)))
-      .slice(0, 9)
-      .map((r) => ({ name: r.title, url: r.url }));
+      .slice(0, requested)
+      .map((r, i) => ({
+        name: r.title,
+        url: r.url,
+        snippet: r.content,
+        position: i + 1,
+      }));
   }
 
   // Try /search then /, each with exponential backoff on 429 / network errors.

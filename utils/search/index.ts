@@ -1,6 +1,5 @@
 import { AppSettings } from "../settings";
 import { SearchConfig, SearchProvider } from "./types";
-import { BingSearch } from "./bing";
 import { SerperSearch } from "./serper";
 import { SearxngSearch } from "./searxng";
 import { DuckDuckGoSearch } from "./duckduckgo";
@@ -23,8 +22,6 @@ export function createSearchProvider(settings: AppSettings): SearchProvider | nu
   };
 
   switch (settings.searchEngine) {
-    case "bing":
-      return new BingSearch(config);
     case "serper":
       return new SerperSearch(config);
     case "searxng":

@@ -241,7 +241,6 @@ Choose how Study Buddy finds web sources:
 - **DuckDuckGo (Free)** — No secret key needed. Good default.
 - **Brave Search** — Requires a secret key.
 - **Serper (Google Search)** — Requires a secret key.
-- **Bing Search** — Requires a secret key.
 - **SearXNG (Self-hosted)** — Requires a server address.
 - **Disabled** — No web search. The tutor uses only your notes or its own knowledge.
 
@@ -398,7 +397,7 @@ Study Buddy is a hybrid desktop application:
 - **Desktop**: Electron wraps the Next.js app as a native application
 - **Design**: Studio Calm design system (shared with Talk Buddy)
 - **AI**: Provider-agnostic — supports Ollama, OpenAI, Anthropic, Google, Groq, Together AI
-- **Search**: DuckDuckGo (default), Brave, Bing, Serper, SearXNG
+- **Search**: DuckDuckGo (default), Brave, Serper, SearXNG
 - **Audio**: Web Speech API for TTS/STT, optional Transformers.js for local Whisper STT
 
 ## How a session works

@@ -131,7 +131,7 @@ export function streamChatCompletion(opts: {
 export interface SearchProvider { search(question: string): Promise<Source[]>; }
 // utils/search/index.ts → createSearchProvider(settings)
 ```
-- One adapter per engine (`bing`, `serper`, `searxng`, `duckduckgo`, `brave`). SearXNG's
+- One adapter per engine (`serper`, `searxng`, `duckduckgo`, `brave`). SearXNG's
   rate-limit + retry lives inside its adapter.
 - `app/api/getSources/route.ts` (465 lines) shrinks to: `resolveSettings` → `createSearchProvider`
   → `search` → return; `disabled` → `[]`. Shared bits (exclusion list, `what is …` prefix) passed in.

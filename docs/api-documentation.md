@@ -126,7 +126,6 @@ X-StudyBuddy-Settings: string (optional, JSON-encoded settings)
 
 | Engine | Type | API Key Required | Features |
 |--------|------|------------------|----------|
-| `bing` | Commercial API | Yes | High-quality results, fast |
 | `serper` | Google API proxy | Yes | Google results, reliable |
 | `searxng` | Self-hosted | No | Privacy-focused, customizable |
 | `duckduckgo` | Web scraping | No | Privacy-focused, free |
@@ -187,7 +186,7 @@ Retrieve current application settings (API keys are redacted for security).
   llmApiKey: "";        // Always empty for security
   llmBaseUrl: string;
   llmModel: string;
-  searchEngine: "bing" | "serper" | "searxng" | "duckduckgo" | "brave" | "disabled";
+  searchEngine: "serper" | "searxng" | "duckduckgo" | "brave" | "disabled";
   searchApiKey: "";     // Always empty for security
   searchUrl: string;
   defaultEducationLevel: string;
@@ -205,7 +204,7 @@ Update application settings.
   llmApiKey?: string;
   llmBaseUrl?: string;
   llmModel?: string;
-  searchEngine?: "bing" | "serper" | "searxng" | "duckduckgo" | "brave" | "disabled";
+  searchEngine?: "serper" | "searxng" | "duckduckgo" | "brave" | "disabled";
   searchApiKey?: string;
   searchUrl?: string;
   defaultEducationLevel?: string;

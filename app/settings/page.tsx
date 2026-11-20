@@ -152,9 +152,8 @@ export default function SettingsPage() {
       return;
     }
 
-    if ((settings.searchEngine === "serper" || settings.searchEngine === "bing" || settings.searchEngine === "brave") && !settings.searchApiKey) {
-      const engineName = settings.searchEngine === "serper" ? "Serper" :
-                        settings.searchEngine === "bing" ? "Bing" : "Brave";
+    if ((settings.searchEngine === "serper" || settings.searchEngine === "brave") && !settings.searchApiKey) {
+      const engineName = settings.searchEngine === "serper" ? "Serper" : "Brave";
       setTestResult({
         type: 'error',
         message: `Please enter your ${engineName} secret key first`
@@ -259,7 +258,6 @@ export default function SettingsPage() {
     { value: "duckduckgo", label: "DuckDuckGo (Free)" },
     { value: "brave", label: "Brave Search" },
     { value: "serper", label: "Serper (Google Search)" },
-    { value: "bing", label: "Bing Search" },
     { value: "searxng", label: "SearXNG (Self-hosted)" },
     { value: "disabled", label: "Disabled (No Search)" },
   ];
@@ -472,12 +470,10 @@ export default function SettingsPage() {
               </div>
             )}
 
-            {(settings.searchEngine === "serper" || settings.searchEngine === "bing" || settings.searchEngine === "brave") && (
+            {(settings.searchEngine === "serper" || settings.searchEngine === "brave") && (
               <div className="mb-4">
                 <label className={labelClasses}>
-                  {settings.searchEngine === "serper" ? "Serper secret key" :
-                   settings.searchEngine === "bing" ? "Bing secret key" :
-                   settings.searchEngine === "brave" ? "Brave secret key" : "Secret key"}
+                  {settings.searchEngine === "serper" ? "Serper secret key" : "Brave secret key"}
                 </label>
                 <div className="flex gap-2">
                   <input
@@ -497,7 +493,7 @@ export default function SettingsPage() {
                   </button>
                 </div>
                 <p className="mt-1 text-sm text-ink-quiet">
-                  Click Test to check your {settings.searchEngine === "serper" ? "Serper" : settings.searchEngine === "bing" ? "Bing" : "Brave"} secret key
+                  Click Test to check your {settings.searchEngine === "serper" ? "Serper" : "Brave"} secret key
                 </p>
               </div>
             )}

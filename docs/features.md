@@ -29,7 +29,6 @@ Study Buddy provides a comprehensive AI-powered tutoring experience with privacy
 ### 🔍 Intelligent Research Integration
 
 **Multi-Engine Search Support**
-- **Bing Search**: Commercial API with high-quality results
 - **Google (via Serper)**: Access to Google's search index
 - **DuckDuckGo**: Privacy-focused search without tracking
 - **SearXNG**: Self-hosted open-source metasearch engine
@@ -184,7 +183,6 @@ Study Buddy provides a comprehensive AI-powered tutoring experience with privacy
 - Local models via Ollama or similar
 
 **Search Provider Network**
-- Microsoft Bing Web Search API
 - Google Search via Serper API
 - Self-hosted SearXNG instances
 - DuckDuckGo HTML scraping (no API required)

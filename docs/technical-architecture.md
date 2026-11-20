@@ -65,7 +65,7 @@ interface AppSettings {
   llmProvider: 'openai' | 'together' | 'custom';
   llmApiKey: string;
   llmBaseUrl: string;
-  searchEngine: 'bing' | 'serper' | 'searxng' | 'duckduckgo' | 'brave';
+  searchEngine: 'serper' | 'searxng' | 'duckduckgo' | 'brave';
   defaultEducationLevel: string;
 }
 ```
@@ -129,7 +129,6 @@ interface SourcesResponse {
 ```
 
 **Supported Engines**:
-- **Bing**: Commercial API with high-quality results
 - **Serper**: Google search results via API
 - **SearXNG**: Self-hosted open-source metasearch
 - **DuckDuckGo**: Privacy-focused search scraping

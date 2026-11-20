@@ -11,7 +11,6 @@ Configure Study Buddy to work best for your needs and preferences.
 
 ### 2. Configure Search Engine
 - **DuckDuckGo**: Privacy-focused, no setup required
-- **Bing**: High-quality results, requires API key
 - **SearXNG**: Self-hosted option for maximum privacy
 - **Disabled**: Chat-only mode without web search
 
@@ -62,15 +61,6 @@ For self-hosted or third-party AI services:
 - **Privacy**: No tracking or personal data collection
 - **Limitations**: May be rate-limited during heavy usage
 - **Best For**: Privacy-conscious users, no API costs
-
-### Bing Search
-1. **Azure Account**: Sign up at [portal.azure.com](https://portal.azure.com)
-2. **Create Resource**: Search for "Bing Search v7"
-3. **Get API Key**: Copy from resource overview page
-4. **Enter Key**: Paste into Search Engine settings
-5. **Test**: Verify search functionality works
-
-**Pricing**: Pay-per-use model, check Azure pricing
 
 ### Serper (Google Search)
 1. **Account**: Sign up at [serper.dev](https://serper.dev/)

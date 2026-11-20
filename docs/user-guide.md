@@ -41,7 +41,7 @@ Welcome to Study Buddy! This guide will help you get the most out of your AI per
 
 ### ⚙️ Flexible Configuration
 - **Multiple AI Providers**: OpenAI, Together AI, or custom endpoints
-- **Search Engine Options**: Bing, Google, DuckDuckGo, SearXNG, or Brave
+- **Search Engine Options**: DuckDuckGo, Brave, Serper, or SearXNG
 - **Customizable Interface**: Adjust settings to your preferences
 
 ## Tips for Effective Learning

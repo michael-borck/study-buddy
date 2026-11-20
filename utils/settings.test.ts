@@ -15,6 +15,11 @@ describe("parseSettings", () => {
     expect(s.contextSize).toBe("small");
   });
 
+  it("migrates the retired bing engine to duckduckgo", () => {
+    const s = parseSettings({ searchEngine: "bing" });
+    expect(s.searchEngine).toBe("duckduckgo");
+  });
+
   it("strips unknown keys", () => {
     const s = parseSettings({ llmModel: "x", bogus: 1 } as Record<string, unknown>);
     expect(s.llmModel).toBe("x");

@@ -76,11 +76,6 @@ Before troubleshooting specific issues, verify your basic setup:
 **Symptoms**: No search results, search error messages
 **Solutions by Engine**:
 
-**Bing Search**:
-- Verify Bing API key in Settings
-- Check API key quota and billing status
-- Ensure key has Web Search API access
-
 **Serper (Google)**:
 - Verify Serper API key
 - Check credit balance at [serper.dev](https://serper.dev/)
@@ -133,7 +128,7 @@ Before troubleshooting specific issues, verify your basic setup:
 1. **Check RAM Usage**: Close other applications
 2. **Internet Speed**: Test with [speedtest.net](https://speedtest.net)
 3. **AI Model**: Try faster models (GPT-3.5 vs GPT-4)
-4. **Search Engine**: Switch to faster option (Bing vs SearXNG)
+4. **Search Engine**: Switch to a faster option (DuckDuckGo vs SearXNG)
 5. **Restart App**: Fresh restart can clear memory issues
 
 #### Settings Not Saving
@@ -232,7 +227,7 @@ Before troubleshooting specific issues, verify your basic setup:
 
 2. **Optimize Search**:
    - Disable search for simple questions
-   - Use faster search engines (Bing > SearXNG)
+   - Use faster search engines (DuckDuckGo > SearXNG)
    - Limit search results in custom configurations
 
 3. **Network Optimization**:
@@ -281,7 +276,8 @@ For connection issues:
 curl -H "Authorization: Bearer YOUR_API_KEY" https://api.openai.com/v1/models
 
 # Test search services
-curl "https://api.bing.microsoft.com/v7.0/search?q=test"
+curl -H "X-Subscription-Token: YOUR_BRAVE_KEY" \
+  "https://api.search.brave.com/res/v1/web/search?q=test"
 
 # Check DNS resolution
 nslookup api.openai.com

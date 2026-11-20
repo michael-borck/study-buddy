@@ -51,6 +51,13 @@ const LEGACY_EDUCATION_LEVELS: Record<string, string> = {
   Undergrad: "University",
 };
 
+// Engines stored by older versions that are no longer selectable. Bing's
+// Search API was retired on 11 August 2025, so a saved "bing" setting falls
+// back to the free default rather than silently disabling search.
+const LEGACY_SEARCH_ENGINES: Record<string, string> = {
+  bing: "duckduckgo",
+};
+
 /**
  * Validate an unknown blob into AppSettings, filling any missing field with its
  * default and stripping unknown keys. Throws on type mismatch.
@@ -60,6 +67,8 @@ export function parseSettings(raw: unknown): AppSettings {
   parsed.defaultEducationLevel =
     LEGACY_EDUCATION_LEVELS[parsed.defaultEducationLevel] ??
     parsed.defaultEducationLevel;
+  parsed.searchEngine =
+    LEGACY_SEARCH_ENGINES[parsed.searchEngine] ?? parsed.searchEngine;
   return parsed;
 }
 
@@ -162,7 +171,6 @@ function getSearchApiKey(): string {
   const searchEngine = process.env.SEARCH_ENGINE || DEFAULT_SETTINGS.searchEngine;
   switch (searchEngine.toLowerCase()) {
     case "serper": return process.env.SERPER_API_KEY || "";
-    case "bing": return process.env.BING_API_KEY || "";
     case "brave": return process.env.BRAVE_API_KEY || "";
     case "duckduckgo": return ""; // DuckDuckGo doesn't need an API key
     default: return "";
